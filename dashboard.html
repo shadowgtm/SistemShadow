@@ -19,7 +19,7 @@
 
         .sidebar {
             width: 200px; 
-            background: #34495e; /* Cambié el color aquí */
+            background: #34495e;
             color: white;
             height: 100vh;
             padding: 20px;
@@ -56,7 +56,7 @@
 
         .sidebar a:hover {
             background: #1abc9c;
-            transform: scale(1.1); /* Efecto de ampliación */
+            transform: scale(1.1);
         }
 
         .sidebar a:nth-child(1) { animation-delay: 0.1s; }
@@ -122,7 +122,7 @@
 
         @media screen and (max-width: 768px) {
             .sidebar {
-                width: 180px; 
+                width: 180px;
             }
 
             .content {
@@ -143,6 +143,14 @@
 
             .sidebar a {
                 text-align: left;
+            }
+
+            #page-frame {
+                display: none; /* Oculta el iframe en pantallas pequeñas */
+            }
+
+            #mobile-content {
+                display: none; /* Oculta el contenido alternativo en pantallas pequeñas */
             }
         }
 
@@ -165,31 +173,60 @@
     <div class="sidebar" id="sidebar">
         <button class="hamburger" onclick="toggleSidebar()" aria-label="Abrir/Cerrar menú de navegación">☰</button>
         <h2>𝙎𝙞𝙨𝙩𝙚𝙢𝙖 𝙎𝙝𝙖𝙙𝙤𝙬</h2>
-       <a href="javascript:void(0);" onclick="loadPage('agenda.html')" aria-label="Ir a la Agenda">📅 Agenda</a>
-<a href="javascript:void(0);" onclick="loadPage('status.html')" aria-label="Ver las Barras">📊 Barras</a>
-<a href="javascript:void(0);" onclick="loadPage('ProductosFaltantes.html')" aria-label="Ver productos faltantes">📦 Productos Faltantes</a>
-<a href="javascript:void(0);" onclick="loadPage('localiza.html')" aria-label="Ver las estaciones">📍 Estaciones</a>
+        <a href="#" onclick="loadPage('agenda.html')" aria-label="Ir a la agenda">📅 Agenda</a>
+        <a href="#" onclick="loadPage('barras.html')" aria-label="Ver las barras">📊 Barras</a>
+        <a href="#" onclick="loadPage('ProductosFaltantes.html')" aria-label="Ver productos faltantes">📦 Productos Faltantes</a>
+        <a href="#" onclick="loadPage('localiza.html')" aria-label="Ver las estaciones">📍 Estaciones</a>
+<a href="#" onclick="loadPage('subirpdf.html')" aria-label="Ver Subir Archivo">☁️ Subir Archivo</a>
+<a href="#" onclick="loadPage('compras.html')" aria-label="Ver Compras">🛍️ Compras (beta)</a>
+<a href="#" onclick="loadPage('envio.html')" aria-label="Ver Envio Beta">🚚 Envio (beta)</a>
 
     </div>
     <div class="content">
         <div class="loader" id="loader"></div>
         <iframe id="page-frame" src="agenda.html" frameborder="0" aria-live="polite"></iframe>
+        <div id="mobile-content" style="display: none;">
+            <p>Redirigiendo a la página...</p>
+        </div>
     </div>
 
     <script>
         function loadPage(page) {
             var loader = document.getElementById('loader');
             loader.style.display = 'block'; // Muestra el loader
-            document.getElementById('page-frame').onload = function() {
-                loader.style.display = 'none'; // Oculta el loader una vez cargado el iframe
-            };
-            document.getElementById('page-frame').src = page;
+
+            // Si estamos en un dispositivo móvil, redirigimos a la página directamente
+            if (window.innerWidth <= 768) {
+                window.location.href = page; // Redirige a la página
+            } else {
+                document.getElementById('page-frame').onload = function() {
+                    loader.style.display = 'none'; // Oculta el loader una vez cargado el iframe
+                };
+                document.getElementById('page-frame').src = page; // Cambia el src del iframe
+            }
         }
 
         function toggleSidebar() {
             var sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('closed');
         }
+
+        // Desactivar iframe en dispositivos móviles
+        function checkDevice() {
+            var iframe = document.getElementById('page-frame');
+            var mobileContent = document.getElementById('mobile-content');
+            if (window.innerWidth <= 768) {
+                iframe.style.display = 'none'; // Oculta el iframe
+                mobileContent.style.display = 'block'; // Muestra el contenido alternativo
+            } else {
+                iframe.style.display = 'block'; // Muestra el iframe
+                mobileContent.style.display = 'none'; // Oculta el contenido alternativo
+            }
+        }
+
+        window.addEventListener('resize', checkDevice); // Detecta cuando el tamaño de la ventana cambia
+        checkDevice(); // Ejecuta la verificación al cargar la página
     </script>
 </body>
 </html>
+

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Códigos de Barras</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #cccccc;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #0078d7;
+            box-shadow: 0 0 8px rgba(0, 120, 215, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: #0078d7;
+            color: #ffffff;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background: #005bb5;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #barcodeContainer {
+            margin-top: 20px;
+        }
+
+        svg {
+            margin: 10px;
+        }
+
+        /* Estilos para impresión */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                display: none;
+            }
+            .print-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100vh;
+                page-break-after: always;
+            }
+            .barcode-item {
+                width: 15.45cm;
+                height: 7.25cm;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 1cm;
+            }
+            .barcode-item h2 {
+                font-size: 24px;
+                margin-bottom: 10px;
+                text-align: center;
+            }
+            .barcode-item svg {
+                width: 100%;
+                height: 100%;
+            }
+            @page {
+                size: auto;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Códigos de Barras</h1>
+        <input type="text" id="codigoInput" placeholder="Ingresa un código y presiona Enter">
+        <div id="barcodeContainer"></div>
+        <button onclick="imprimirCodigos()">Imprimir Códigos de Barras</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script>
+        document.getElementById('codigoInput').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                const codigo = this.value.trim();
+                if (codigo) {
+                    generarCodigoBarras(codigo);
+                    this.value = ''; // Limpiar el campo de entrada
+                }
+            }
+        });
+
+        function generarCodigoBarras(codigo) {
+            const barcodeContainer = document.getElementById('barcodeContainer');
+            barcodeContainer.innerHTML = ''; // Limpiar códigos anteriores
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            JsBarcode(svg, codigo, {
+                format: "CODE128",
+                displayValue: true,
+                fontSize: 16,
+                height: 50
+            });
+            barcodeContainer.appendChild(svg);
+        }
+
+        function imprimirCodigos() {
+            const barcodeContainer = document.getElementById('barcodeContainer');
+            const svg = barcodeContainer.querySelector('svg');
+
+            if (!svg) {
+                alert("Primero genera un código de barras.");
+                return;
+            }
+
+            const printContainer = document.createElement('div');
+            printContainer.classList.add('print-container');
+
+            // Crear dos copias del mismo código de barras
+            for (let i = 0; i < 2; i++) {
+                const barcodeItem = document.createElement('div');
+                barcodeItem.classList.add('barcode-item');
+
+                // Agregar el encabezado
+                const encabezado = document.createElement('h2');
+                encabezado.textContent = "Recepción de Mercadería Macaal S.A";
+                barcodeItem.appendChild(encabezado);
+
+                // Agregar el código de barras
+                barcodeItem.appendChild(svg.cloneNode(true));
+                printContainer.appendChild(barcodeItem);
+            }
+
+            document.body.appendChild(printContainer);
+            window.print();
+            document.body.removeChild(printContainer); // Limpiar después de imprimir
+        }
+    </script>
+</body>
+</html>

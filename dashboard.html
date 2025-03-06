@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background-color: #ecf0f1;
+            color: #34495e;
+            display: flex;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar {
+            width: 200px; 
+            background: #34495e; /* Cambié el color aquí */
+            color: white;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: width 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.6rem;
+            word-wrap: break-word;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            margin: 10px 0;
+            background: #16a085;
+            border-radius: 5px;
+            text-align: center;
+            transition: background 0.3s ease, transform 0.3s ease;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideIn 0.3s forwards;
+        }
+
+        .sidebar a:hover {
+            background: #1abc9c;
+            transform: scale(1.1); /* Efecto de ampliación */
+        }
+
+        .sidebar a:nth-child(1) { animation-delay: 0.1s; }
+        .sidebar a:nth-child(2) { animation-delay: 0.2s; }
+        .sidebar a:nth-child(3) { animation-delay: 0.3s; }
+        .sidebar a:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .sidebar .hamburger {
+            display: none;
+            font-size: 30px;
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .content {
+            margin-left: 220px;
+            padding: 30px;
+            flex-grow: 1;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            transition: margin-left 0.3s ease;
+            overflow: hidden;
+        }
+
+        .content iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                width: 180px; 
+            }
+
+            .content {
+                margin-left: 200px;
+            }
+
+            .sidebar .hamburger {
+                display: block;
+            }
+
+            .sidebar.closed {
+                width: 0;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+
+            .sidebar a {
+                text-align: left;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+                box-shadow: none;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Abrir/Cerrar menú de navegación">☰</button>
+        <h2>𝙎𝙞𝙨𝙩𝙚𝙢𝙖 𝙎𝙝𝙖𝙙𝙤𝙬</h2>
+        <a href="#" onclick="loadPage('agenda.html')" aria-label="Ir a la agenda">📅 Agenda</a>
+        <a href="#" onclick="loadPage('barras.html')" aria-label="Ver las barras">📊 Barras</a>
+        <a href="#" onclick="loadPage('ProductosFaltantes.html')" aria-label="Ver productos faltantes">📦 Productos Faltantes</a>
+        <a href="#" onclick="loadPage('localiza.html')" aria-label="Ver las estaciones">📍 Estaciones</a>
+    </div>
+    <div class="content">
+        <div class="loader" id="loader"></div>
+        <iframe id="page-frame" src="agenda.html" frameborder="0" aria-live="polite"></iframe>
+    </div>
+
+    <script>
+        function loadPage(page) {
+            var loader = document.getElementById('loader');
+            loader.style.display = 'block'; // Muestra el loader
+            document.getElementById('page-frame').onload = function() {
+                loader.style.display = 'none'; // Oculta el loader una vez cargado el iframe
+            };
+            document.getElementById('page-frame').src = page;
+        }
+
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('closed');
+        }
+    </script>
+</body>
+</html>

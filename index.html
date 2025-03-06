@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticación</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1d252c;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #e0e0e0;
+            text-align: center;
+        }
+
+        .auth-container {
+            background-color: #2f3b44;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 350px;
+            border: 1px solid #444;
+        }
+
+        .title-shadow {
+            font-size: 48px;
+            font-weight: bold;
+            color: #4caf50;
+            text-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #3c474f;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        input:focus {
+            border: 1px solid #4caf50;
+            outline: none;
+        }
+
+        input.error {
+            border: 1px solid #e74c3c;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4caf50;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #388e3c;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+
+        /* Compatibilidad móvil */
+        @media (max-width: 600px) {
+            .title-shadow {
+                font-size: 36px;
+            }
+            h2 {
+                font-size: 18px;
+            }
+            input {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <div class="title-shadow">𝙎𝙞𝙨𝙩𝙚𝙢𝙖 𝙎𝙝𝙖𝙙𝙤𝙬</div>
+        <h2>Iniciar sesión</h2>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Usuario" required>
+            <input type="password" id="password" placeholder="Contraseña" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <div id="errorMessage" class="error-message"></div>
+    </div>
+
+    <script>
+        // Verificar si ya hay una sesión activa
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            window.location.href = 'dashboard.html';  // Redirigir si el usuario está autenticado
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Limpiar el estado de error
+            const errorMessage = document.getElementById('errorMessage');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            usernameInput.classList.remove('error');
+            passwordInput.classList.remove('error');
+            errorMessage.textContent = '';
+
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            if (!username || !password) {
+                // Marcar los campos vacíos como error
+                if (!username) {
+                    usernameInput.classList.add('error');
+                }
+                if (!password) {
+                    passwordInput.classList.add('error');
+                }
+                errorMessage.textContent = 'Por favor, complete ambos campos.';
+                return;
+            }
+
+            // Verificación de credenciales
+            if (username === "luis.bardales" && password === "Zacapa321") {
+                // Guardar la sesión en localStorage
+                localStorage.setItem('isLoggedIn', 'true');
+                window.location.href = 'dashboard.html';  // Redirige a dashboard.html
+            } else {
+                errorMessage.textContent = 'Credenciales incorrectas';
+            }
+        });
+    </script>
+
+</body>
+</html>

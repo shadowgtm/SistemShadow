@@ -191,6 +191,8 @@
             <div class="logo">ShSyMobil</div>
             <ul>
                 <li><a href="#">Configuración</a></li>
+                <!-- Botón de Cerrar sesión -->
+                <li><a href="#" onclick="cerrarSesion()">Cerrar sesión</a></li>
             </ul>
         </nav>
 
@@ -200,7 +202,6 @@
             <header>
                 <div class="user-info">
                     <span>Bienvenido! Aun nos encontramos en Fase BETA</span>
-                   
                 </div>
             </header>
 
@@ -264,5 +265,15 @@
             </section>
         </div>
     </div>
+
+    <script>
+        function cerrarSesion() {
+            // Eliminar los datos de sesión almacenados
+            localStorage.removeItem('usuario'); // Por ejemplo, si guardas el usuario en localStorage
+
+            // Redirigir a la página de login
+            window.location.href = 'index.html'; // Aquí rediriges a la página de login
+        }
+    </script>
 </body>
 </html>

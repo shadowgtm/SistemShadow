@@ -40,6 +40,14 @@
             margin-bottom: 20px;
         }
 
+        label {
+            display: block;
+            margin: 8px 0 5px;
+            font-weight: bold;
+            color: #e0e0e0;
+            text-align: left;
+        }
+
         input {
             width: 100%;
             padding: 10px;
@@ -101,11 +109,16 @@
         <div class="title-shadow">𝙎𝙞𝙨𝙩𝙚𝙢𝙖 𝙎𝙝𝙖𝙙𝙤𝙬</div>
         <h2>Iniciar sesión</h2>
         <form id="loginForm">
+            <label for="username">Usuario:</label>
             <input type="text" id="username" placeholder="Usuario" required>
+            
+            <label for="password">Contraseña:</label>
             <input type="password" id="password" placeholder="Contraseña" required>
+            
             <button type="submit">Entrar</button>
         </form>
         <div id="errorMessage" class="error-message"></div>
+        <button id="logoutButton" style="display: none;">Cerrar sesión</button>
     </div>
 
     <script>
@@ -124,6 +137,7 @@
             return /Mobi|Android/i.test(navigator.userAgent);
         }
 
+        // Manejo del formulario de inicio de sesión
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
@@ -165,6 +179,19 @@
                 errorMessage.textContent = 'Credenciales incorrectas';
             }
         });
+
+        // Función para cerrar sesión
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            document.getElementById('logoutButton').style.display = 'none'; // Ocultar el botón de cierre de sesión
+            window.location.href = 'login.html'; // Redirigir a la página de inicio de sesión
+        }
+
+        // Mostrar el botón de cierre de sesión si la sesión está activa
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            document.getElementById('logoutButton').style.display = 'block';
+            document.getElementById('logoutButton').addEventListener('click', logout);
+        }
     </script>
 
 </body>

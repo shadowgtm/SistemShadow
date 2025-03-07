@@ -118,7 +118,6 @@
             <button type="submit">Entrar</button>
         </form>
         <div id="errorMessage" class="error-message"></div>
-        <button id="logoutButton" style="display: none;">Cerrar sesión</button>
     </div>
 
     <script>
@@ -137,7 +136,6 @@
             return /Mobi|Android/i.test(navigator.userAgent);
         }
 
-        // Manejo del formulario de inicio de sesión
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
@@ -179,19 +177,6 @@
                 errorMessage.textContent = 'Credenciales incorrectas';
             }
         });
-
-        // Función para cerrar sesión
-        function logout() {
-            localStorage.removeItem('isLoggedIn');
-            document.getElementById('logoutButton').style.display = 'none'; // Ocultar el botón de cierre de sesión
-            window.location.href = 'login.html'; // Redirigir a la página de inicio de sesión
-        }
-
-        // Mostrar el botón de cierre de sesión si la sesión está activa
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            document.getElementById('logoutButton').style.display = 'block';
-            document.getElementById('logoutButton').addEventListener('click', logout);
-        }
     </script>
 
 </body>

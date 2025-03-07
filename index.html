@@ -121,8 +121,6 @@
     </div>
 
     <script>
-        // Verificar si ya hay una sesión activa
-        if (localStorage.getItem('isLoggedIn') === 'true') {
             // Si la sesión está activa, verificar si es móvil o computadora
             if (isMobileDevice()) {
                 window.location.href = 'm.dashboard.html';  // Redirigir a m.dashboard.html en dispositivos móviles

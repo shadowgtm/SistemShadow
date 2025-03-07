@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Envíos de Camiones</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5; /* Fondo claro */
+            color: #333; /* Texto oscuro */
+        }
+
+        header {
+            background-color: #ffffff; /* Blanco */
+            color: #333; /* Texto oscuro */
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: #333; /* Texto oscuro */
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #1d99f3; /* Azul claro al pasar el mouse */
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .tabs button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            background-color: #ffffff; /* Blanco */
+            color: #333; /* Texto oscuro */
+            border: 1px solid #ddd; /* Borde suave */
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .tabs button:hover {
+            background-color: #1d99f3; /* Azul claro */
+            color: #fff; /* Texto blanco */
+        }
+
+        section {
+            padding: 20px;
+            margin: 20px;
+            background-color: #ffffff; /* Blanco */
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
+        }
+
+        form label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #333; /* Texto oscuro */
+        }
+
+        form input, form select, form button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd; /* Borde suave */
+            border-radius: 4px;
+            background-color: #f9f9f9; /* Fondo claro */
+            color: #333; /* Texto oscuro */
+            transition: border-color 0.3s ease;
+        }
+
+        form input:focus, form select:focus {
+            border-color: #1d99f3; /* Azul claro al enfocar */
+        }
+
+        form button {
+            background-color: #1d99f3; /* Azul claro */
+            color: #fff; /* Texto blanco */
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        form button:hover {
+            background-color: #1476c5; /* Azul más oscuro */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #ddd; /* Borde suave */
+            text-align: left;
+        }
+
+        table th {
+            background-color: #f5f5f5; /* Fondo claro */
+            color: #333; /* Texto oscuro */
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #ffffff; /* Blanco */
+            color: #333; /* Texto oscuro */
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+        }
+
+        .resumen {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .resumen div {
+            text-align: center;
+            padding: 10px;
+            background-color: #f9f9f9; /* Fondo claro */
+            border-radius: 8px;
+            width: 30%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05); /* Sombra suave */
+        }
+
+        .notificacion {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            text-align: center;
+            display: none;
+        }
+
+        .notificacion.exito {
+            background-color: #4caf50; /* Verde */
+            color: #fff; /* Texto blanco */
+        }
+
+        .notificacion.error {
+            background-color: #f44336; /* Rojo */
+            color: #fff; /* Texto blanco */
+        }
+
+        .filtros {
+            margin-bottom: 20px;
+        }
+
+        .filtros select {
+            padding: 10px;
+            border: 1px solid #ddd; /* Borde suave */
+            border-radius: 4px;
+            background-color: #f9f9f9; /* Fondo claro */
+            color: #333; /* Texto oscuro */
+        }
+
+        .exportar {
+            margin-top: 20px;
+        }
+
+        .exportar button {
+            padding: 10px;
+            background-color: #1d99f3; /* Azul claro */
+            color: #fff; /* Texto blanco */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .exportar button:hover {
+            background-color: #1476c5; /* Azul más oscuro */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Gestión de Envíos de Camiones</h1>
+        <nav>
+            <ul>
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#nuevo-envio">Nuevo Envío</a></li>
+                <li><a href="#lista-envios">Lista de Envíos</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="tabs">
+        <button onclick="mostrarSeccion('envios')">Envíos</button>
+        <button onclick="mostrarSeccion('clientes')">Clientes</button>
+        <button onclick="mostrarSeccion('camiones')">Camiones</button>
+    </div>
+
+    <!-- Sección de Envíos -->
+    <section id="envios" class="seccion">
+        <h2>Resumen de Envíos</h2>
+        <div class="resumen">
+            <div>
+                <p>Total de envíos</p>
+                <span id="total-envios">0</span>
+            </div>
+            <div>
+                <p>Envíos en tránsito</p>
+                <span id="envios-transito">0</span>
+            </div>
+            <div>
+                <p>Envíos entregados</p>
+                <span id="envios-entregados">0</span>
+            </div>
+        </div>
+        <div class="resumen">
+            <div>
+                <p>Costos totales</p>
+                <span id="costos-totales">$0</span>
+            </div>
+        </div>
+
+        <h2>Registrar Nuevo Envío</h2>
+        <form id="form-envio">
+            <label for="destino">Destino:</label>
+            <input type="text" id="destino" name="destino" required>
+
+            <label for="cliente">Cliente:</label>
+            <select id="cliente" name="cliente" required>
+                <!-- Opciones de clientes se llenarán dinámicamente -->
+            </select>
+
+            <label for="camion">Camión:</label>
+            <select id="camion" name="camion" required>
+                <!-- Opciones de camiones se llenarán dinámicamente -->
+            </select>
+
+            <label for="fecha">Fecha de Salida:</label>
+            <input type="date" id="fecha" name="fecha" required>
+
+            <label for="costo">Costo ($):</label>
+            <input type="number" id="costo" name="costo" required>
+
+            <label for="estado">Estado:</label>
+            <select id="estado" name="estado">
+                <option value="pendiente">Pendiente</option>
+                <option value="transito">En Tránsito</option>
+                <option value="entregado">Entregado</option>
+            </select>
+
+            <button type="submit">Registrar Envío</button>
+        </form>
+        <div id="notificacion" class="notificacion"></div>
+
+        <h2>Lista de Envíos</h2>
+        <div class="filtros">
+            <label for="filtro-estado">Filtrar por estado:</label>
+            <select id="filtro-estado">
+                <option value="todos">Todos</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="transito">En Tránsito</option>
+                <option value="entregado">Entregado</option>
+            </select>
+        </div>
+        <input type="text" id="buscar-envio" placeholder="Buscar por destino...">
+        <table id="tabla-envios">
+            <thead>
+                <tr>
+                    <th>Destino</th>
+                    <th>Cliente</th>
+                    <th>Camion</th>
+                    <th>Fecha</th>
+                    <th>Costo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los envíos se agregarán dinámicamente aquí -->
+            </tbody>
+        </table>
+        <div class="exportar">
+            <button onclick="exportarCSV()">Exportar a CSV</button>
+        </div>
+    </section>
+
+    <!-- Sección de Clientes -->
+    <section id="clientes" class="seccion" style="display: none;">
+        <h2>Gestión de Clientes</h2>
+        <form id="form-cliente">
+            <label for="nombre-cliente">Nombre:</label>
+            <input type="text" id="nombre-cliente" name="nombre-cliente" required>
+
+            <label for="email-cliente">Email:</label>
+            <input type="email" id="email-cliente" name="email-cliente" required>
+
+            <label for="telefono-cliente">Teléfono:</label>
+            <input type="text" id="telefono-cliente" name="telefono-cliente" required>
+
+            <button type="submit">Registrar Cliente</button>
+        </form>
+        <div id="notificacion-cliente" class="notificacion"></div>
+
+        <h2>Lista de Clientes</h2>
+        <table id="tabla-clientes">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los clientes se agregarán dinámicamente aquí -->
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Sección de Camiones -->
+    <section id="camiones" class="seccion" style="display: none;">
+        <h2>Gestión de Camiones</h2>
+        <form id="form-camion">
+            <label for="placa-camion">Placa:</label>
+            <input type="text" id="placa-camion" name="placa-camion" required>
+
+            <label for="modelo-camion">Modelo:</label>
+            <input type="text" id="modelo-camion" name="modelo-camion" required>
+
+            <label for="capacidad-camion">Capacidad (kg):</label>
+            <input type="number" id="capacidad-camion" name="capacidad-camion" required>
+
+            <button type="submit">Registrar Camión</button>
+        </form>
+        <div id="notificacion-camion" class="notificacion"></div>
+
+        <h2>Lista de Camiones</h2>
+        <table id="tabla-camiones">
+            <thead>
+                <tr>
+                    <th>Placa</th>
+                    <th>Modelo</th>
+                    <th>Capacidad</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los camiones se agregarán dinámicamente aquí -->
+            </tbody>
+        </table>
+    </section>
+
+    <footer>
+        <!-- Texto eliminado -->
+    </footer>
+
+    <script>
+        // Datos de ejemplo (simulando una base de datos)
+        let envios = JSON.parse(localStorage.getItem('envios')) || [];
+        let clientes = JSON.parse(localStorage.getItem('clientes')) || [];
+        let camiones = JSON.parse(localStorage.getItem('camiones')) || [];
+
+        // Elementos del DOM
+        const formEnvio = document.getElementById('form-envio');
+        const formCliente = document.getElementById('form-cliente');
+        const formCamion = document.getElementById('form-camion');
+        const tablaEnvios = document.getElementById('tabla-envios').getElementsByTagName('tbody')[0];
+        const tablaClientes = document.getElementById('tabla-clientes').getElementsByTagName('tbody')[0];
+        const tablaCamiones = document.getElementById('tabla-camiones').getElementsByTagName('tbody')[0];
+        const buscarEnvio = document.getElementById('buscar-envio');
+        const filtroEstado = document.getElementById('filtro-estado');
+        const totalEnvios = document.getElementById('total-envios');
+        const enviosTransito = document.getElementById('envios-transito');
+        const enviosEntregados = document.getElementById('envios-entregados');
+        const costosTotales = document.getElementById('costos-totales');
+        const notificacion = document.getElementById('notificacion');
+        const notificacionCliente = document.getElementById('notificacion-cliente');
+        const notificacionCamion = document.getElementById('notificacion-camion');
+
+        // Función para mostrar notificaciones
+        function mostrarNotificacion(elemento, mensaje, tipo) {
+            elemento.textContent = mensaje;
+            elemento.className = `notificacion ${tipo}`;
+            elemento.style.display = 'block';
+            setTimeout(() => {
+                elemento.style.display = 'none';
+            }, 3000);
+        }
+
+        // Función para mostrar secciones
+        function mostrarSeccion(seccion) {
+            document.querySelectorAll('.seccion').forEach(sec => {
+                sec.style.display = 'none';
+            });
+            document.getElementById(seccion).style.display = 'block';
+        }
+
+        // Función para agregar un envío
+        function agregarEnvio(event) {
+            event.preventDefault();
+
+            const destino = document.getElementById('destino').value;
+            const cliente = document.getElementById('cliente').value;
+            const camion = document.getElementById('camion').value;
+            const fecha = document.getElementById('fecha').value;
+            const costo = parseFloat(document.getElementById('costo').value);
+            const estado = document.getElementById('estado').value;
+
+            const nuevoEnvio = {
+                id: Date.now(), // ID único
+                destino,
+                cliente,
+                camion,
+                fecha,
+                costo,
+                estado
+            };
+
+            envios.push(nuevoEnvio);
+            localStorage.setItem('envios', JSON.stringify(envios));
+            actualizarTablaEnvios();
+            actualizarResumen();
+            formEnvio.reset();
+            mostrarNotificacion(notificacion, 'Envío registrado con éxito', 'exito');
+        }
+
+        // Función para agregar un cliente
+        function agregarCliente(event) {
+            event.preventDefault();
+
+            const nombre = document.getElementById('nombre-cliente').value;
+            const email = document.getElementById('email-cliente').value;
+            const telefono = document.getElementById('telefono-cliente').value;
+
+            const nuevoCliente = {
+                id: Date.now(), // ID único
+                nombre,
+                email,
+                telefono
+            };
+
+            clientes.push(nuevoCliente);
+            localStorage.setItem('clientes', JSON.stringify(clientes));
+            actualizarTablaClientes();
+            actualizarOpcionesClientes();
+            formCliente.reset();
+            mostrarNotificacion(notificacionCliente, 'Cliente registrado con éxito', 'exito');
+        }
+
+        // Función para agregar un camión
+        function agregarCamion(event) {
+            event.preventDefault();
+
+            const placa = document.getElementById('placa-camion').value;
+            const modelo = document.getElementById('modelo-camion').value;
+            const capacidad = parseFloat(document.getElementById('capacidad-camion').value);
+
+            const nuevoCamion = {
+                id: Date.now(), // ID único
+                placa,
+                modelo,
+                capacidad
+            };
+
+            camiones.push(nuevoCamion);
+            localStorage.setItem('camiones', JSON.stringify(camiones));
+            actualizarTablaCamiones();
+            actualizarOpcionesCamiones();
+            formCamion.reset();
+            mostrarNotificacion(notificacionCamion, 'Camión registrado con éxito', 'exito');
+        }
+
+        // Función para actualizar la tabla de envíos
+        function actualizarTablaEnvios() {
+            tablaEnvios.innerHTML = '';
+            const filtro = filtroEstado.value;
+            const textoBusqueda = buscarEnvio.value.toLowerCase();
+            const resultados = envios.filter(envio => {
+                const coincideEstado = filtro === 'todos' || envio.estado === filtro;
+                const coincideBusqueda = envio.destino.toLowerCase().includes(textoBusqueda);
+                return coincideEstado && coincideBusqueda;
+            });
+
+            resultados.forEach(envio => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${envio.destino}</td>
+                    <td>${envio.cliente}</td>
+                    <td>${envio.camion}</td>
+                    <td>${envio.fecha}</td>
+                    <td>$${envio.costo.toFixed(2)}</td>
+                    <td>${envio.estado}</td>
+                    <td>
+                        <button onclick="editarEnvio(${envio.id})">Editar</button>
+                        <button onclick="eliminarEnvio(${envio.id})">Eliminar</button>
+                    </td>
+                `;
+                tablaEnvios.appendChild(fila);
+            });
+        }
+
+        // Función para actualizar la tabla de clientes
+        function actualizarTablaClientes() {
+            tablaClientes.innerHTML = '';
+            clientes.forEach(cliente => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${cliente.nombre}</td>
+                    <td>${cliente.email}</td>
+                    <td>${cliente.telefono}</td>
+                    <td>
+                        <button onclick="editarCliente(${cliente.id})">Editar</button>
+                        <button onclick="eliminarCliente(${cliente.id})">Eliminar</button>
+                    </td>
+                `;
+                tablaClientes.appendChild(fila);
+            });
+        }
+
+        // Función para actualizar la tabla de camiones
+        function actualizarTablaCamiones() {
+            tablaCamiones.innerHTML = '';
+            camiones.forEach(camion => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${camion.placa}</td>
+                    <td>${camion.modelo}</td>
+                    <td>${camion.capacidad} kg</td>
+                    <td>
+                        <button onclick="editarCamion(${camion.id})">Editar</button>
+                        <button onclick="eliminarCamion(${camion.id})">Eliminar</button>
+                    </td>
+                `;
+                tablaCamiones.appendChild(fila);
+            });
+        }
+
+        // Función para actualizar el resumen
+        function actualizarResumen() {
+            totalEnvios.textContent = envios.length;
+            enviosTransito.textContent = envios.filter(envio => envio.estado === 'transito').length;
+            enviosEntregados.textContent = envios.filter(envio => envio.estado === 'entregado').length;
+            const totalCostos = envios.reduce((sum, envio) => sum + envio.costo, 0);
+            costosTotales.textContent = `$${totalCostos.toFixed(2)}`;
+        }
+
+        // Función para actualizar las opciones de clientes en el formulario de envíos
+        function actualizarOpcionesClientes() {
+            const selectCliente = document.getElementById('cliente');
+            selectCliente.innerHTML = '';
+            clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.nombre;
+                option.textContent = cliente.nombre;
+                selectCliente.appendChild(option);
+            });
+        }
+
+        // Función para actualizar las opciones de camiones en el formulario de envíos
+        function actualizarOpcionesCamiones() {
+            const selectCamion = document.getElementById('camion');
+            selectCamion.innerHTML = '';
+            camiones.forEach(camion => {
+                const option = document.createElement('option');
+                option.value = camion.placa;
+                option.textContent = `${camion.placa} (${camion.modelo})`;
+                selectCamion.appendChild(option);
+            });
+        }
+
+        // Función para eliminar un envío
+        function eliminarEnvio(id) {
+            envios = envios.filter(envio => envio.id !== id);
+            localStorage.setItem('envios', JSON.stringify(envios));
+            actualizarTablaEnvios();
+            actualizarResumen();
+            mostrarNotificacion(notificacion, 'Envío eliminado con éxito', 'exito');
+        }
+
+        // Función para eliminar un cliente
+        function eliminarCliente(id) {
+            clientes = clientes.filter(cliente => cliente.id !== id);
+            localStorage.setItem('clientes', JSON.stringify(clientes));
+            actualizarTablaClientes();
+            actualizarOpcionesClientes();
+            mostrarNotificacion(notificacionCliente, 'Cliente eliminado con éxito', 'exito');
+        }
+
+        // Función para eliminar un camión
+        function eliminarCamion(id) {
+            camiones = camiones.filter(camion => camion.id !== id);
+            localStorage.setItem('camiones', JSON.stringify(camiones));
+            actualizarTablaCamiones();
+            actualizarOpcionesCamiones();
+            mostrarNotificacion(notificacionCamion, 'Camión eliminado con éxito', 'exito');
+        }
+
+        // Función para editar un envío
+        function editarEnvio(id) {
+            const envio = envios.find(envio => envio.id === id);
+            if (envio) {
+                document.getElementById('destino').value = envio.destino;
+                document.getElementById('cliente').value = envio.cliente;
+                document.getElementById('camion').value = envio.camion;
+                document.getElementById('fecha').value = envio.fecha;
+                document.getElementById('costo').value = envio.costo;
+                document.getElementById('estado').value = envio.estado;
+
+                eliminarEnvio(id); // Eliminar el envío antiguo
+            }
+        }
+
+        // Función para editar un cliente
+        function editarCliente(id) {
+            const cliente = clientes.find(cliente => cliente.id === id);
+            if (cliente) {
+                document.getElementById('nombre-cliente').value = cliente.nombre;
+                document.getElementById('email-cliente').value = cliente.email;
+                document.getElementById('telefono-cliente').value = cliente.telefono;
+
+                eliminarCliente(id); // Eliminar el cliente antiguo
+            }
+        }
+
+        // Función para editar un camión
+        function editarCamion(id) {
+            const camion = camiones.find(camion => camion.id === id);
+            if (camion) {
+                document.getElementById('placa-camion').value = camion.placa;
+                document.getElementById('modelo-camion').value = camion.modelo;
+                document.getElementById('capacidad-camion').value = camion.capacidad;
+
+                eliminarCamion(id); // Eliminar el camión antiguo
+            }
+        }
+
+        // Función para exportar a CSV
+        function exportarCSV() {
+            const csvContent = "data:text/csv;charset=utf-8," +
+                "Destino,Cliente,Camión,Fecha,Costo,Estado\n" +
+                envios.map(envio => 
+                    `${envio.destino},${envio.cliente},${envio.camion},${envio.fecha},${envio.costo},${envio.estado}`
+                ).join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "envios.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Eventos
+        formEnvio.addEventListener('submit', agregarEnvio);
+        formCliente.addEventListener('submit', agregarCliente);
+        formCamion.addEventListener('submit', agregarCamion);
+        buscarEnvio.addEventListener('input', actualizarTablaEnvios);
+        filtroEstado.addEventListener('change', actualizarTablaEnvios);
+
+        // Inicialización
+        actualizarTablaEnvios();
+        actualizarTablaClientes();
+        actualizarTablaCamiones();
+        actualizarResumen();
+        actualizarOpcionesClientes();
+        actualizarOpcionesCamiones();
+        mostrarSeccion('envios'); // Mostrar la sección de envíos por defecto
+    </script>
+</body>
+</html>

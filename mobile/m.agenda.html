@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario Proveedores MACAAL</title>
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+    <!-- Estilos personalizados -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #calendar {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .fc-toolbar-title {
+            font-size: 1.5em;
+        }
+        .fc-button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .fc-button:hover {
+            background-color: #45a049;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group input[type="time"] {
+            width: 48%;
+        }
+        .form-group button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #45a049;
+        }
+        .delete-button {
+            background-color: #f44336;
+            margin-left: 10px;
+        }
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+        .attendance-status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .attendance-status.confirmed {
+            color: #4CAF50;
+        }
+        .attendance-status.absent {
+            color: #f44336;
+        }
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-container input {
+            padding: 8px;
+            width: 300px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .history-container {
+            margin-top: 20px;
+        }
+        .history-container h2 {
+            text-align: center;
+        }
+        .history-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .history-container li {
+            background-color: #f9f9f9;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Calendario Proveedores Macaal</h1>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Buscar citas por proveedor o fecha (Año-Mes-Dia)">
+        <button onclick="filterEvents()">Buscar</button>
+    </div>
+    <div id="calendar"></div>
+
+    <!-- Modal para agregar/editar citas -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle">Agregar Cita</h2>
+            <form id="eventForm">
+                <div class="form-group">
+                    <label for="eventTitle">Proveedor:</label>
+                    <input type="text" id="eventTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventStartTime">Hora de inicio:</label>
+                    <input type="time" id="eventStartTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventEndTime">Hora de finalización:</label>
+                    <input type="time" id="eventEndTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventNotes">Notas:</label>
+                    <textarea id="eventNotes" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <button type="submit" id="saveButton">Guardar</button>
+                    <button type="button" id="deleteButton" class="delete-button">Eliminar</button>
+                </div>
+            </form>
+            <div id="attendanceSection" class="attendance-status">
+                <p>Estado de asistencia: <span id="attendanceStatus">Pendiente</span></p>
+                <button type="button" id="confirmButton">Confirmar Asistencia</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de citas -->
+    <div class="history-container">
+        <h2>Historial de Asistencias</h2>
+        <ul id="historyList"></ul>
+    </div>
+
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/es.js"></script>
+    <!-- Script personalizado -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var modal = document.getElementById('eventModal');
+            var closeBtn = document.querySelector('.close');
+            var eventForm = document.getElementById('eventForm');
+            var saveButton = document.getElementById('saveButton');
+            var deleteButton = document.getElementById('deleteButton');
+            var modalTitle = document.getElementById('modalTitle');
+            var attendanceSection = document.getElementById('attendanceSection');
+            var attendanceStatus = document.getElementById('attendanceStatus');
+            var confirmButton = document.getElementById('confirmButton');
+            var searchInput = document.getElementById('searchInput');
+            var historyList = document.getElementById('historyList');
+
+            var selectedDate = null;
+            var selectedEvent = null;
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                editable: true, // Habilitar drag and drop
+                events: [],
+                dateClick: function(info) {
+                    selectedDate = info.dateStr;
+                    selectedEvent = null;
+                    modalTitle.textContent = 'Agregar Cita';
+                    saveButton.textContent = 'Guardar';
+                    deleteButton.style.display = 'none';
+                    attendanceSection.style.display = 'none';
+                    document.getElementById('eventTitle').value = '';
+                    document.getElementById('eventStartTime').value = '';
+                    document.getElementById('eventEndTime').value = '';
+                    document.getElementById('eventNotes').value = '';
+                    modal.style.display = 'block';
+                },
+                eventClick: function(info) {
+                    selectedEvent = info.event;
+                    modalTitle.textContent = 'Editar Cita';
+                    saveButton.textContent = 'Actualizar';
+                    deleteButton.style.display = 'inline-block';
+                    attendanceSection.style.display = 'block';
+                    document.getElementById('eventTitle').value = selectedEvent.title;
+                    document.getElementById('eventStartTime').value = selectedEvent.start.toTimeString().substring(0, 5);
+                    document.getElementById('eventEndTime').value = selectedEvent.end ? selectedEvent.end.toTimeString().substring(0, 5) : '';
+                    document.getElementById('eventNotes').value = selectedEvent.extendedProps.notes || '';
+
+                    // Mostrar estado de asistencia
+                    if (selectedEvent.extendedProps.attendance === 'Confirmado') {
+                        attendanceStatus.textContent = 'Confirmado';
+                        attendanceStatus.className = 'attendance-status Confirmado';
+                    } else if (selectedEvent.extendedProps.attendance === 'Ausente') {
+                        attendanceStatus.textContent = 'Ausente';
+                        attendanceStatus.className = 'attendance-status Ausente';
+                    } else {
+                        attendanceStatus.textContent = 'Pendiente';
+                        attendanceStatus.className = '';
+                    }
+
+                    modal.style.display = 'block';
+                },
+                eventDrop: function(info) {
+                    // Verificar solapamiento al mover un evento
+                    if (isEventOverlapping(info.event)) {
+                        alert('No se puede mover la cita: hay un solapamiento con otra cita.');
+                        info.revert();
+                    }
+                },
+                eventResize: function(info) {
+                    // Verificar solapamiento al cambiar la duración de un evento
+                    if (isEventOverlapping(info.event)) {
+                        alert('No se puede cambiar la duración: hay un solapamiento con otra cita.');
+                        info.revert();
+                    }
+                }
+            });
+
+            calendar.render();
+
+            // Cerrar modal al hacer clic en la "X"
+            closeBtn.onclick = function() {
+                modal.style.display = 'none';
+            };
+
+            // Cerrar modal al hacer clic fuera del contenido
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            };
+
+            // Manejar el envío del formulario
+            eventForm.onsubmit = function(event) {
+                event.preventDefault();
+                var title = document.getElementById('eventTitle').value;
+                var startTime = document.getElementById('eventStartTime').value;
+                var endTime = document.getElementById('eventEndTime').value;
+                var notes = document.getElementById('eventNotes').value;
+
+                if (title && startTime && endTime) {
+                    var startDateTime = (selectedEvent ? selectedEvent.start.toISOString().substring(0, 10) : selectedDate) + 'T' + startTime;
+                    var endDateTime = (selectedEvent ? selectedEvent.start.toISOString().substring(0, 10) : selectedDate) + 'T' + endTime;
+
+                    if (selectedEvent) {
+                        // Actualizar evento existente
+                        selectedEvent.setProp('title', title);
+                        selectedEvent.setDates(startDateTime, endDateTime);
+                        selectedEvent.setExtendedProp('notes', notes);
+                    } else {
+                        // Verificar solapamiento antes de agregar un nuevo evento
+                        var newEvent = {
+                            title: title,
+                            start: startDateTime,
+                            end: endDateTime,
+                            extendedProps: {
+                                attendance: 'pending',
+                                notes: notes
+                            }
+                        };
+                        if (isEventOverlapping(newEvent)) {
+                            alert('No se puede agendar la cita: hay un solapamiento con otra cita.');
+                            return;
+                        }
+                        calendar.addEvent(newEvent);
+                    }
+
+                    modal.style.display = 'none';
+                    eventForm.reset();
+                    updateHistory();
+                } else {
+                    alert('Por favor, complete todos los campos.');
+                }
+            };
+function filterEvents() {
+    var searchTerm = searchInput.value.toLowerCase();
+    var events = calendar.getEvents();
+    events.forEach(function(event) {
+        var eventDate = event.start.toISOString().substring(0, 10);
+        var eventNotes = event.extendedProps.notes || '';
+        var eventStatus = event.extendedProps.attendance || 'Pendiente';
+
+        if (
+            event.title.toLowerCase().includes(searchTerm) ||
+            eventDate.includes(searchTerm) ||
+            eventNotes.toLowerCase().includes(searchTerm) ||
+            eventStatus.toLowerCase().includes(searchTerm)
+        ) {
+            event.setProp('display', 'auto');
+        } else {
+            event.setProp('display', 'none');
+        }
+    });
+}
+            // Manejar la eliminación de eventos
+            deleteButton.onclick = function() {
+                if (selectedEvent) {
+                    selectedEvent.remove();
+                    modal.style.display = 'none';
+                    eventForm.reset();
+                    updateHistory();
+                }
+            };
+
+            // Manejar la confirmación de asistencia
+            confirmButton.onclick = function() {
+                if (selectedEvent) {
+                    selectedEvent.setExtendedProp('attendance', 'Confirmado');
+                    attendanceStatus.textContent = 'Confirmado';
+                    attendanceStatus.className = 'attendance-status Confirmado';
+                    updateHistory();
+                }
+            };
+
+            // Verificar asistencia automáticamente
+            setInterval(function() {
+                var now = new Date();
+                calendar.getEvents().forEach(function(event) {
+                    if (event.end && event.end < now && event.extendedProps.attendance === 'Pendiente') {
+                        event.setExtendedProp('attendance', 'Ausente');
+                        if (event === selectedEvent) {
+                            attendanceStatus.textContent = 'Ausente';
+                            attendanceStatus.className = 'attendance-status Ausente';
+                        }
+                    }
+                });
+                updateHistory();
+            }, 60000); // Verificar cada minuto
+
+            // Función para verificar solapamientos
+            function isEventOverlapping(event) {
+                var events = calendar.getEvents();
+                for (var i = 0; i < events.length; i++) {
+                    var existingEvent = events[i];
+                    if (existingEvent !== event && existingEvent.start < event.end && existingEvent.end > event.start) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // Función para filtrar eventos
+            function filterEvents() {
+                var searchTerm = searchInput.value.toLowerCase();
+                var events = calendar.getEvents();
+                events.forEach(function(event) {
+                    var eventDate = event.start.toISOString().substring(0, 10);
+                    if (event.title.toLowerCase().includes(searchTerm) || eventDate.includes(searchTerm)) {
+                        event.setProp('display', 'auto');
+                    } else {
+                        event.setProp('display', 'none');
+                    }
+                });
+            }
+eventForm.onsubmit = function(event) {
+    event.preventDefault();
+    var title = document.getElementById('eventTitle').value;
+    var startTime = document.getElementById('eventStartTime').value;
+    var endTime = document.getElementById('eventEndTime').value;
+    var notes = document.getElementById('eventNotes').value;
+
+    if (title && startTime && endTime) {
+        var startDateTime = (selectedEvent ? selectedEvent.start.toISOString().substring(0, 10) : selectedDate) + 'T' + startTime;
+        var endDateTime = (selectedEvent ? selectedEvent.start.toISOString().substring(0, 10) : selectedDate) + 'T' + endTime;
+
+        if (selectedEvent) {
+            selectedEvent.setProp('title', title);
+            selectedEvent.setDates(startDateTime, endDateTime);
+            selectedEvent.setExtendedProp('notes', notes);
+            alert('Cita actualizada correctamente.');
+        } else {
+            var newEvent = {
+                title: title,
+                start: startDateTime,
+                end: endDateTime,
+                extendedProps: {
+                    attendance: 'Pendiente',
+                    notes: notes
+                }
+            };
+            if (isEventOverlapping(newEvent)) {
+                alert('No se puede agendar la cita: hay un solapamiento con otra cita.');
+                return;
+            }
+            calendar.addEvent(newEvent);
+            alert('Cita agregada correctamente.');
+        }
+
+        modal.style.display = 'none';
+        eventForm.reset();
+        updateHistory();
+    } else {
+        alert('Por favor, complete todos los campos.');
+    }
+};
+
+            // Función para actualizar el historial de citas
+            function updateHistory() {
+                historyList.innerHTML = '';
+                var events = calendar.getEvents();
+                events.sort((a, b) => a.start - b.start);
+                events.forEach(function(event) {
+                    var li = document.createElement('li');
+                    li.innerHTML = `
+                        <strong>${event.title}</strong><br>
+                        Fecha: ${event.start.toLocaleString()}<br>
+                        Estado: ${event.extendedProps.attendance || 'Pendiente'}<br>
+                        Notas: ${event.extendedProps.notes || 'N/A'}
+                    `;
+                    historyList.appendChild(li);
+                });
+            }
+
+            // Actualizar el historial al cargar la página
+            updateHistory();
+        });
+    </script>
+</body>
+</html>

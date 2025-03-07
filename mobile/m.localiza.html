@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estaciones de Productos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Añadimos Font Awesome para los íconos -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Estilo global para el cuerpo y fondo */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fb;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        /* Contenedor principal con borde redondeado y sombra */
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #ecf0f1;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            box-sizing: border-box;
+            margin-top: 20px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 12px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background-color: #f1f1f1;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Modal (ventana flotante) */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modal-content {
+            background-color: #ecf0f1;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
+            max-height: 70vh; /* Limitar la altura máxima */
+            overflow-y: auto; /* Permitir desplazamiento si hay demasiados productos */
+        }
+
+        #modal-content h3 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        /* Estilo de la lista de productos */
+        #modal-content ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #modal-content li {
+            padding: 12px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            line-height: 1.5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #modal-content li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Estilo para las cantidades */
+        .producto-cantidad {
+            background-color: #e6f7e6;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        /* Estilo para el botón de cierre */
+        #cerrar-modal {
+            background-color: red;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #cerrar-modal:hover {
+            background-color: darkred;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .input-group label {
+            flex: 1;
+            text-align: left;
+            padding-right: 10px;
+            line-height: 1.5;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            flex: 2;
+        }
+
+        /* Estilos de respuesta para móviles */
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            button {
+                width: 100%;
+                padding: 14px;
+                font-size: 18px;
+            }
+
+            #modal-content {
+                padding: 20px;
+            }
+
+            #modal-content ul li {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            #cerrar-modal {
+                width: 100%;
+                font-size: 18px;
+                padding: 14px;
+            }
+        }
+
+        /* Estilo para el botón de eliminación (basurero) */
+        .btn-eliminar {
+            background-color: transparent;
+            border: none;
+            color: #e74c3c;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .btn-eliminar:hover {
+            color: #c0392b;
+        }
+
+        /* Botón flotante de exportación personalizado */
+        .btn-exportar {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #4CAF50; /* Color verde */
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .btn-exportar:hover {
+            background-color: #45a049;
+            transform: scale(1.1);
+        }
+
+        /* Ajuste de la posición del botón flotante en pantallas móviles */
+        @media (max-width: 600px) {
+            .btn-exportar {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 25px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Estaciones para Ingresar Productos</h1>
+
+        <!-- Formulario para agregar producto, cantidad y estación -->
+        <form id="formulario-producto">
+            <div class="input-group">
+                <label for="producto-nombre">Producto:</label>
+                <input type="text" id="producto-nombre" placeholder="Escribe el nombre del producto..." required>
+            </div>
+            <div class="input-group">
+                <label for="cantidad-producto">Cantidad:</label>
+                <input type="number" id="cantidad-producto" placeholder="Escribe la cantidad..." required min="1">
+            </div>
+            <div class="input-group">
+                <label for="codigo-estacion">Código de Estación:</label>
+                <input type="text" id="codigo-estacion" placeholder="Escribe el código de la estación..." required>
+            </div>
+
+            <button type="submit">Agregar Producto</button>
+        </form>
+
+        <div class="input-group">
+            <label for="codigo-estacion-mostrar">Ver productos por Estación:</label>
+            <input type="text" id="codigo-estacion-mostrar" placeholder="ASD1, ASD2, ASD3" required>
+        </div>
+    </div>
+
+    <!-- Modal (ventana flotante) -->
+    <div id="modal">
+        <div id="modal-content">
+            <h3>Productos en la Estación</h3>
+            <ul id="lista-productos">
+                <!-- Los productos se agregarán aquí como elementos de lista -->
+            </ul>
+            <button id="cerrar-modal">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Botón flotante de exportación -->
+    <button class="btn-exportar" title="Exportar">
+        <i class="fas fa-book"></i> <!-- Ícono de libro -->
+    </button>
+
+    <script>
+        // Recuperar productos guardados en Local Storage
+        const estacionesProductos = JSON.parse(localStorage.getItem('estacionesProductos')) || {
+            'asd1': [],
+            'asd2': [],
+            'asd3': []
+        };
+
+        // Función para manejar la adición de productos en cada estación
+        function agregarProducto(estacion, producto, cantidad) {
+            const nuevoProducto = { producto, cantidad };
+
+            // Agregar el producto a la estación correspondiente
+            estacionesProductos[estacion].push(nuevoProducto);
+
+            // Guardar nuevamente en Local Storage
+            localStorage.setItem('estacionesProductos', JSON.stringify(estacionesProductos));
+
+            // Actualizar la lista con los productos de la estación
+            actualizarLista(estacion);
+        }
+
+        // Función para actualizar la lista con los productos de una estación
+        function actualizarLista(estacion) {
+            const lista = document.getElementById('lista-productos');
+            lista.innerHTML = ''; // Limpiar lista antes de agregar los nuevos productos
+
+            // Recorrer los productos de la estación seleccionada y agregarlos a la lista
+            estacionesProductos[estacion].forEach(({ producto, cantidad }, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `${producto} <span class="producto-cantidad">${cantidad}</span>`;
+                
+                // Agregar el botón de eliminar
+                const btnEliminar = document.createElement('button');
+                btnEliminar.classList.add('btn-eliminar');
+                btnEliminar.innerHTML = '🗑️';
+                btnEliminar.onclick = function() {
+                    eliminarProducto(estacion, index);
+                };
+
+                li.appendChild(btnEliminar);
+                lista.appendChild(li);
+            });
+        }
+
+        // Función para eliminar producto de la estación
+        function eliminarProducto(estacion, index) {
+            // Eliminar el producto de la estación
+            estacionesProductos[estacion].splice(index, 1);
+
+            // Guardar los cambios en Local Storage
+            localStorage.setItem('estacionesProductos', JSON.stringify(estacionesProductos));
+
+            // Actualizar la lista con los productos restantes
+            actualizarLista(estacion);
+        }
+
+        // Event listener para el formulario de agregar producto
+        document.getElementById('formulario-producto').addEventListener('submit', function(e) {
+            e.preventDefault();  // Evitar el envío del formulario
+
+            const producto = document.getElementById('producto-nombre').value.trim();
+            const cantidad = document.getElementById('cantidad-producto').value.trim();
+            const codigoEstacion = document.getElementById('codigo-estacion').value.trim().toLowerCase();
+
+            if (producto && cantidad > 0 && (codigoEstacion === 'asd1' || codigoEstacion === 'asd2' || codigoEstacion === 'asd3')) {
+                // Llamamos a la función agregarProducto para agregar el producto a la estación correspondiente
+                agregarProducto(codigoEstacion, producto, cantidad);
+
+                // Limpiar los campos de entrada
+                document.getElementById('producto-nombre').value = '';
+                document.getElementById('cantidad-producto').value = '';
+                document.getElementById('codigo-estacion').value = '';
+            } else {
+                alert('Por favor, ingresa un nombre de producto válido, una cantidad mayor que 0 y un código de estación correcto (asd1, asd2 o asd3).');
+            }
+        });
+
+        // Event listener para mostrar productos en la estación al presionar Enter
+        document.getElementById('codigo-estacion-mostrar').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                const codigoEstacionMostrar = document.getElementById('codigo-estacion-mostrar').value.trim().toLowerCase();
+
+                if (codigoEstacionMostrar === 'asd1' || codigoEstacionMostrar === 'asd2' || codigoEstacionMostrar === 'asd3') {
+                    // Mostrar la ventana flotante (modal)
+                    document.getElementById('modal').style.display = 'flex';
+
+                    // Actualizar la lista con los productos de la estación correspondiente
+                    actualizarLista(codigoEstacionMostrar);
+                } else {
+                    alert('Código de estación inválido. Por favor ingresa asd1, asd2 o asd3.');
+                }
+            }
+        });
+
+        // Event listener para cerrar el modal
+        document.getElementById('cerrar-modal').addEventListener('click', function() {
+            document.getElementById('modal').style.display = 'none';
+        });
+
+        // Event listener para el botón de exportación (crear PDF)
+        document.querySelector('.btn-exportar').addEventListener('click', function() {
+            const estaciones = Object.keys(estacionesProductos);
+
+            // Mostrar un prompt para seleccionar la estación
+            const estacionSeleccionada = prompt(`Selecciona una estación para exportar sus productos:\n\n${estaciones.join('\n')}`).toLowerCase();
+
+            if (estaciones.includes(estacionSeleccionada)) {
+                // Crear el documento PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(12);
+                doc.text(`Productos en la Estación ${estacionSeleccionada.toUpperCase()}:`, 10, 10);
+
+                // Agregar los productos de la estación al PDF
+                estacionesProductos[estacionSeleccionada].forEach(({ producto, cantidad }, index) => {
+                    doc.text(`${index + 1}. ${producto} - Cantidad: ${cantidad}`, 10, 20 + index * 10);
+                });
+
+                // Descargar el archivo PDF
+                doc.save(`${estacionSeleccionada}-productos.pdf`);
+            } else {
+                alert('Estación inválida. Por favor elige una estación válida.');
+            }
+        });
+    </script>
+</body>
+</html>

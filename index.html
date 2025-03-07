@@ -111,7 +111,17 @@
     <script>
         // Verificar si ya hay una sesión activa
         if (localStorage.getItem('isLoggedIn') === 'true') {
-            window.location.href = 'dashboard.html';  // Redirigir si el usuario está autenticado
+            // Si la sesión está activa, verificar si es móvil o computadora
+            if (isMobileDevice()) {
+                window.location.href = 'm.dashboard.html';  // Redirigir a m.dashboard.html en dispositivos móviles
+            } else {
+                window.location.href = 'dashboard.html';  // Redirigir a dashboard.html en computadoras
+            }
+        }
+
+        // Función para detectar si el dispositivo es móvil
+        function isMobileDevice() {
+            return /Mobi|Android/i.test(navigator.userAgent);
         }
 
         document.getElementById('loginForm').addEventListener('submit', function(event) {
@@ -144,7 +154,13 @@
             if (username === "luis.bardales" && password === "Zacapa321") {
                 // Guardar la sesión en localStorage
                 localStorage.setItem('isLoggedIn', 'true');
-                window.location.href = 'dashboard.html';  // Redirige a dashboard.html
+
+                // Redirigir según el tipo de dispositivo
+                if (isMobileDevice()) {
+                    window.location.href = 'm.dashboard.html';  // Redirigir a m.dashboard.html en dispositivos móviles
+                } else {
+                    window.location.href = 'dashboard.html';  // Redirigir a dashboard.html en computadoras
+                }
             } else {
                 errorMessage.textContent = 'Credenciales incorrectas';
             }

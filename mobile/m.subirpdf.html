@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subir PDF a Google Drive</title>
+    <!-- Agregar Font Awesome para los iconos -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
     <style>
         /* Estilos generales */
         body {
@@ -73,6 +76,32 @@
             transform: translateY(2px); /* Efecto cuando se hace clic en el botón */
         }
 
+        /* Estilo para el botón "Volver atrás" en la esquina superior izquierda */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: transparent; /* Fondo transparente */
+            color: #555555; /* Gris oscuro para el ícono */
+            font-size: 24px; /* Tamaño adecuado para el ícono */
+            padding: 8px;
+            border-radius: 50%; /* Botón redondo */
+            border: none; /* Sin borde */
+            text-decoration: none;
+            transition: all 0.3s ease; /* Transición suave */
+            cursor: pointer;
+        }
+
+        /* Hover y efecto de "Volver atrás" */
+        .back-button:hover {
+            color: #0078D4; /* Cambio a azul al pasar el mouse */
+            transform: scale(1.1); /* Efecto de aumento */
+        }
+
+        .back-button:active {
+            transform: scale(0.95); /* Efecto de reducción al hacer clic */
+        }
+
         /* Estilo para dispositivos móviles */
         @media (max-width: 600px) {
             .container {
@@ -102,5 +131,10 @@
             <a href="https://forms.gle/59ir8ARKH3aQYQPd7" target="_blank">Subir archivo PDF</a>
         </div>
     </div>
+
+    <!-- Botón de "Volver atrás" con ícono actualizado -->
+    <a href="/m.dashboard.html" class="back-button">
+        <i class="fas fa-arrow-left"></i> <!-- Ícono de flecha hacia atrás simple -->
+    </a>
 </body>
 </html>

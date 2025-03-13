@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Productos</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            font-size: 28px;
+            color: #333;
+        }
+
+        .search-box {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        input[type="text"] {
+            width: 70%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #007bff;
+        }
+
+        button {
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .product-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .product-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .product-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-item h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .product-item p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .no-results {
+            color: #ff4d4d;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        /* Estilos para la ventana modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            width: 700px; /* Ancho mayor para la modal */
+            max-height: 90vh;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 25px;
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+        }
+
+        .modal-content .form-row {
+            display: flex;
+            gap: 20px; /* Más espacio entre los campos */
+            margin-bottom: 20px; /* Espacio entre filas */
+        }
+
+        .modal-content .form-group {
+            flex: 1;
+        }
+
+        .modal-content label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .modal-content input[type="text"],
+        .modal-content input[type="number"],
+        .modal-content select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .modal-content input[type="text"]:focus,
+        .modal-content input[type="number"]:focus,
+        .modal-content select:focus {
+            border-color: #007bff;
+        }
+
+        .modal-content .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px; /* Más espacio arriba de los botones */
+        }
+
+        .modal-content button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-content button.close {
+            background-color: #dc3545;
+        }
+
+        .modal-content button:hover {
+            background-color: #0056b3;
+        }
+
+        .modal-content button.close:hover {
+            background-color: #c82333;
+        }
+
+        /* Estilos para la ventana de detalles del producto */
+        .product-details-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .product-details-content {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            width: 400px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .product-details-content h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+            text-align: center;
+        }
+
+        .product-details-content p {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .product-details-content .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .product-details-content button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            flex: 1;
+        }
+
+        .product-details-content button.edit {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .product-details-content button.edit:hover {
+            background-color: #218838;
+        }
+
+        .product-details-content button.delete {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .product-details-content button.delete:hover {
+            background-color: #c82333;
+        }
+
+        .product-details-content button.close {
+            background-color: #6c757d;
+            color: #fff;
+        }
+
+        .product-details-content button.close:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Buscador de Productos</h1>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Buscar por nombre o código...">
+            <button onclick="searchProducts()">Buscar</button>
+            <button onclick="openModal()">Añadir Producto</button>
+        </div>
+        
+        <ul class="product-list" id="productList">
+            <!-- Los productos se añadirán aquí dinámicamente -->
+        </ul>
+        <p id="noResults" class="no-results" style="display: none;">No se encontraron resultados.</p>
+    </div>
+
+    <!-- Ventana modal para añadir productos -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2>Añadir Producto</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="productCode">Código de producto:</label>
+                    <input type="text" id="productCode" placeholder="Código">
+                </div>
+                <div class="form-group">
+                    <label for="productName">Nombre de producto:</label>
+                    <input type="text" id="productName" placeholder="Nombre">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="barcode">Código de barras:</label>
+                    <input type="text" id="barcode" placeholder="Código de barras">
+                </div>
+                <div class="form-group">
+                    <label for="supplier">Proveedor:</label>
+                    <select id="supplier">
+                        <option value="Proveedor A">Proveedor A</option>
+                        <option value="Proveedor B">Proveedor B</option>
+                        <option value="Proveedor C">Proveedor C</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category">Categoría:</label>
+                    <select id="category">
+                        <option value="Electrónica">Electrónica</option>
+                        <option value="Hogar">Hogar</option>
+                        <option value="Oficina">Oficina</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="costPrice">Precio de costo:</label>
+                    <input type="number" id="costPrice" placeholder="Precio de costo" oninput="calculateSellingPrice()">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="profitMargin">Margen de venta (%):</label>
+                    <input type="number" id="profitMargin" placeholder="Margen" oninput="calculateSellingPrice()">
+                </div>
+                <div class="form-group">
+                    <label for="sellingPrice">Precio de venta:</label>
+                    <input type="number" id="sellingPrice" placeholder="Precio de venta">
+                </div>
+            </div>
+            <div class="button-group">
+                <button onclick="addProduct()">Añadir</button>
+                <button onclick="closeModal()" class="close">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ventana modal para detalles del producto -->
+    <div id="productDetailsModal" class="product-details-modal">
+        <div class="product-details-content">
+            <h2 id="detailsProductName"></h2>
+            <p><strong>Código:</strong> <span id="detailsProductCode"></span></p>
+            <p><strong>Código de barras:</strong> <span id="detailsBarcode"></span></p>
+            <p><strong>Proveedor:</strong> <span id="detailsSupplier"></span></p>
+            <p><strong>Categoría:</strong> <span id="detailsCategory"></span></p>
+            <p><strong>Precio de costo:</strong> $<span id="detailsCostPrice"></span></p>
+            <p><strong>Margen de venta:</strong> <span id="detailsProfitMargin"></span>%</p>
+            <p><strong>Precio de venta:</strong> $<span id="detailsSellingPrice"></span></p>
+            <div class="button-group">
+                <button class="edit" onclick="editProduct()">Editar</button>
+                <button class="delete" onclick="deleteProduct()">Eliminar</button>
+                <button class="close" onclick="closeProductDetailsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProduct = null; // Variable para almacenar el producto actual
+
+        // Función para buscar productos por nombre o código
+        function searchProducts() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const productItems = document.querySelectorAll('.product-item');
+            const noResultsMessage = document.getElementById('noResults');
+            let foundResults = false;
+
+            productItems.forEach(item => {
+                const productName = item.getAttribute('data-name').toLowerCase();
+                const productCode = item.getAttribute('data-code').toLowerCase();
+
+                if (productName.includes(input) || productCode.includes(input)) {
+                    item.style.display = "block";
+                    foundResults = true;
+                } else {
+                    item.style.display = "none";
+                }
+            });
+
+            if (!foundResults) {
+                noResultsMessage.style.display = "block";
+            } else {
+                noResultsMessage.style.display = "none";
+            }
+        }
+
+        // Funciones para manejar la ventana modal
+        function openModal() {
+            document.getElementById('modal').style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = "none";
+            clearModalFields(); // Limpiar los campos de la modal
+        }
+
+        // Función para limpiar los campos de la modal
+        function clearModalFields() {
+            document.getElementById('productCode').value = "";
+            document.getElementById('productName').value = "";
+            document.getElementById('barcode').value = "";
+            document.getElementById('supplier').value = "Proveedor A";
+            document.getElementById('category').value = "Electrónica";
+            document.getElementById('costPrice').value = "";
+            document.getElementById('profitMargin').value = "";
+            document.getElementById('sellingPrice').value = "";
+        }
+
+        // Función para calcular el precio de venta
+        function calculateSellingPrice() {
+            const costPrice = parseFloat(document.getElementById('costPrice').value);
+            const profitMargin = parseFloat(document.getElementById('profitMargin').value);
+
+            if (!isNaN(costPrice) && !isNaN(profitMargin)) {
+                const sellingPrice = costPrice * (1 + profitMargin / 100);
+                document.getElementById('sellingPrice').value = sellingPrice.toFixed(2);
+            }
+        }
+
+        // Función para añadir un nuevo producto
+        function addProduct() {
+            const productCode = document.getElementById('productCode').value.trim();
+            const productName = document.getElementById('productName').value.trim();
+            const barcode = document.getElementById('barcode').value.trim();
+            const supplier = document.getElementById('supplier').value;
+            const category = document.getElementById('category').value;
+            const costPrice = document.getElementById('costPrice').value.trim();
+            const profitMargin = document.getElementById('profitMargin').value.trim();
+            const sellingPrice = document.getElementById('sellingPrice').value.trim();
+
+            if (productCode && productName && barcode && supplier && category && costPrice && profitMargin && sellingPrice) {
+                const productList = document.getElementById('productList');
+                const newItem = document.createElement('li');
+                newItem.className = "product-item";
+                newItem.setAttribute('data-code', productCode);
+                newItem.setAttribute('data-name', productName);
+                newItem.setAttribute('data-barcode', barcode);
+                newItem.setAttribute('data-supplier', supplier);
+                newItem.setAttribute('data-category', category);
+                newItem.setAttribute('data-costPrice', costPrice);
+                newItem.setAttribute('data-profitMargin', profitMargin);
+                newItem.setAttribute('data-sellingPrice', sellingPrice);
+
+                newItem.innerHTML = `
+                    <h3>${productName}</h3>
+                    <p><strong>Código:</strong> ${productCode}</p>
+                    <p><strong>Precio:</strong> $${sellingPrice}</p>
+                `;
+
+                newItem.onclick = () => showProductDetails(newItem);
+                productList.appendChild(newItem);
+                closeModal(); // Cerrar la ventana modal
+            } else {
+                alert("Por favor, completa todos los campos.");
+            }
+        }
+
+        // Función para mostrar los detalles del producto
+        function showProductDetails(item) {
+            currentProduct = item; // Guardar el producto actual
+            document.getElementById('detailsProductName').textContent = item.getAttribute('data-name');
+            document.getElementById('detailsProductCode').textContent = item.getAttribute('data-code');
+            document.getElementById('detailsBarcode').textContent = item.getAttribute('data-barcode');
+            document.getElementById('detailsSupplier').textContent = item.getAttribute('data-supplier');
+            document.getElementById('detailsCategory').textContent = item.getAttribute('data-category');
+            document.getElementById('detailsCostPrice').textContent = item.getAttribute('data-costPrice');
+            document.getElementById('detailsProfitMargin').textContent = item.getAttribute('data-profitMargin');
+            document.getElementById('detailsSellingPrice').textContent = item.getAttribute('data-sellingPrice');
+            document.getElementById('productDetailsModal').style.display = "flex";
+        }
+
+        // Función para eliminar un producto
+        function deleteProduct() {
+            if (currentProduct) {
+                currentProduct.remove(); // Eliminar el producto de la lista
+                closeProductDetailsModal(); // Cerrar la ventana de detalles
+                currentProduct = null; // Limpiar la variable
+            }
+        }
+
+        // Función para editar un producto (pendiente de implementación)
+        function editProduct() {
+            alert("Editar producto: Pendiente de implementación.");
+        }
+
+        // Función para cerrar la ventana de detalles del producto
+        function closeProductDetailsModal() {
+            document.getElementById('productDetailsModal').style.display = "none";
+            currentProduct = null; // Limpiar la variable
+        }
+    </script>
+</body>
+</html>

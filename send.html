@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Escaneo Móvil - Transferencias</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #9b59b6;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        
+        .app-container {
+            max-width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), #1a252f);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .header-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .header-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .scanner-section {
+            padding: 20px;
+            background: white;
+            margin: 15px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .scanner-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .scanner-input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .scanner-input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            background: var(--light);
+            transition: border-color 0.3s;
+        }
+        
+        .scanner-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+        
+        .scanner-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+        
+        .scanner-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .scanner-btn:hover {
+            background: #2980b9;
+        }
+        
+        .scanner-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .scanner-btn-success {
+            background: var(--success);
+        }
+        
+        .scanner-btn-success:hover {
+            background: #219653;
+        }
+        
+        .scanner-btn-danger {
+            background: var(--danger);
+        }
+        
+        .scanner-btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .product-info-section {
+            padding: 20px;
+            background: white;
+            margin: 0 15px 15px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        
+        .product-info-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .product-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .product-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--secondary), var(--info));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .product-details h3 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .product-details p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .stock-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stock-card {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stock-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stock-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .transfer-form {
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: var(--light);
+            transition: border-color 0.3s;
+        }
+        
+        .form-select:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--light);
+            padding: 10px;
+            border-radius: 12px;
+        }
+        
+        .quantity-btn {
+            width: 50px;
+            height: 50px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        
+        .quantity-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .quantity-input {
+            flex: 1;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: none;
+            border: none;
+            outline: none;
+        }
+        
+        .transfer-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--success), #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .transfer-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .transfer-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .recent-transfers {
+            padding: 20px;
+            background: white;
+            margin: 0 15px 15px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .recent-title {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .transfers-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .transfer-item {
+            padding: 15px;
+            background: var(--light);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--success);
+        }
+        
+        .transfer-item.in {
+            border-left-color: var(--info);
+        }
+        
+        .transfer-item.out {
+            border-left-color: var(--warning);
+        }
+        
+        .transfer-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .transfer-product {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .transfer-quantity {
+            font-weight: 700;
+            color: var(--success);
+        }
+        
+        .transfer-details {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .transfer-time {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+        
+        .app-footer {
+            margin-top: auto;
+            padding: 15px;
+            text-align: center;
+            color: #666;
+            font-size: 0.8rem;
+            border-top: 1px solid #eee;
+            background: white;
+        }
+        
+        /* Modal para configuración */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalFadeIn 0.3s;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #999;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .config-item {
+            margin-bottom: 20px;
+        }
+        
+        .config-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .config-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .config-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .app-header {
+                padding: 12px 15px;
+            }
+            
+            .header-title {
+                font-size: 1.3rem;
+            }
+            
+            .scanner-section, .product-info-section, .recent-transfers {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .stock-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+            
+            .product-details h3 {
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* Touch improvements */
+        button, .header-btn, .quantity-btn {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        input, select {
+            font-size: 16px; /* Previene zoom en iOS */
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <div>
+                    <div class="header-title">
+                        <i class="fas fa-barcode"></i> Escaneo Móvil
+                    </div>
+                    <div class="header-subtitle">Transferencias rápidas</div>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn" id="btnSettings" title="Configuración">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button class="header-btn" id="btnHistory" title="Historial completo">
+                        <i class="fas fa-history"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <main>
+            <!-- Sección de escaneo -->
+            <section class="scanner-section">
+                <h2 class="scanner-title">
+                    <i class="fas fa-qrcode"></i> Escanear producto
+                </h2>
+                
+                <div class="scanner-input-container">
+                    <i class="fas fa-barcode scanner-icon"></i>
+                    <input type="text" 
+                           class="scanner-input" 
+                           id="scannerInput"
+                           placeholder="Escanear código o escribir SKU..."
+                           autocomplete="off"
+                           autocorrect="off"
+                           spellcheck="false"
+                           autofocus>
+                </div>
+                
+                <div class="scanner-buttons">
+                    <button class="scanner-btn" id="btnScan">
+                        <i class="fas fa-search"></i> Buscar producto
+                    </button>
+                    <button class="scanner-btn scanner-btn-danger" id="btnClear">
+                        <i class="fas fa-eraser"></i> Limpiar
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Información del producto encontrado -->
+            <section class="product-info-section" id="productInfoSection">
+                <div class="product-header">
+                    <div class="product-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="product-details">
+                        <h3 id="productName">Nombre del producto</h3>
+                        <p id="productSku">SKU: <span id="skuValue"></span></p>
+                        <p id="productProveedor">Proveedor: <span id="proveedorValue"></span></p>
+                    </div>
+                </div>
+                
+                <div class="stock-info">
+                    <div class="stock-card">
+                        <div class="stock-label">Stock Almacén</div>
+                        <div class="stock-value" id="stockAlmacen">0</div>
+                    </div>
+                    <div class="stock-card">
+                        <div class="stock-label">Stock Tienda</div>
+                        <div class="stock-value" id="stockTienda">0</div>
+                    </div>
+                </div>
+                
+                <form class="transfer-form" id="transferForm">
+                    <input type="hidden" id="productId">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tipo de transferencia</label>
+                        <select class="form-select" id="transferType" required>
+                            <option value="almacenToTienda">Almacén → Tienda</option>
+                            <option value="tiendaToAlmacen">Tienda → Almacén</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Cantidad a transferir</label>
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-btn" id="btnDecrease">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" 
+                                   class="quantity-input" 
+                                   id="transferQuantity" 
+                                   value="1" 
+                                   min="1" 
+                                   max="100"
+                                   readonly>
+                            <button type="button" class="quantity-btn" id="btnIncrease">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div style="text-align: center; margin-top: 10px; font-size: 0.9rem; color: #666;">
+                            Disponible: <span id="availableStock">0</span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="transfer-btn" id="btnTransfer">
+                        <i class="fas fa-exchange-alt"></i> Realizar transferencia
+                    </button>
+                </form>
+            </section>
+            
+            <!-- Transferencias recientes -->
+            <section class="recent-transfers">
+                <h3 class="recent-title">
+                    <i class="fas fa-clock"></i> Transferencias recientes
+                </h3>
+                <div class="transfers-list" id="transfersList">
+                    <!-- Las transferencias se cargarán aquí dinámicamente -->
+                </div>
+            </section>
+        </main>
+        
+        <footer class="app-footer">
+            <p>Sistema de escaneo móvil para transferencias</p>
+        </footer>
+    </div>
+    
+    <!-- Modal de configuración -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-cog"></i> Configuración
+                </h3>
+                <button class="modal-close" id="closeSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="config-item">
+                    <label class="config-label">URL del servidor</label>
+                    <input type="text" 
+                           class="config-input" 
+                           id="serverUrl"
+                           placeholder="http://localhost:3000/api"
+                           value="http://localhost:3000/api">
+                    <small style="color: #666; font-size: 0.9rem;">URL de conexión al sistema principal</small>
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">Modo vibrar al escanear</label>
+                    <select class="config-input" id="vibrationMode">
+                        <option value="on">Activado</option>
+                        <option value="off">Desactivado</option>
+                    </select>
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">Sonido de confirmación</label>
+                    <select class="config-input" id="soundMode">
+                        <option value="on">Activado</option>
+                        <option value="off">Desactivado</option>
+                    </select>
+                </div>
+                
+                <div class="config-item">
+                    <label class="config-label">Auto-enviar después de escanear</label>
+                    <select class="config-input" id="autoSubmit">
+                        <option value="off">Desactivado</option>
+                        <option value="on">Activado</option>
+                    </select>
+                    <small style="color: #666; font-size: 0.9rem;">Enviar automáticamente después de encontrar producto</small>
+                </div>
+                
+                <button class="scanner-btn" style="margin-top: 20px;" id="btnSaveSettings">
+                    <i class="fas fa-save"></i> Guardar configuración
+                </button>
+                
+                <button class="scanner-btn scanner-btn-danger" style="margin-top: 10px;" id="btnClearData">
+                    <i class="fas fa-trash"></i> Limpiar datos locales
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de historial -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-history"></i> Historial completo
+                </h3>
+                <button class="modal-close" id="closeHistory">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="historyList">
+                    <!-- El historial se cargará aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Datos iniciales de ejemplo para móvil
+        let productos = [
+            {id: 1, sku: "DPI001", name: "BACINICA PARA NIÑOS", barcode: "DPI001", proveedor: "STAMPO INTERNACIONAL", almacen: 15, tienda: 5},
+            {id: 2, sku: "DPI002", name: "JARRA 1LITRO SURTIDA C/TAPA", barcode: "DPI002", proveedor: "STAMPO INTERNACIONAL", almacen: 8, tienda: 12},
+            {id: 3, sku: "DPI003", name: "PRODUCTO EJEMPLO", barcode: "DPI003", proveedor: "STAMPO INTERNACIONAL", almacen: 25, tienda: 8},
+            {id: 4, sku: "ELEC001", name: "LAPTOP HP", barcode: "7890123456789", proveedor: "ELECTRO MUNDO", almacen: 10, tienda: 3},
+            {id: 5, sku: "ROPA001", name: "CAMISETA ALGODÓN", barcode: "8901234567890", proveedor: "TEXTILES S.A.", almacen: 50, tienda: 20}
+        ];
+
+        // Historial de transferencias
+        let transferencias = [
+            {
+                id: 1,
+                fecha: new Date().toISOString(),
+                producto: "BACINICA PARA NIÑOS",
+                sku: "DPI001",
+                cantidad: 5,
+                tipo: "almacenToTienda",
+                origen: "almacen",
+                destino: "tienda"
+            },
+            {
+                id: 2,
+                fecha: new Date(Date.now() - 3600000).toISOString(), // Hace 1 hora
+                producto: "JARRA 1LITRO SURTIDA C/TAPA",
+                sku: "DPI002",
+                cantidad: 3,
+                tipo: "tiendaToAlmacen",
+                origen: "tienda",
+                destino: "almacen"
+            }
+        ];
+
+        // Configuración local
+        let config = {
+            serverUrl: "http://localhost:3000/api",
+            vibrationMode: "on",
+            soundMode: "on",
+            autoSubmit: "off"
+        };
+
+        // Elementos del DOM
+        const scannerInput = document.getElementById('scannerInput');
+        const btnScan = document.getElementById('btnScan');
+        const btnClear = document.getElementById('btnClear');
+        const productInfoSection = document.getElementById('productInfoSection');
+        const productName = document.getElementById('productName');
+        const skuValue = document.getElementById('skuValue');
+        const proveedorValue = document.getElementById('proveedorValue');
+        const stockAlmacen = document.getElementById('stockAlmacen');
+        const stockTienda = document.getElementById('stockTienda');
+        const productIdInput = document.getElementById('productId');
+        const transferType = document.getElementById('transferType');
+        const transferQuantity = document.getElementById('transferQuantity');
+        const btnDecrease = document.getElementById('btnDecrease');
+        const btnIncrease = document.getElementById('btnIncrease');
+        const availableStock = document.getElementById('availableStock');
+        const btnTransfer = document.getElementById('btnTransfer');
+        const transferForm = document.getElementById('transferForm');
+        const transfersList = document.getElementById('transfersList');
+        const btnSettings = document.getElementById('btnSettings');
+        const btnHistory = document.getElementById('btnHistory');
+        const settingsModal = document.getElementById('settingsModal');
+        const historyModal = document.getElementById('historyModal');
+        const closeSettings = document.getElementById('closeSettings');
+        const closeHistory = document.getElementById('closeHistory');
+        const serverUrl = document.getElementById('serverUrl');
+        const vibrationMode = document.getElementById('vibrationMode');
+        const soundMode = document.getElementById('soundMode');
+        const autoSubmit = document.getElementById('autoSubmit');
+        const btnSaveSettings = document.getElementById('btnSaveSettings');
+        const btnClearData = document.getElementById('btnClearData');
+        const historyList = document.getElementById('historyList');
+
+        // Cargar configuración al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarConfiguracion();
+            actualizarTransferenciasRecientes();
+            configurarEventos();
+            
+            // Enfocar el input de escaneo
+            scannerInput.focus();
+            
+            // Simular vibración (solo en dispositivos móviles)
+            if ('vibrate' in navigator && config.vibrationMode === 'on') {
+                navigator.vibrate(100);
+            }
+        });
+
+        // Cargar configuración desde localStorage
+        function cargarConfiguracion() {
+            const savedConfig = localStorage.getItem('mobileScannerConfig');
+            if (savedConfig) {
+                config = JSON.parse(savedConfig);
+                
+                // Actualizar UI
+                serverUrl.value = config.serverUrl;
+                vibrationMode.value = config.vibrationMode;
+                soundMode.value = config.soundMode;
+                autoSubmit.value = config.autoSubmit;
+            }
+            
+            // Cargar datos locales
+            const savedProductos = localStorage.getItem('mobileProductos');
+            if (savedProductos) {
+                productos = JSON.parse(savedProductos);
+            }
+            
+            const savedTransferencias = localStorage.getItem('mobileTransferencias');
+            if (savedTransferencias) {
+                transferencias = JSON.parse(savedTransferencias);
+            }
+        }
+
+        // Guardar configuración
+        function guardarConfiguracion() {
+            config.serverUrl = serverUrl.value;
+            config.vibrationMode = vibrationMode.value;
+            config.soundMode = soundMode.value;
+            config.autoSubmit = autoSubmit.value;
+            
+            localStorage.setItem('mobileScannerConfig', JSON.stringify(config));
+            
+            Swal.fire({
+                title: 'Configuración guardada',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'btn btn-success'
+                },
+                buttonsStyling: false
+            });
+        }
+
+        // Configurar eventos
+        function configurarEventos() {
+            // Escanear producto
+            btnScan.addEventListener('click', buscarProducto);
+            scannerInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    buscarProducto();
+                }
+            });
+            
+            // Limpiar escáner
+            btnClear.addEventListener('click', limpiarEscanner);
+            
+            // Control de cantidad
+            btnDecrease.addEventListener('click', function() {
+                let value = parseInt(transferQuantity.value);
+                if (value > 1) {
+                    transferQuantity.value = value - 1;
+                    actualizarStockDisponible();
+                }
+            });
+            
+            btnIncrease.addEventListener('click', function() {
+                let value = parseInt(transferQuantity.value);
+                const max = parseInt(transferQuantity.max);
+                if (value < max) {
+                    transferQuantity.value = value + 1;
+                    actualizarStockDisponible();
+                }
+            });
+            
+            // Cambiar tipo de transferencia
+            transferType.addEventListener('change', actualizarStockDisponible);
+            
+            // Enviar transferencia
+            transferForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                realizarTransferencia();
+            });
+            
+            // Modales
+            btnSettings.addEventListener('click', function() {
+                settingsModal.style.display = 'flex';
+            });
+            
+            btnHistory.addEventListener('click', function() {
+                mostrarHistorialCompleto();
+                historyModal.style.display = 'flex';
+            });
+            
+            closeSettings.addEventListener('click', function() {
+                settingsModal.style.display = 'none';
+            });
+            
+            closeHistory.addEventListener('click', function() {
+                historyModal.style.display = 'none';
+            });
+            
+            // Cerrar modales al hacer clic fuera
+            window.addEventListener('click', function(e) {
+                if (e.target === settingsModal) {
+                    settingsModal.style.display = 'none';
+                }
+                if (e.target === historyModal) {
+                    historyModal.style.display = 'none';
+                }
+            });
+            
+            // Guardar configuración
+            btnSaveSettings.addEventListener('click', guardarConfiguracion);
+            
+            // Limpiar datos
+            btnClearData.addEventListener('click', function() {
+                Swal.fire({
+                    title: '¿Limpiar datos?',
+                    text: 'Se eliminarán todos los datos locales',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, limpiar',
+                    cancelButtonText: 'Cancelar',
+                    customClass: {
+                        confirmButton: 'btn btn-danger',
+                        cancelButton: 'btn btn-secondary'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        localStorage.clear();
+                        productos = [];
+                        transferencias = [];
+                        actualizarTransferenciasRecientes();
+                        
+                        Swal.fire({
+                            title: 'Datos limpiados',
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                });
+            });
+        }
+
+        // Buscar producto por SKU o código de barras
+        function buscarProducto() {
+            const codigo = scannerInput.value.trim();
+            
+            if (!codigo) {
+                Swal.fire({
+                    title: 'Código vacío',
+                    text: 'Ingresa un SKU o código de barras',
+                    icon: 'info',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-info'
+                    },
+                    buttonsStyling: false
+                });
+                return;
+            }
+            
+            // Buscar producto
+            const producto = productos.find(p => 
+                p.sku === codigo || 
+                p.barcode === codigo ||
+                p.sku.toLowerCase().includes(codigo.toLowerCase()) ||
+                p.name.toLowerCase().includes(codigo.toLowerCase())
+            );
+            
+            if (producto) {
+                mostrarProducto(producto);
+                
+                // Vibrar si está activado
+                if ('vibrate' in navigator && config.vibrationMode === 'on') {
+                    navigator.vibrate([100, 50, 100]);
+                }
+                
+                // Reproducir sonido si está activado
+                if (config.soundMode === 'on') {
+                    reproducirSonido('success');
+                }
+                
+                // Auto-enviar si está activado
+                if (config.autoSubmit === 'on') {
+                    setTimeout(() => {
+                        realizarTransferencia();
+                    }, 500);
+                }
+            } else {
+                Swal.fire({
+                    title: 'Producto no encontrado',
+                    text: `No se encontró producto con código: ${codigo}`,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-danger'
+                    },
+                    buttonsStyling: false
+                });
+                
+                // Vibrar si está activado
+                if ('vibrate' in navigator && config.vibrationMode === 'on') {
+                    navigator.vibrate([200, 100, 200]);
+                }
+                
+                // Reproducir sonido si está activado
+                if (config.soundMode === 'on') {
+                    reproducirSonido('error');
+                }
+            }
+        }
+
+        // Reproducir sonido
+        function reproducirSonido(tipo) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                if (tipo === 'success') {
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(1200, audioContext.currentTime + 0.1);
+                } else if (tipo === 'error') {
+                    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime + 0.1);
+                }
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                console.log('Audio no soportado');
+            }
+        }
+
+        // Mostrar información del producto
+        function mostrarProducto(producto) {
+            productName.textContent = producto.name;
+            skuValue.textContent = producto.sku;
+            proveedorValue.textContent = producto.proveedor;
+            stockAlmacen.textContent = producto.almacen;
+            stockTienda.textContent = producto.tienda;
+            productIdInput.value = producto.id;
+            
+            // Resetear valores
+            transferQuantity.value = 1;
+            transferType.value = 'almacenToTienda';
+            
+            // Actualizar stock disponible
+            actualizarStockDisponible();
+            
+            // Mostrar sección
+            productInfoSection.classList.add('active');
+            
+            // Desplazar hacia la sección
+            setTimeout(() => {
+                productInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        }
+
+        // Actualizar stock disponible según tipo de transferencia
+        function actualizarStockDisponible() {
+            const productoId = parseInt(productIdInput.value);
+            const producto = productos.find(p => p.id === productoId);
+            
+            if (!producto) return;
+            
+            const tipo = transferType.value;
+            
+            if (tipo === 'almacenToTienda') {
+                availableStock.textContent = producto.almacen;
+                transferQuantity.max = producto.almacen;
+                availableStock.style.color = '#3498db';
+            } else {
+                availableStock.textContent = producto.tienda;
+                transferQuantity.max = producto.tienda;
+                availableStock.style.color = '#27ae60';
+            }
+            
+            // Ajustar cantidad si es mayor al disponible
+            const cantidad = parseInt(transferQuantity.value);
+            const max = parseInt(transferQuantity.max);
+            if (cantidad > max) {
+                transferQuantity.value = max;
+            }
+        }
+
+        // Realizar transferencia
+        function realizarTransferencia() {
+            const productoId = parseInt(productIdInput.value);
+            const tipo = transferType.value;
+            const cantidad = parseInt(transferQuantity.value);
+            
+            const productoIndex = productos.findIndex(p => p.id === productoId);
+            if (productoIndex === -1) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Producto no encontrado',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-danger'
+                    },
+                    buttonsStyling: false
+                });
+                return;
+            }
+            
+            const producto = productos[productoIndex];
+            
+            let origen, destino;
+            
+            if (tipo === 'almacenToTienda') {
+                if (cantidad > producto.almacen) {
+                    Swal.fire({
+                        title: 'Stock insuficiente',
+                        text: `Solo hay ${producto.almacen} unidades en almacén`,
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-warning'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                
+                producto.almacen -= cantidad;
+                producto.tienda += cantidad;
+                origen = 'almacen';
+                destino = 'tienda';
+            } else {
+                if (cantidad > producto.tienda) {
+                    Swal.fire({
+                        title: 'Stock insuficiente',
+                        text: `Solo hay ${producto.tienda} unidades en tienda`,
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-warning'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                
+                producto.tienda -= cantidad;
+                producto.almacen += cantidad;
+                origen = 'tienda';
+                destino = 'almacen';
+            }
+            
+            // Guardar cambios localmente
+            localStorage.setItem('mobileProductos', JSON.stringify(productos));
+            
+            // Registrar transferencia
+            const nuevaTransferencia = {
+                id: transferencias.length > 0 ? Math.max(...transferencias.map(t => t.id)) + 1 : 1,
+                fecha: new Date().toISOString(),
+                producto: producto.name,
+                sku: producto.sku,
+                cantidad: cantidad,
+                tipo: tipo,
+                origen: origen,
+                destino: destino
+            };
+            
+            transferencias.unshift(nuevaTransferencia);
+            localStorage.setItem('mobileTransferencias', JSON.stringify(transferencias));
+            
+            // Vibrar si está activado
+            if ('vibrate' in navigator && config.vibrationMode === 'on') {
+                navigator.vibrate([100, 50, 100, 50, 100]);
+            }
+            
+            // Reproducir sonido si está activado
+            if (config.soundMode === 'on') {
+                reproducirSonido('success');
+            }
+            
+            // Mostrar confirmación
+            Swal.fire({
+                title: 'Transferencia exitosa',
+                html: `✅ <strong>${cantidad} unidades</strong><br>
+                      📦 <strong>${producto.name}</strong><br>
+                      📍 <strong>${origen} → ${destino}</strong>`,
+                icon: 'success',
+                confirmButtonText: 'Continuar',
+                customClass: {
+                    confirmButton: 'btn btn-success'
+                },
+                buttonsStyling: false
+            }).then(() => {
+                // Actualizar UI
+                stockAlmacen.textContent = producto.almacen;
+                stockTienda.textContent = producto.tienda;
+                actualizarStockDisponible();
+                actualizarTransferenciasRecientes();
+                
+                // Limpiar y enfocar
+                limpiarEscanner();
+                
+                // Intentar sincronizar con servidor
+                sincronizarConServidor(nuevaTransferencia);
+            });
+        }
+
+        // Sincronizar con servidor
+        function sincronizarConServidor(transferencia) {
+            // Esto es una simulación - en producción se conectaría al servidor real
+            console.log('Sincronizando transferencia:', transferencia);
+            
+            // Simular envío asíncrono
+            if (config.serverUrl && config.serverUrl !== 'http://localhost:3000/api') {
+                fetch(config.serverUrl + '/transferencias', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(transferencia)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Transferencia sincronizada:', data);
+                })
+                .catch(error => {
+                    console.error('Error sincronizando:', error);
+                    // Guardar para reintentar más tarde
+                    guardarTransferenciaPendiente(transferencia);
+                });
+            }
+        }
+
+        // Guardar transferencia pendiente de sincronización
+        function guardarTransferenciaPendiente(transferencia) {
+            let pendientes = JSON.parse(localStorage.getItem('transferenciasPendientes') || '[]');
+            pendientes.push(transferencia);
+            localStorage.setItem('transferenciasPendientes', JSON.stringify(pendientes));
+        }
+
+        // Limpiar escáner
+        function limpiarEscanner() {
+            scannerInput.value = '';
+            productInfoSection.classList.remove('active');
+            scannerInput.focus();
+        }
+
+        // Actualizar lista de transferencias recientes
+        function actualizarTransferenciasRecientes() {
+            transfersList.innerHTML = '';
+            
+            if (transferencias.length === 0) {
+                transfersList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <p>No hay transferencias recientes</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Mostrar solo las 5 más recientes
+            const recientes = transferencias.slice(0, 5);
+            
+            recientes.forEach(transf => {
+                const fecha = new Date(transf.fecha);
+                const ahora = new Date();
+                const diffMs = ahora - fecha;
+                const diffMins = Math.floor(diffMs / 60000);
+                
+                let tiempo = '';
+                if (diffMins < 1) {
+                    tiempo = 'Hace unos segundos';
+                } else if (diffMins < 60) {
+                    tiempo = `Hace ${diffMins} min`;
+                } else if (diffMins < 1440) {
+                    const horas = Math.floor(diffMins / 60);
+                    tiempo = `Hace ${horas} h`;
+                } else {
+                    tiempo = fecha.toLocaleTimeString('es-ES', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                }
+                
+                const tipoClase = transf.tipo === 'almacenToTienda' ? 'out' : 'in';
+                const icono = transf.tipo === 'almacenToTienda' ? 'fa-arrow-right' : 'fa-arrow-left';
+                
+                const item = document.createElement('div');
+                item.className = `transfer-item ${tipoClase}`;
+                item.innerHTML = `
+                    <div class="transfer-header">
+                        <div class="transfer-product">${transf.producto}</div>
+                        <div class="transfer-quantity">${transf.cantidad} uds</div>
+                    </div>
+                    <div class="transfer-details">
+                        <i class="fas ${icono}"></i> ${transf.origen} → ${transf.destino}
+                    </div>
+                    <div class="transfer-time">
+                        <i class="far fa-clock"></i> ${tiempo}
+                    </div>
+                `;
+                
+                transfersList.appendChild(item);
+            });
+        }
+
+        // Mostrar historial completo
+        function mostrarHistorialCompleto() {
+            historyList.innerHTML = '';
+            
+            if (transferencias.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <p>No hay historial de transferencias</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            transferencias.forEach(transf => {
+                const fecha = new Date(transf.fecha);
+                const fechaStr = fecha.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const tipoClase = transf.tipo === 'almacenToTienda' ? 'out' : 'in';
+                const icono = transf.tipo === 'almacenToTienda' ? 'fa-arrow-right' : 'fa-arrow-left';
+                
+                const item = document.createElement('div');
+                item.className = `transfer-item ${tipoClase}`;
+                item.innerHTML = `
+                    <div class="transfer-header">
+                        <div class="transfer-product">${transf.producto}</div>
+                        <div class="transfer-quantity">${transf.cantidad} uds</div>
+                    </div>
+                    <div class="transfer-details">
+                        <i class="fas ${icono}"></i> ${transf.origen} → ${transf.destino}
+                    </div>
+                    <div class="transfer-details" style="margin-top: 5px;">
+                        <i class="fas fa-barcode"></i> SKU: ${transf.sku}
+                    </div>
+                    <div class="transfer-time">
+                        <i class="far fa-calendar"></i> ${fechaStr}
+                    </div>
+                `;
+                
+                historyList.appendChild(item);
+            });
+        }
+
+        // Código para simulación de escáner de cámara (opcional)
+        function iniciarEscaneoCamara() {
+            // Esto es solo para demostración - en producción usarías una librería como QuaggaJS o Instascan
+            Swal.fire({
+                title: 'Escanear con cámara',
+                text: 'Esta función requiere permisos de cámara',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Continuar',
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Simular escaneo
+                    simularEscaneoCamara();
+                }
+            });
+        }
+
+        function simularEscaneoCamara() {
+            // Simular escaneo después de 2 segundos
+            setTimeout(() => {
+                // Elegir un producto aleatorio para simular
+                const productosDisponibles = productos.filter(p => p.almacen > 0 || p.tienda > 0);
+                if (productosDisponibles.length > 0) {
+                    const productoAleatorio = productosDisponibles[Math.floor(Math.random() * productosDisponibles.length)];
+                    scannerInput.value = productoAleatorio.sku;
+                    buscarProducto();
+                }
+            }, 2000);
+        }
+
+        // Añadir botón de cámara si está en móvil
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            const scannerButtons = document.querySelector('.scanner-buttons');
+            const btnCamera = document.createElement('button');
+            btnCamera.className = 'scanner-btn scanner-btn-success';
+            btnCamera.innerHTML = '<i class="fas fa-camera"></i> Usar cámara';
+            btnCamera.addEventListener('click', iniciarEscaneoCamara);
+            scannerButtons.insertBefore(btnCamera, scannerButtons.firstChild);
+        }
+    </script>
+</body>
+</html>

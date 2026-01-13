@@ -6,6 +6,11 @@
     <title>Escaneo Handheld - Transferencias</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
     <style>
         :root {
             --primary: #2c3e50;
@@ -92,6 +97,25 @@
             background: rgba(255, 255, 255, 0.2);
         }
         
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 4px;
+        }
+        
+        .connection-status.online {
+            color: #4CAF50;
+        }
+        
+        .connection-status.offline {
+            color: #FF9800;
+        }
+        
         .scanner-section {
             padding: 15px;
             background: white;
@@ -106,6 +130,10 @@
             margin-bottom: 15px;
             color: var(--primary);
             font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .scanner-input-container {
@@ -183,10 +211,19 @@
             background: #c0392b;
         }
         
+        .scanner-btn-warning {
+            background: var(--warning);
+        }
+        
+        .scanner-btn-warning:hover {
+            background: #e67e22;
+        }
+        
         .content-area {
             flex: 1;
             overflow-y: auto;
             padding: 0 10px;
+            -webkit-overflow-scrolling: touch;
         }
         
         .product-info-section {
@@ -233,6 +270,7 @@
             font-size: 1.1rem;
             color: var(--primary);
             margin-bottom: 4px;
+            word-break: break-word;
         }
         
         .product-details p {
@@ -381,6 +419,7 @@
         .transfers-list {
             max-height: 200px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .transfer-item {
@@ -463,6 +502,7 @@
             max-height: 90vh;
             overflow-y: auto;
             animation: modalFadeIn 0.3s;
+            -webkit-overflow-scrolling: touch;
         }
         
         @keyframes modalFadeIn {
@@ -519,10 +559,26 @@
             border-color: var(--secondary);
         }
         
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
         /* Touch improvements */
         button, .header-btn, .quantity-btn {
             -webkit-user-select: none;
             user-select: none;
+            touch-action: manipulation;
         }
         
         input, select {
@@ -546,6 +602,32 @@
         
         .transfers-list::-webkit-scrollbar-thumb:hover {
             background: #555;
+        }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
         }
         
         /* Responsive para handheld */
@@ -577,6 +659,39 @@
                 font-size: 1.1rem;
             }
         }
+        
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            animation: slideDown 0.3s ease;
+            display: none;
+        }
+        
+        @keyframes slideDown {
+            from { top: -50px; opacity: 0; }
+            to { top: 80px; opacity: 1; }
+        }
+        
+        .notification.error {
+            background: var(--danger);
+        }
+        
+        .notification.warning {
+            background: var(--warning);
+        }
+        
+        .notification.info {
+            background: var(--info);
+        }
     </style>
 </head>
 <body>
@@ -588,8 +703,14 @@
                         <i class="fas fa-barcode"></i> Handheld Scanner
                     </div>
                     <div class="header-subtitle">Transferencias rápidas</div>
+                    <div id="connectionStatus" class="connection-status">
+                        <i class="fas fa-sync fa-spin"></i> Conectando...
+                    </div>
                 </div>
                 <div class="header-actions">
+                    <button class="header-btn" id="btnSync" title="Sincronizar">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                     <button class="header-btn" id="btnSettings" title="Configuración">
                         <i class="fas fa-cog"></i>
                     </button>
@@ -694,7 +815,7 @@
             <!-- Transferencias recientes -->
             <section class="recent-transfers">
                 <h3 class="recent-title">
-                    <i class="fas fa-clock"></i> Recientes
+                    <i class="fas fa-clock"></i> Transferencias Hoy
                 </h3>
                 <div class="transfers-list" id="transfersList">
                     <!-- Las transferencias se cargarán aquí dinámicamente -->
@@ -702,6 +823,15 @@
             </section>
         </div>
     </div>
+    
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div id="loadingText">Sincronizando con Firebase...</div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
     
     <!-- Modal de configuración -->
     <div class="modal" id="settingsModal">
@@ -730,21 +860,44 @@
                 </div>
                 
                 <div class="config-item">
-                    <label class="config-label">Auto-enviar después de escanear</label>
+                    <label class="config-label">Auto-transferir</label>
                     <select class="config-input" id="autoSubmit">
                         <option value="off">Desactivado</option>
                         <option value="on">Activado</option>
                     </select>
-                    <small style="color: #666; font-size: 0.85rem;">Enviar automáticamente después de encontrar producto</small>
+                    <small style="color: #666; font-size: 0.85rem;">Transferir automáticamente después de escanear</small>
                 </div>
                 
-                <button class="scanner-btn" style="margin-top: 15px;" id="btnSaveSettings">
-                    <i class="fas fa-save"></i> Guardar
+                <div class="config-item">
+                    <label class="config-label">Cantidad predeterminada</label>
+                    <select class="config-input" id="defaultQuantity">
+                        <option value="1">1 unidad</option>
+                        <option value="5">5 unidades</option>
+                        <option value="10">10 unidades</option>
+                    </select>
+                </div>
+                
+                <button class="scanner-btn scanner-btn-success" style="margin-top: 15px;" id="btnSaveSettings">
+                    <i class="fas fa-save"></i> Guardar configuración
                 </button>
                 
-                <button class="scanner-btn scanner-btn-danger" style="margin-top: 10px;" id="btnClearData">
-                    <i class="fas fa-trash"></i> Limpiar datos
+                <button class="scanner-btn scanner-btn-warning" style="margin-top: 10px;" id="btnSyncNow">
+                    <i class="fas fa-sync-alt"></i> Sincronizar ahora
                 </button>
+                
+                <button class="scanner-btn scanner-btn-danger" style="margin-top: 10px;" id="btnClearLocal">
+                    <i class="fas fa-trash"></i> Limpiar datos locales
+                </button>
+                
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+                    <h4 style="margin-bottom: 10px; color: var(--primary);">Información de conexión</h4>
+                    <div style="font-size: 0.85rem; color: #666;">
+                        <div><strong>Estado:</strong> <span id="firebaseStatus">Desconectado</span></div>
+                        <div><strong>Productos:</strong> <span id="productCount">0</span></div>
+                        <div><strong>Transferencias hoy:</strong> <span id="transfersToday">0</span></div>
+                        <div><strong>Última sincronización:</strong> <span id="lastSync">Nunca</span></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -754,7 +907,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">
-                    <i class="fas fa-history"></i> Historial completo
+                    <i class="fas fa-history"></i> Historial de Transferencias
                 </h3>
                 <button class="modal-close" id="closeHistory">&times;</button>
             </div>
@@ -768,45 +921,38 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Datos iniciales de ejemplo para handheld
-        let productos = [
-            {id: 1, sku: "DPI001", name: "BACINICA PARA NIÑOS", barcode: "DPI001", proveedor: "STAMPO INTERNACIONAL", almacen: 15, tienda: 5},
-            {id: 2, sku: "DPI002", name: "JARRA 1LITRO SURTIDA C/TAPA", barcode: "DPI002", proveedor: "STAMPO INTERNACIONAL", almacen: 8, tienda: 12},
-            {id: 3, sku: "DPI003", name: "PRODUCTO EJEMPLO", barcode: "DPI003", proveedor: "STAMPO INTERNACIONAL", almacen: 25, tienda: 8},
-            {id: 4, sku: "ELEC001", name: "LAPTOP HP", barcode: "7890123456789", proveedor: "ELECTRO MUNDO", almacen: 10, tienda: 3},
-            {id: 5, sku: "ROPA001", name: "CAMISETA ALGODÓN", barcode: "8901234567890", proveedor: "TEXTILES S.A.", almacen: 50, tienda: 20}
-        ];
+        // Configuración de Firebase (MISMA que el sistema web)
+        const firebaseConfig = {
+            apiKey: "AIzaSyC5PwQQrY02yhICT4hl6nzZTEvA-CLgC2g",
+            authDomain: "thogar-de74d.firebaseapp.com",
+            projectId: "thogar-de74d",
+            storageBucket: "thogar-de74d.firebasestorage.app",
+            messagingSenderId: "605168322064",
+            appId: "1:605168322064:web:e0d9a16c5e5bc230d9ac95"
+        };
 
-        // Historial de transferencias
-        let transferencias = [
-            {
-                id: 1,
-                fecha: new Date().toISOString(),
-                producto: "BACINICA PARA NIÑOS",
-                sku: "DPI001",
-                cantidad: 5,
-                tipo: "almacenToTienda",
-                origen: "almacen",
-                destino: "tienda"
-            },
-            {
-                id: 2,
-                fecha: new Date(Date.now() - 3600000).toISOString(), // Hace 1 hora
-                producto: "JARRA 1LITRO SURTIDA C/TAPA",
-                sku: "DPI002",
-                cantidad: 3,
-                tipo: "tiendaToAlmacen",
-                origen: "tienda",
-                destino: "almacen"
-            }
-        ];
+        // Inicializar Firebase
+        let app, db;
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log("Firebase inicializado para handheld");
+        } catch (error) {
+            console.error("Error inicializando Firebase:", error);
+        }
 
-        // Configuración local
+        // Variables globales
+        let productos = [];
+        let transferencias = [];
         let config = {
             vibrationMode: "on",
             soundMode: "on",
-            autoSubmit: "off"
+            autoSubmit: "off",
+            defaultQuantity: "1"
         };
+        let isOnline = navigator.onLine;
+        let currentProduct = null;
+        let syncInProgress = false;
 
         // Elementos del DOM
         const scannerInput = document.getElementById('scannerInput');
@@ -827,6 +973,7 @@
         const btnTransfer = document.getElementById('btnTransfer');
         const transferForm = document.getElementById('transferForm');
         const transfersList = document.getElementById('transfersList');
+        const btnSync = document.getElementById('btnSync');
         const btnSettings = document.getElementById('btnSettings');
         const btnHistory = document.getElementById('btnHistory');
         const settingsModal = document.getElementById('settingsModal');
@@ -836,23 +983,31 @@
         const vibrationMode = document.getElementById('vibrationMode');
         const soundMode = document.getElementById('soundMode');
         const autoSubmit = document.getElementById('autoSubmit');
+        const defaultQuantity = document.getElementById('defaultQuantity');
         const btnSaveSettings = document.getElementById('btnSaveSettings');
-        const btnClearData = document.getElementById('btnClearData');
+        const btnSyncNow = document.getElementById('btnSyncNow');
+        const btnClearLocal = document.getElementById('btnClearLocal');
         const historyList = document.getElementById('historyList');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+        const notification = document.getElementById('notification');
+        const firebaseStatus = document.getElementById('firebaseStatus');
+        const productCount = document.getElementById('productCount');
+        const transfersToday = document.getElementById('transfersToday');
+        const lastSync = document.getElementById('lastSync');
 
-        // Cargar configuración al iniciar
-        document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', async function() {
             cargarConfiguracion();
-            actualizarTransferenciasRecientes();
             configurarEventos();
+            await inicializarDatos();
             
             // Enfocar el input de escaneo
             scannerInput.focus();
             
-            // Simular vibración (solo en dispositivos móviles)
-            if ('vibrate' in navigator && config.vibrationMode === 'on') {
-                navigator.vibrate(100);
-            }
+            // Configurar escáner handheld (simula teclado)
+            setupHandheldScanner();
         });
 
         // Cargar configuración desde localStorage
@@ -860,11 +1015,10 @@
             const savedConfig = localStorage.getItem('handheldConfig');
             if (savedConfig) {
                 config = JSON.parse(savedConfig);
-                
-                // Actualizar UI
                 vibrationMode.value = config.vibrationMode;
                 soundMode.value = config.soundMode;
                 autoSubmit.value = config.autoSubmit;
+                defaultQuantity.value = config.defaultQuantity || "1";
             }
             
             // Cargar datos locales
@@ -877,6 +1031,9 @@
             if (savedTransferencias) {
                 transferencias = JSON.parse(savedTransferencias);
             }
+            
+            // Configurar cantidad predeterminada
+            transferQuantity.value = config.defaultQuantity || "1";
         }
 
         // Guardar configuración
@@ -884,19 +1041,23 @@
             config.vibrationMode = vibrationMode.value;
             config.soundMode = soundMode.value;
             config.autoSubmit = autoSubmit.value;
+            config.defaultQuantity = defaultQuantity.value;
             
             localStorage.setItem('handheldConfig', JSON.stringify(config));
+            transferQuantity.value = config.defaultQuantity;
             
-            Swal.fire({
-                title: 'Configuración guardada',
-                icon: 'success',
-                confirmButtonText: 'OK',
-                customClass: {
-                    confirmButton: 'btn btn-success'
-                },
-                buttonsStyling: false,
-                timer: 1500
-            });
+            mostrarNotificacion('Configuración guardada', 'success');
+        }
+
+        // Mostrar notificación
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            notification.textContent = mensaje;
+            notification.className = `notification ${tipo}`;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
         }
 
         // Configurar eventos
@@ -940,8 +1101,14 @@
                 realizarTransferencia();
             });
             
+            // Sincronizar
+            btnSync.addEventListener('click', async function() {
+                await sincronizarConFirebase();
+            });
+            
             // Modales
             btnSettings.addEventListener('click', function() {
+                actualizarInfoConfiguracion();
                 settingsModal.style.display = 'flex';
             });
             
@@ -958,24 +1125,20 @@
                 historyModal.style.display = 'none';
             });
             
-            // Cerrar modales al hacer clic fuera
-            window.addEventListener('click', function(e) {
-                if (e.target === settingsModal) {
-                    settingsModal.style.display = 'none';
-                }
-                if (e.target === historyModal) {
-                    historyModal.style.display = 'none';
-                }
-            });
-            
             // Guardar configuración
             btnSaveSettings.addEventListener('click', guardarConfiguracion);
             
-            // Limpiar datos
-            btnClearData.addEventListener('click', function() {
+            // Sincronizar ahora
+            btnSyncNow.addEventListener('click', async function() {
+                settingsModal.style.display = 'none';
+                await sincronizarConFirebase();
+            });
+            
+            // Limpiar datos locales
+            btnClearLocal.addEventListener('click', function() {
                 Swal.fire({
-                    title: '¿Limpiar datos?',
-                    text: 'Se eliminarán todos los datos locales',
+                    title: '¿Limpiar datos locales?',
+                    text: 'Los datos del servidor NO se eliminarán',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Sí, limpiar',
@@ -987,98 +1150,309 @@
                     buttonsStyling: false
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        localStorage.clear();
                         productos = [];
                         transferencias = [];
-                        actualizarTransferenciasRecientes();
+                        localStorage.removeItem('handheldProductos');
+                        localStorage.removeItem('handheldTransferencias');
                         
-                        Swal.fire({
-                            title: 'Datos limpiados',
-                            icon: 'success',
-                            confirmButtonText: 'OK',
-                            customClass: {
-                                confirmButton: 'btn btn-success'
-                            },
-                            buttonsStyling: false,
-                            timer: 1500
-                        });
+                        actualizarTransferenciasRecientes();
+                        mostrarNotificacion('Datos locales limpiados', 'success');
+                        
+                        // Recargar desde Firebase
+                        setTimeout(() => {
+                            sincronizarConFirebase();
+                        }, 1000);
                     }
                 });
             });
+            
+            // Cerrar modales al hacer clic fuera
+            window.addEventListener('click', function(e) {
+                if (e.target === settingsModal) {
+                    settingsModal.style.display = 'none';
+                }
+                if (e.target === historyModal) {
+                    historyModal.style.display = 'none';
+                }
+            });
+            
+            // Manejar conexión/desconexión
+            window.addEventListener('online', async () => {
+                isOnline = true;
+                actualizarEstadoConexion();
+                await sincronizarConFirebase();
+            });
+            
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                actualizarEstadoConexion();
+            });
+            
+            // Swipe para recargar (para móviles)
+            let touchStartY = 0;
+            document.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+            });
+            
+            document.addEventListener('touchend', function(e) {
+                const touchEndY = e.changedTouches[0].clientY;
+                const diff = touchStartY - touchEndY;
+                
+                // Swipe down desde el top para recargar
+                if (touchStartY < 50 && diff > 100) {
+                    sincronizarConFirebase();
+                }
+            });
+        }
+
+        // Actualizar estado de conexión
+        function actualizarEstadoConexion() {
+            if (isOnline) {
+                connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Conectado';
+                connectionStatus.classList.add('online');
+                connectionStatus.classList.remove('offline');
+            } else {
+                connectionStatus.innerHTML = '<i class="fas fa-wifi-slash"></i> Sin conexión';
+                connectionStatus.classList.add('offline');
+                connectionStatus.classList.remove('online');
+            }
+        }
+
+        // Inicializar datos
+        async function inicializarDatos() {
+            mostrarLoading(true, "Cargando datos...");
+            
+            try {
+                // Verificar conexión a Firebase
+                if (db) {
+                    // Cargar productos desde Firebase
+                    await cargarProductosFirebase();
+                    
+                    // Cargar transferencias de hoy desde Firebase
+                    await cargarTransferenciasHoy();
+                    
+                    mostrarNotificacion('Datos cargados correctamente', 'success');
+                } else {
+                    // Usar datos locales si no hay Firebase
+                    actualizarTransferenciasRecientes();
+                    mostrarNotificacion('Modo offline - Usando datos locales', 'warning');
+                }
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                mostrarNotificacion('Error cargando datos', 'error');
+            } finally {
+                mostrarLoading(false);
+                actualizarEstadoConexion();
+            }
+        }
+
+        // Mostrar/ocultar loading
+        function mostrarLoading(mostrar, texto = "Cargando...") {
+            if (mostrar) {
+                loadingText.textContent = texto;
+                loadingOverlay.style.display = 'flex';
+            } else {
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        // Cargar productos desde Firebase
+        async function cargarProductosFirebase() {
+            try {
+                if (!db) throw new Error("Firebase no disponible");
+                
+                const snapshot = await db.collection('products').get();
+                productos = [];
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    productos.push({
+                        id: data.id || doc.id,
+                        sku: data.sku,
+                        name: data.name,
+                        barcode: data.barcode,
+                        proveedor: data.proveedor,
+                        almacen: data.almacen || 0,
+                        tienda: data.tienda || 0
+                    });
+                });
+                
+                // Guardar localmente para modo offline
+                localStorage.setItem('handheldProductos', JSON.stringify(productos));
+                
+                console.log(`Cargados ${productos.length} productos de Firebase`);
+                return true;
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+                return false;
+            }
+        }
+
+        // Cargar transferencias de hoy
+        async function cargarTransferenciasHoy() {
+            try {
+                if (!db) {
+                    // Usar datos locales si no hay Firebase
+                    actualizarTransferenciasRecientes();
+                    return;
+                }
+                
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                
+                const snapshot = await db.collection('historial')
+                    .where('tipo', '==', 'transferencia')
+                    .where('fecha', '>=', hoy.toISOString())
+                    .orderBy('fecha', 'desc')
+                    .limit(50)
+                    .get();
+                
+                transferencias = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    transferencias.push({
+                        id: data.id || doc.id,
+                        fecha: data.fecha,
+                        producto: data.producto,
+                        sku: data.sku,
+                        cantidad: data.cantidad,
+                        tipo: data.origen === 'almacen' ? 'almacenToTienda' : 'tiendaToAlmacen',
+                        origen: data.origen,
+                        destino: data.destino
+                    });
+                });
+                
+                // Guardar localmente
+                localStorage.setItem('handheldTransferencias', JSON.stringify(transferencias));
+                
+                actualizarTransferenciasRecientes();
+                actualizarContadorTransferencias();
+                
+                return true;
+            } catch (error) {
+                console.error('Error cargando transferencias:', error);
+                return false;
+            }
+        }
+
+        // Sincronizar con Firebase
+        async function sincronizarConFirebase() {
+            if (syncInProgress) return;
+            
+            syncInProgress = true;
+            mostrarLoading(true, "Sincronizando con Firebase...");
+            
+            try {
+                if (!db) throw new Error("Firebase no disponible");
+                
+                // Sincronizar productos
+                await cargarProductosFirebase();
+                
+                // Sincronizar transferencias
+                await cargarTransferenciasHoy();
+                
+                // Actualizar última sincronización
+                const ahora = new Date();
+                lastSync.textContent = ahora.toLocaleTimeString('es-ES');
+                localStorage.setItem('lastSync', ahora.toISOString());
+                
+                mostrarNotificacion('Sincronización completa', 'success');
+                actualizarInfoConfiguracion();
+                
+            } catch (error) {
+                console.error('Error en sincronización:', error);
+                mostrarNotificacion('Error en sincronización', 'error');
+            } finally {
+                syncInProgress = false;
+                mostrarLoading(false);
+            }
         }
 
         // Buscar producto por SKU o código de barras
-        function buscarProducto() {
+        async function buscarProducto() {
             const codigo = scannerInput.value.trim();
             
             if (!codigo) {
-                Swal.fire({
-                    title: 'Código vacío',
-                    text: 'Escanee con el handheld',
-                    icon: 'info',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'btn btn-info'
-                    },
-                    buttonsStyling: false,
-                    timer: 1500
-                });
+                mostrarNotificacion('Escanee con el handheld', 'warning');
+                vibrar('error');
                 return;
             }
             
-            // Buscar producto
-            const producto = productos.find(p => 
+            let producto = productos.find(p => 
                 p.sku === codigo || 
                 p.barcode === codigo
             );
             
+            // Si no se encuentra localmente, buscar en Firebase
+            if (!producto && db) {
+                try {
+                    mostrarLoading(true, "Buscando producto...");
+                    
+                    const snapshot = await db.collection('products')
+                        .where('sku', '==', codigo)
+                        .get();
+                    
+                    if (!snapshot.empty) {
+                        const doc = snapshot.docs[0];
+                        const data = doc.data();
+                        producto = {
+                            id: data.id || doc.id,
+                            sku: data.sku,
+                            name: data.name,
+                            barcode: data.barcode,
+                            proveedor: data.proveedor,
+                            almacen: data.almacen || 0,
+                            tienda: data.tienda || 0
+                        };
+                        
+                        // Agregar a lista local
+                        productos.push(producto);
+                        localStorage.setItem('handheldProductos', JSON.stringify(productos));
+                    }
+                } catch (error) {
+                    console.error('Error buscando producto:', error);
+                } finally {
+                    mostrarLoading(false);
+                }
+            }
+            
             if (producto) {
                 mostrarProducto(producto);
+                vibrar('success');
+                reproducirSonido('success');
                 
-                // Vibrar si está activado
-                if ('vibrate' in navigator && config.vibrationMode === 'on') {
-                    navigator.vibrate([100, 50, 100]);
-                }
-                
-                // Reproducir sonido si está activado
-                if (config.soundMode === 'on') {
-                    reproducirSonido('success');
-                }
-                
-                // Auto-enviar si está activado
+                // Auto-transferir si está activado
                 if (config.autoSubmit === 'on') {
                     setTimeout(() => {
                         realizarTransferencia();
-                    }, 300);
+                    }, 500);
                 }
             } else {
-                Swal.fire({
-                    title: 'Producto no encontrado',
-                    text: `SKU: ${codigo}`,
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'btn btn-danger'
-                    },
-                    buttonsStyling: false,
-                    timer: 2000
-                });
-                
-                // Vibrar si está activado
-                if ('vibrate' in navigator && config.vibrationMode === 'on') {
-                    navigator.vibrate([200, 100, 200]);
-                }
-                
-                // Reproducir sonido si está activado
-                if (config.soundMode === 'on') {
-                    reproducirSonido('error');
-                }
+                mostrarNotificacion(`Producto no encontrado: ${codigo}`, 'error');
+                vibrar('error');
+                reproducirSonido('error');
+            }
+        }
+
+        // Vibrar dispositivo
+        function vibrar(tipo) {
+            if (!navigator.vibrate || config.vibrationMode !== 'on') return;
+            
+            if (tipo === 'success') {
+                navigator.vibrate([100, 50, 100]);
+            } else if (tipo === 'error') {
+                navigator.vibrate([200, 100, 200]);
+            } else if (tipo === 'transfer') {
+                navigator.vibrate([100, 50, 100, 50, 100]);
             }
         }
 
         // Reproducir sonido
         function reproducirSonido(tipo) {
+            if (config.soundMode !== 'on') return;
+            
             try {
+                // Crear contexto de audio
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
@@ -1092,6 +1466,8 @@
                 } else if (tipo === 'error') {
                     oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
                     oscillator.frequency.setValueAtTime(200, audioContext.currentTime + 0.1);
+                } else if (tipo === 'scan') {
+                    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
                 }
                 
                 gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
@@ -1106,6 +1482,8 @@
 
         // Mostrar información del producto
         function mostrarProducto(producto) {
+            currentProduct = producto;
+            
             productName.textContent = producto.name;
             skuValue.textContent = producto.sku;
             proveedorValue.textContent = producto.proveedor;
@@ -1114,7 +1492,7 @@
             productIdInput.value = producto.id;
             
             // Resetear valores
-            transferQuantity.value = 1;
+            transferQuantity.value = config.defaultQuantity || "1";
             transferType.value = 'almacenToTienda';
             
             // Actualizar stock disponible
@@ -1129,22 +1507,19 @@
             }, 100);
         }
 
-        // Actualizar stock disponible según tipo de transferencia
+        // Actualizar stock disponible
         function actualizarStockDisponible() {
-            const productoId = parseInt(productIdInput.value);
-            const producto = productos.find(p => p.id === productoId);
-            
-            if (!producto) return;
+            if (!currentProduct) return;
             
             const tipo = transferType.value;
             
             if (tipo === 'almacenToTienda') {
-                availableStock.textContent = producto.almacen;
-                transferQuantity.max = producto.almacen;
+                availableStock.textContent = currentProduct.almacen;
+                transferQuantity.max = currentProduct.almacen;
                 availableStock.style.color = '#3498db';
             } else {
-                availableStock.textContent = producto.tienda;
-                transferQuantity.max = producto.tienda;
+                availableStock.textContent = currentProduct.tienda;
+                transferQuantity.max = currentProduct.tienda;
                 availableStock.style.color = '#27ae60';
             }
             
@@ -1157,44 +1532,29 @@
         }
 
         // Realizar transferencia
-        function realizarTransferencia() {
-            const productoId = parseInt(productIdInput.value);
+        async function realizarTransferencia() {
+            if (!currentProduct) {
+                mostrarNotificacion('Primero escanee un producto', 'warning');
+                return;
+            }
+            
+            const productoId = currentProduct.id;
             const tipo = transferType.value;
             const cantidad = parseInt(transferQuantity.value);
             
             const productoIndex = productos.findIndex(p => p.id === productoId);
             if (productoIndex === -1) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Producto no encontrado',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'btn btn-danger'
-                    },
-                    buttonsStyling: false,
-                    timer: 1500
-                });
+                mostrarNotificacion('Producto no encontrado', 'error');
                 return;
             }
             
             const producto = productos[productoIndex];
-            
             let origen, destino;
             
             if (tipo === 'almacenToTienda') {
                 if (cantidad > producto.almacen) {
-                    Swal.fire({
-                        title: 'Stock insuficiente',
-                        text: `Solo hay ${producto.almacen} unidades en almacén`,
-                        icon: 'warning',
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            confirmButton: 'btn btn-warning'
-                        },
-                        buttonsStyling: false,
-                        timer: 2000
-                    });
+                    mostrarNotificacion(`Solo hay ${producto.almacen} unidades en almacén`, 'error');
+                    vibrar('error');
                     return;
                 }
                 
@@ -1204,17 +1564,8 @@
                 destino = 'tienda';
             } else {
                 if (cantidad > producto.tienda) {
-                    Swal.fire({
-                        title: 'Stock insuficiente',
-                        text: `Solo hay ${producto.tienda} unidades en tienda`,
-                        icon: 'warning',
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            confirmButton: 'btn btn-warning'
-                        },
-                        buttonsStyling: false,
-                        timer: 2000
-                    });
+                    mostrarNotificacion(`Solo hay ${producto.tienda} unidades en tienda`, 'error');
+                    vibrar('error');
                     return;
                 }
                 
@@ -1227,32 +1578,32 @@
             // Guardar cambios localmente
             localStorage.setItem('handheldProductos', JSON.stringify(productos));
             
-            // Registrar transferencia
+            // Registrar transferencia local
             const nuevaTransferencia = {
-                id: transferencias.length > 0 ? Math.max(...transferencias.map(t => t.id)) + 1 : 1,
+                id: 'local_' + Date.now(),
                 fecha: new Date().toISOString(),
                 producto: producto.name,
                 sku: producto.sku,
                 cantidad: cantidad,
                 tipo: tipo,
                 origen: origen,
-                destino: destino
+                destino: destino,
+                sync: false // Pendiente de sincronizar
             };
             
             transferencias.unshift(nuevaTransferencia);
             localStorage.setItem('handheldTransferencias', JSON.stringify(transferencias));
             
-            // Vibrar si está activado
-            if ('vibrate' in navigator && config.vibrationMode === 'on') {
-                navigator.vibrate([100, 50, 100, 50, 100]);
+            // Sincronizar con Firebase si hay conexión
+            if (db && isOnline) {
+                await sincronizarTransferenciaFirebase(producto, cantidad, origen, destino);
             }
             
-            // Reproducir sonido si está activado
-            if (config.soundMode === 'on') {
-                reproducirSonido('success');
-            }
+            // Efectos
+            vibrar('transfer');
+            reproducirSonido('success');
             
-            // Mostrar confirmación rápida
+            // Mostrar confirmación
             Swal.fire({
                 title: '✅ Transferencia exitosa',
                 html: `<strong>${cantidad} uds</strong><br>
@@ -1267,16 +1618,52 @@
                 stockTienda.textContent = producto.tienda;
                 actualizarStockDisponible();
                 actualizarTransferenciasRecientes();
+                actualizarContadorTransferencias();
                 
                 // Limpiar y enfocar
                 limpiarEscanner();
             });
         }
 
+        // Sincronizar transferencia con Firebase
+        async function sincronizarTransferenciaFirebase(producto, cantidad, origen, destino) {
+            try {
+                if (!db) return false;
+                
+                // Actualizar producto en Firebase
+                await db.collection('products').doc(producto.id.toString()).update({
+                    almacen: producto.almacen,
+                    tienda: producto.tienda,
+                    ultimoEnvio: origen === 'almacen' ? new Date().toISOString().split('T')[0] : producto.ultimoEnvio
+                });
+                
+                // Registrar en historial de Firebase
+                const historialId = 'hist_' + Date.now();
+                await db.collection('historial').doc(historialId).set({
+                    id: historialId,
+                    fecha: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    tipo: 'transferencia',
+                    producto: producto.name,
+                    sku: producto.sku,
+                    cantidad: cantidad,
+                    origen: origen,
+                    destino: destino,
+                    usuario: 'handheld'
+                });
+                
+                console.log('Transferencia sincronizada con Firebase');
+                return true;
+            } catch (error) {
+                console.error('Error sincronizando transferencia:', error);
+                return false;
+            }
+        }
+
         // Limpiar escáner
         function limpiarEscanner() {
             scannerInput.value = '';
             productInfoSection.classList.remove('active');
+            currentProduct = null;
             scannerInput.focus();
         }
 
@@ -1290,7 +1677,7 @@
                         <div class="empty-icon">
                             <i class="fas fa-exchange-alt"></i>
                         </div>
-                        <p>No hay transferencias</p>
+                        <p>No hay transferencias hoy</p>
                     </div>
                 `;
                 return;
@@ -1323,12 +1710,14 @@
                 const tipoClase = transf.tipo === 'almacenToTienda' ? 'out' : 'in';
                 const icono = transf.tipo === 'almacenToTienda' ? 'fa-arrow-right' : 'fa-arrow-left';
                 
+                const syncIcon = transf.sync === false ? '<i class="fas fa-clock sync-pending" style="color: var(--warning); margin-left: 5px;"></i>' : '';
+                
                 const item = document.createElement('div');
                 item.className = `transfer-item ${tipoClase}`;
                 item.innerHTML = `
                     <div class="transfer-header">
                         <div class="transfer-product">${transf.producto}</div>
-                        <div class="transfer-quantity">${transf.cantidad} uds</div>
+                        <div class="transfer-quantity">${transf.cantidad} uds ${syncIcon}</div>
                     </div>
                     <div class="transfer-details">
                         <i class="fas ${icono}"></i> ${transf.origen} → ${transf.destino}
@@ -1340,6 +1729,19 @@
                 
                 transfersList.appendChild(item);
             });
+        }
+
+        // Actualizar contador de transferencias
+        function actualizarContadorTransferencias() {
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            
+            const transferenciasHoy = transferencias.filter(t => {
+                const fechaTransf = new Date(t.fecha);
+                return fechaTransf >= hoy;
+            });
+            
+            transfersToday.textContent = transferenciasHoy.length;
         }
 
         // Mostrar historial completo
@@ -1358,53 +1760,122 @@
                 return;
             }
             
+            // Agrupar por fecha
+            const transferenciasPorFecha = {};
             transferencias.forEach(transf => {
                 const fecha = new Date(transf.fecha);
-                const fechaStr = fecha.toLocaleTimeString('es-ES', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
+                const fechaKey = fecha.toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                 });
                 
-                const tipoClase = transf.tipo === 'almacenToTienda' ? 'out' : 'in';
-                const icono = transf.tipo === 'almacenToTienda' ? 'fa-arrow-right' : 'fa-arrow-left';
-                
-                const item = document.createElement('div');
-                item.className = `transfer-item ${tipoClase}`;
-                item.innerHTML = `
-                    <div class="transfer-header">
-                        <div class="transfer-product">${transf.producto}</div>
-                        <div class="transfer-quantity">${transf.cantidad} uds</div>
-                    </div>
-                    <div class="transfer-details">
-                        <i class="fas ${icono}"></i> ${transf.origen} → ${transf.destino}
-                    </div>
-                    <div class="transfer-details" style="margin-top: 4px;">
-                        <i class="fas fa-barcode"></i> SKU: ${transf.sku}
-                    </div>
-                    <div class="transfer-time">
-                        <i class="far fa-clock"></i> ${fechaStr}
-                    </div>
+                if (!transferenciasPorFecha[fechaKey]) {
+                    transferenciasPorFecha[fechaKey] = [];
+                }
+                transferenciasPorFecha[fechaKey].push(transf);
+            });
+            
+            // Mostrar por fecha
+            Object.keys(transferenciasPorFecha).forEach(fecha => {
+                const fechaHeader = document.createElement('div');
+                fechaHeader.style.cssText = `
+                    padding: 10px;
+                    background: var(--light);
+                    border-radius: 8px;
+                    margin-bottom: 10px;
+                    font-weight: 600;
+                    color: var(--primary);
                 `;
+                fechaHeader.textContent = fecha;
+                historyList.appendChild(fechaHeader);
                 
-                historyList.appendChild(item);
+                transferenciasPorFecha[fecha].forEach(transf => {
+                    const fechaTransf = new Date(transf.fecha);
+                    const horaStr = fechaTransf.toLocaleTimeString('es-ES', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    const tipoClase = transf.tipo === 'almacenToTienda' ? 'out' : 'in';
+                    const icono = transf.tipo === 'almacenToTienda' ? 'fa-arrow-right' : 'fa-arrow-left';
+                    
+                    const syncIcon = transf.sync === false ? 
+                        '<i class="fas fa-clock" title="Pendiente de sincronizar" style="color: var(--warning); margin-left: 5px;"></i>' : 
+                        '<i class="fas fa-check" title="Sincronizado" style="color: var(--success); margin-left: 5px;"></i>';
+                    
+                    const item = document.createElement('div');
+                    item.className = `transfer-item ${tipoClase}`;
+                    item.innerHTML = `
+                        <div class="transfer-header">
+                            <div class="transfer-product">${transf.producto}</div>
+                            <div class="transfer-quantity">${transf.cantidad} uds ${syncIcon}</div>
+                        </div>
+                        <div class="transfer-details">
+                            <i class="fas ${icono}"></i> ${transf.origen} → ${transf.destino}
+                        </div>
+                        <div class="transfer-details" style="margin-top: 4px;">
+                            <i class="fas fa-barcode"></i> SKU: ${transf.sku}
+                        </div>
+                        <div class="transfer-time">
+                            <i class="far fa-clock"></i> ${horaStr}
+                        </div>
+                    `;
+                    
+                    historyList.appendChild(item);
+                });
             });
         }
 
-        // Función para integración con handheld scanner
-        function setupHandheldScanner() {
-            // Esta función es para integración con scanners físicos
-            // Los scanners handheld suelen simular teclado
-            console.log('Handheld scanner listo');
+        // Actualizar información en configuración
+        function actualizarInfoConfiguracion() {
+            firebaseStatus.textContent = db && isOnline ? 'Conectado' : 'Desconectado';
+            firebaseStatus.style.color = db && isOnline ? 'var(--success)' : 'var(--danger)';
             
-            // Sugerencia para integración:
-            // 1. El scanner enviará Enter después del código
-            // 2. Podemos capturar el código automáticamente
-            // 3. Ya lo hacemos con el evento keypress para Enter
+            productCount.textContent = productos.length;
+            actualizarContadorTransferencias();
+            
+            const savedLastSync = localStorage.getItem('lastSync');
+            if (savedLastSync) {
+                const lastSyncDate = new Date(savedLastSync);
+                lastSync.textContent = lastSyncDate.toLocaleTimeString('es-ES');
+            }
         }
 
-        // Inicializar integración con handheld
-        setupHandheldScanner();
+        // Configurar escáner handheld
+        function setupHandheldScanner() {
+            console.log('Handheld scanner configurado');
+            
+            // Los scanners físicos suelen enviar:
+            // 1. El código escaneado
+            // 2. Una tecla Enter al final
+            // 3. Ya está configurado con el evento keypress para Enter
+            
+            // Sugerencias adicionales:
+            // - Mantener el input siempre enfocado
+            // - Limpiar automáticamente después de cierto tiempo
+            // - Configurar sonidos/vibraciones específicas
+            
+            // Auto-enfocar si se pierde el foco
+            document.addEventListener('click', function(e) {
+                if (e.target !== scannerInput && !scannerInput.contains(e.target)) {
+                    scannerInput.focus();
+                }
+            });
+            
+            // Limpiar automáticamente después de 30 segundos sin uso
+            let clearTimer;
+            scannerInput.addEventListener('input', function() {
+                clearTimeout(clearTimer);
+                clearTimer = setTimeout(() => {
+                    if (scannerInput.value && !currentProduct) {
+                        scannerInput.value = '';
+                    }
+                }, 30000);
+            });
+        }
+
     </script>
 </body>
 </html>

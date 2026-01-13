@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Escaneo Móvil - Transferencias</title>
+    <title>Escaneo Handheld - Transferencias</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
@@ -31,11 +31,13 @@
             line-height: 1.6;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
+            height: 100vh;
+            overflow: hidden;
         }
         
         .app-container {
             max-width: 100%;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -43,7 +45,7 @@
         .app-header {
             background: linear-gradient(135deg, var(--primary), #1a252f);
             color: white;
-            padding: 15px 20px;
+            padding: 12px 15px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
@@ -57,27 +59,27 @@
         }
         
         .header-title {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 600;
         }
         
         .header-subtitle {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0.8;
             margin-top: 2px;
         }
         
         .header-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
         
         .header-btn {
             background: rgba(255, 255, 255, 0.1);
             border: none;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -91,31 +93,32 @@
         }
         
         .scanner-section {
-            padding: 20px;
+            padding: 15px;
             background: white;
-            margin: 15px;
-            border-radius: 15px;
+            margin: 10px;
+            border-radius: 12px;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            flex-shrink: 0;
         }
         
         .scanner-title {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: var(--primary);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
         
         .scanner-input-container {
             position: relative;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .scanner-input {
             width: 100%;
-            padding: 16px 20px 16px 50px;
+            padding: 14px 15px 14px 45px;
             border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 1.1rem;
+            border-radius: 10px;
+            font-size: 1rem;
             background: var(--light);
             transition: border-color 0.3s;
         }
@@ -131,25 +134,29 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--secondary);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+        }
+        
+        .scanner-buttons {
+            display: flex;
+            gap: 10px;
         }
         
         .scanner-btn {
-            width: 100%;
-            padding: 16px;
+            flex: 1;
+            padding: 14px;
             background: var(--secondary);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
+            border-radius: 10px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             transition: background 0.3s;
-            margin-bottom: 15px;
         }
         
         .scanner-btn:hover {
@@ -176,11 +183,17 @@
             background: #c0392b;
         }
         
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 10px;
+        }
+        
         .product-info-section {
-            padding: 20px;
+            padding: 15px;
             background: white;
-            margin: 0 15px 15px;
-            border-radius: 15px;
+            margin: 0 0 10px 0;
+            border-radius: 12px;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
             display: none;
             animation: fadeIn 0.3s;
@@ -198,81 +211,81 @@
         .product-header {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
             border-bottom: 1px solid #eee;
         }
         
         .product-icon {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             background: linear-gradient(135deg, var(--secondary), var(--info));
-            border-radius: 12px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
         }
         
         .product-details h3 {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             color: var(--primary);
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         
         .product-details p {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         
         .stock-info {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 15px;
         }
         
         .stock-card {
             background: var(--light);
-            padding: 15px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 8px;
             text-align: center;
         }
         
         .stock-label {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #666;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         
         .stock-value {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: var(--primary);
         }
         
         .transfer-form {
-            margin-top: 20px;
+            margin-top: 15px;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .form-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 600;
             color: var(--primary);
         }
         
         .form-select {
             width: 100%;
-            padding: 16px;
+            padding: 14px;
             border: 2px solid #e0e0e0;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 1rem;
             background: var(--light);
             transition: border-color 0.3s;
@@ -286,20 +299,20 @@
         .quantity-control {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             background: var(--light);
-            padding: 10px;
-            border-radius: 12px;
+            padding: 8px;
+            border-radius: 10px;
         }
         
         .quantity-btn {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             background: var(--secondary);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1.5rem;
+            border-radius: 8px;
+            font-size: 1.3rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -314,7 +327,7 @@
         .quantity-input {
             flex: 1;
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: var(--primary);
             background: none;
@@ -324,18 +337,18 @@
         
         .transfer-btn {
             width: 100%;
-            padding: 18px;
+            padding: 16px;
             background: linear-gradient(135deg, var(--success), #2ecc71);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 1.2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             transition: transform 0.2s;
         }
         
@@ -349,32 +362,32 @@
         }
         
         .recent-transfers {
-            padding: 20px;
+            padding: 15px;
             background: white;
-            margin: 0 15px 15px;
-            border-radius: 15px;
+            margin: 0 0 10px 0;
+            border-radius: 12px;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
         }
         
         .recent-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--primary);
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         
         .transfers-list {
-            max-height: 300px;
+            max-height: 200px;
             overflow-y: auto;
         }
         
         .transfer-item {
-            padding: 15px;
+            padding: 12px;
             background: var(--light);
-            border-radius: 10px;
-            margin-bottom: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
             border-left: 4px solid var(--success);
         }
         
@@ -389,50 +402,42 @@
         .transfer-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         
         .transfer-product {
             font-weight: 600;
             color: var(--primary);
+            font-size: 0.95rem;
         }
         
         .transfer-quantity {
             font-weight: 700;
             color: var(--success);
+            font-size: 0.95rem;
         }
         
         .transfer-details {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #666;
         }
         
         .transfer-time {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #999;
-            margin-top: 5px;
+            margin-top: 4px;
         }
         
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
+            padding: 30px 15px;
             color: #999;
         }
         
         .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
+            font-size: 2.5rem;
+            margin-bottom: 12px;
             color: #ddd;
-        }
-        
-        .app-footer {
-            margin-top: auto;
-            padding: 15px;
-            text-align: center;
-            color: #666;
-            font-size: 0.8rem;
-            border-top: 1px solid #eee;
-            background: white;
         }
         
         /* Modal para configuración */
@@ -447,14 +452,14 @@
             z-index: 1000;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 15px;
         }
         
         .modal-content {
             background: white;
-            border-radius: 15px;
+            border-radius: 12px;
             width: 100%;
-            max-width: 500px;
+            max-width: 400px;
             max-height: 90vh;
             overflow-y: auto;
             animation: modalFadeIn 0.3s;
@@ -466,7 +471,7 @@
         }
         
         .modal-header {
-            padding: 20px;
+            padding: 15px;
             border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
@@ -474,29 +479,29 @@
         }
         
         .modal-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             color: var(--primary);
         }
         
         .modal-close {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: #999;
             cursor: pointer;
         }
         
         .modal-body {
-            padding: 20px;
+            padding: 15px;
         }
         
         .config-item {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .config-label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 600;
             color: var(--primary);
         }
@@ -514,36 +519,6 @@
             border-color: var(--secondary);
         }
         
-        /* Responsive adjustments */
-        @media (max-width: 480px) {
-            .app-header {
-                padding: 12px 15px;
-            }
-            
-            .header-title {
-                font-size: 1.3rem;
-            }
-            
-            .scanner-section, .product-info-section, .recent-transfers {
-                margin: 10px;
-                padding: 15px;
-            }
-            
-            .stock-info {
-                grid-template-columns: 1fr;
-            }
-            
-            .product-icon {
-                width: 45px;
-                height: 45px;
-                font-size: 1.3rem;
-            }
-            
-            .product-details h3 {
-                font-size: 1.1rem;
-            }
-        }
-        
         /* Touch improvements */
         button, .header-btn, .quantity-btn {
             -webkit-user-select: none;
@@ -553,6 +528,55 @@
         input, select {
             font-size: 16px; /* Previene zoom en iOS */
         }
+        
+        /* Scrollbar styling */
+        .transfers-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .transfers-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+        
+        .transfers-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 2px;
+        }
+        
+        .transfers-list::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Responsive para handheld */
+        @media (max-height: 600px) {
+            .app-header {
+                padding: 8px 12px;
+            }
+            
+            .header-title {
+                font-size: 1.2rem;
+            }
+            
+            .scanner-section {
+                padding: 10px;
+                margin: 8px;
+            }
+            
+            .product-info-section, .recent-transfers {
+                padding: 12px;
+            }
+            
+            .stock-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -561,7 +585,7 @@
             <div class="header-content">
                 <div>
                     <div class="header-title">
-                        <i class="fas fa-barcode"></i> Escaneo Móvil
+                        <i class="fas fa-barcode"></i> Handheld Scanner
                     </div>
                     <div class="header-subtitle">Transferencias rápidas</div>
                 </div>
@@ -576,35 +600,34 @@
             </div>
         </header>
         
-        <main>
-            <!-- Sección de escaneo -->
-            <section class="scanner-section">
-                <h2 class="scanner-title">
-                    <i class="fas fa-qrcode"></i> Escanear producto
-                </h2>
-                
-                <div class="scanner-input-container">
-                    <i class="fas fa-barcode scanner-icon"></i>
-                    <input type="text" 
-                           class="scanner-input" 
-                           id="scannerInput"
-                           placeholder="Escanear código o escribir SKU..."
-                           autocomplete="off"
-                           autocorrect="off"
-                           spellcheck="false"
-                           autofocus>
-                </div>
-                
-                <div class="scanner-buttons">
-                    <button class="scanner-btn" id="btnScan">
-                        <i class="fas fa-search"></i> Buscar producto
-                    </button>
-                    <button class="scanner-btn scanner-btn-danger" id="btnClear">
-                        <i class="fas fa-eraser"></i> Limpiar
-                    </button>
-                </div>
-            </section>
+        <section class="scanner-section">
+            <h2 class="scanner-title">
+                <i class="fas fa-qrcode"></i> Escanear producto
+            </h2>
             
+            <div class="scanner-input-container">
+                <i class="fas fa-barcode scanner-icon"></i>
+                <input type="text" 
+                       class="scanner-input" 
+                       id="scannerInput"
+                       placeholder="Escanear con handheld..."
+                       autocomplete="off"
+                       autocorrect="off"
+                       spellcheck="false"
+                       autofocus>
+            </div>
+            
+            <div class="scanner-buttons">
+                <button class="scanner-btn" id="btnScan">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                <button class="scanner-btn scanner-btn-danger" id="btnClear">
+                    <i class="fas fa-eraser"></i> Limpiar
+                </button>
+            </div>
+        </section>
+        
+        <div class="content-area">
             <!-- Información del producto encontrado -->
             <section class="product-info-section" id="productInfoSection">
                 <div class="product-header">
@@ -657,13 +680,13 @@
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
-                        <div style="text-align: center; margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        <div style="text-align: center; margin-top: 8px; font-size: 0.85rem; color: #666;">
                             Disponible: <span id="availableStock">0</span>
                         </div>
                     </div>
                     
                     <button type="submit" class="transfer-btn" id="btnTransfer">
-                        <i class="fas fa-exchange-alt"></i> Realizar transferencia
+                        <i class="fas fa-exchange-alt"></i> Transferir
                     </button>
                 </form>
             </section>
@@ -671,17 +694,13 @@
             <!-- Transferencias recientes -->
             <section class="recent-transfers">
                 <h3 class="recent-title">
-                    <i class="fas fa-clock"></i> Transferencias recientes
+                    <i class="fas fa-clock"></i> Recientes
                 </h3>
                 <div class="transfers-list" id="transfersList">
                     <!-- Las transferencias se cargarán aquí dinámicamente -->
                 </div>
             </section>
-        </main>
-        
-        <footer class="app-footer">
-            <p>Sistema de escaneo móvil para transferencias</p>
-        </footer>
+        </div>
     </div>
     
     <!-- Modal de configuración -->
@@ -694,16 +713,6 @@
                 <button class="modal-close" id="closeSettings">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="config-item">
-                    <label class="config-label">URL del servidor</label>
-                    <input type="text" 
-                           class="config-input" 
-                           id="serverUrl"
-                           placeholder="http://localhost:3000/api"
-                           value="http://localhost:3000/api">
-                    <small style="color: #666; font-size: 0.9rem;">URL de conexión al sistema principal</small>
-                </div>
-                
                 <div class="config-item">
                     <label class="config-label">Modo vibrar al escanear</label>
                     <select class="config-input" id="vibrationMode">
@@ -726,15 +735,15 @@
                         <option value="off">Desactivado</option>
                         <option value="on">Activado</option>
                     </select>
-                    <small style="color: #666; font-size: 0.9rem;">Enviar automáticamente después de encontrar producto</small>
+                    <small style="color: #666; font-size: 0.85rem;">Enviar automáticamente después de encontrar producto</small>
                 </div>
                 
-                <button class="scanner-btn" style="margin-top: 20px;" id="btnSaveSettings">
-                    <i class="fas fa-save"></i> Guardar configuración
+                <button class="scanner-btn" style="margin-top: 15px;" id="btnSaveSettings">
+                    <i class="fas fa-save"></i> Guardar
                 </button>
                 
                 <button class="scanner-btn scanner-btn-danger" style="margin-top: 10px;" id="btnClearData">
-                    <i class="fas fa-trash"></i> Limpiar datos locales
+                    <i class="fas fa-trash"></i> Limpiar datos
                 </button>
             </div>
         </div>
@@ -759,7 +768,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Datos iniciales de ejemplo para móvil
+        // Datos iniciales de ejemplo para handheld
         let productos = [
             {id: 1, sku: "DPI001", name: "BACINICA PARA NIÑOS", barcode: "DPI001", proveedor: "STAMPO INTERNACIONAL", almacen: 15, tienda: 5},
             {id: 2, sku: "DPI002", name: "JARRA 1LITRO SURTIDA C/TAPA", barcode: "DPI002", proveedor: "STAMPO INTERNACIONAL", almacen: 8, tienda: 12},
@@ -794,7 +803,6 @@
 
         // Configuración local
         let config = {
-            serverUrl: "http://localhost:3000/api",
             vibrationMode: "on",
             soundMode: "on",
             autoSubmit: "off"
@@ -825,7 +833,6 @@
         const historyModal = document.getElementById('historyModal');
         const closeSettings = document.getElementById('closeSettings');
         const closeHistory = document.getElementById('closeHistory');
-        const serverUrl = document.getElementById('serverUrl');
         const vibrationMode = document.getElementById('vibrationMode');
         const soundMode = document.getElementById('soundMode');
         const autoSubmit = document.getElementById('autoSubmit');
@@ -850,24 +857,23 @@
 
         // Cargar configuración desde localStorage
         function cargarConfiguracion() {
-            const savedConfig = localStorage.getItem('mobileScannerConfig');
+            const savedConfig = localStorage.getItem('handheldConfig');
             if (savedConfig) {
                 config = JSON.parse(savedConfig);
                 
                 // Actualizar UI
-                serverUrl.value = config.serverUrl;
                 vibrationMode.value = config.vibrationMode;
                 soundMode.value = config.soundMode;
                 autoSubmit.value = config.autoSubmit;
             }
             
             // Cargar datos locales
-            const savedProductos = localStorage.getItem('mobileProductos');
+            const savedProductos = localStorage.getItem('handheldProductos');
             if (savedProductos) {
                 productos = JSON.parse(savedProductos);
             }
             
-            const savedTransferencias = localStorage.getItem('mobileTransferencias');
+            const savedTransferencias = localStorage.getItem('handheldTransferencias');
             if (savedTransferencias) {
                 transferencias = JSON.parse(savedTransferencias);
             }
@@ -875,12 +881,11 @@
 
         // Guardar configuración
         function guardarConfiguracion() {
-            config.serverUrl = serverUrl.value;
             config.vibrationMode = vibrationMode.value;
             config.soundMode = soundMode.value;
             config.autoSubmit = autoSubmit.value;
             
-            localStorage.setItem('mobileScannerConfig', JSON.stringify(config));
+            localStorage.setItem('handheldConfig', JSON.stringify(config));
             
             Swal.fire({
                 title: 'Configuración guardada',
@@ -889,7 +894,8 @@
                 customClass: {
                     confirmButton: 'btn btn-success'
                 },
-                buttonsStyling: false
+                buttonsStyling: false,
+                timer: 1500
             });
         }
 
@@ -993,7 +999,8 @@
                             customClass: {
                                 confirmButton: 'btn btn-success'
                             },
-                            buttonsStyling: false
+                            buttonsStyling: false,
+                            timer: 1500
                         });
                     }
                 });
@@ -1007,13 +1014,14 @@
             if (!codigo) {
                 Swal.fire({
                     title: 'Código vacío',
-                    text: 'Ingresa un SKU o código de barras',
+                    text: 'Escanee con el handheld',
                     icon: 'info',
                     confirmButtonText: 'OK',
                     customClass: {
                         confirmButton: 'btn btn-info'
                     },
-                    buttonsStyling: false
+                    buttonsStyling: false,
+                    timer: 1500
                 });
                 return;
             }
@@ -1021,9 +1029,7 @@
             // Buscar producto
             const producto = productos.find(p => 
                 p.sku === codigo || 
-                p.barcode === codigo ||
-                p.sku.toLowerCase().includes(codigo.toLowerCase()) ||
-                p.name.toLowerCase().includes(codigo.toLowerCase())
+                p.barcode === codigo
             );
             
             if (producto) {
@@ -1043,18 +1049,19 @@
                 if (config.autoSubmit === 'on') {
                     setTimeout(() => {
                         realizarTransferencia();
-                    }, 500);
+                    }, 300);
                 }
             } else {
                 Swal.fire({
                     title: 'Producto no encontrado',
-                    text: `No se encontró producto con código: ${codigo}`,
+                    text: `SKU: ${codigo}`,
                     icon: 'error',
                     confirmButtonText: 'OK',
                     customClass: {
                         confirmButton: 'btn btn-danger'
                     },
-                    buttonsStyling: false
+                    buttonsStyling: false,
+                    timer: 2000
                 });
                 
                 // Vibrar si está activado
@@ -1088,10 +1095,10 @@
                 }
                 
                 gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
                 
                 oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.3);
+                oscillator.stop(audioContext.currentTime + 0.2);
             } catch (e) {
                 console.log('Audio no soportado');
             }
@@ -1119,7 +1126,7 @@
             // Desplazar hacia la sección
             setTimeout(() => {
                 productInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 300);
+            }, 100);
         }
 
         // Actualizar stock disponible según tipo de transferencia
@@ -1165,7 +1172,8 @@
                     customClass: {
                         confirmButton: 'btn btn-danger'
                     },
-                    buttonsStyling: false
+                    buttonsStyling: false,
+                    timer: 1500
                 });
                 return;
             }
@@ -1184,7 +1192,8 @@
                         customClass: {
                             confirmButton: 'btn btn-warning'
                         },
-                        buttonsStyling: false
+                        buttonsStyling: false,
+                        timer: 2000
                     });
                     return;
                 }
@@ -1203,7 +1212,8 @@
                         customClass: {
                             confirmButton: 'btn btn-warning'
                         },
-                        buttonsStyling: false
+                        buttonsStyling: false,
+                        timer: 2000
                     });
                     return;
                 }
@@ -1215,7 +1225,7 @@
             }
             
             // Guardar cambios localmente
-            localStorage.setItem('mobileProductos', JSON.stringify(productos));
+            localStorage.setItem('handheldProductos', JSON.stringify(productos));
             
             // Registrar transferencia
             const nuevaTransferencia = {
@@ -1230,7 +1240,7 @@
             };
             
             transferencias.unshift(nuevaTransferencia);
-            localStorage.setItem('mobileTransferencias', JSON.stringify(transferencias));
+            localStorage.setItem('handheldTransferencias', JSON.stringify(transferencias));
             
             // Vibrar si está activado
             if ('vibrate' in navigator && config.vibrationMode === 'on') {
@@ -1242,18 +1252,15 @@
                 reproducirSonido('success');
             }
             
-            // Mostrar confirmación
+            // Mostrar confirmación rápida
             Swal.fire({
-                title: 'Transferencia exitosa',
-                html: `✅ <strong>${cantidad} unidades</strong><br>
-                      📦 <strong>${producto.name}</strong><br>
-                      📍 <strong>${origen} → ${destino}</strong>`,
+                title: '✅ Transferencia exitosa',
+                html: `<strong>${cantidad} uds</strong><br>
+                      <small>${producto.name}</small><br>
+                      <small>${origen} → ${destino}</small>`,
                 icon: 'success',
-                confirmButtonText: 'Continuar',
-                customClass: {
-                    confirmButton: 'btn btn-success'
-                },
-                buttonsStyling: false
+                showConfirmButton: false,
+                timer: 1500
             }).then(() => {
                 // Actualizar UI
                 stockAlmacen.textContent = producto.almacen;
@@ -1263,43 +1270,7 @@
                 
                 // Limpiar y enfocar
                 limpiarEscanner();
-                
-                // Intentar sincronizar con servidor
-                sincronizarConServidor(nuevaTransferencia);
             });
-        }
-
-        // Sincronizar con servidor
-        function sincronizarConServidor(transferencia) {
-            // Esto es una simulación - en producción se conectaría al servidor real
-            console.log('Sincronizando transferencia:', transferencia);
-            
-            // Simular envío asíncrono
-            if (config.serverUrl && config.serverUrl !== 'http://localhost:3000/api') {
-                fetch(config.serverUrl + '/transferencias', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(transferencia)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Transferencia sincronizada:', data);
-                })
-                .catch(error => {
-                    console.error('Error sincronizando:', error);
-                    // Guardar para reintentar más tarde
-                    guardarTransferenciaPendiente(transferencia);
-                });
-            }
-        }
-
-        // Guardar transferencia pendiente de sincronización
-        function guardarTransferenciaPendiente(transferencia) {
-            let pendientes = JSON.parse(localStorage.getItem('transferenciasPendientes') || '[]');
-            pendientes.push(transferencia);
-            localStorage.setItem('transferenciasPendientes', JSON.stringify(pendientes));
         }
 
         // Limpiar escáner
@@ -1319,7 +1290,7 @@
                         <div class="empty-icon">
                             <i class="fas fa-exchange-alt"></i>
                         </div>
-                        <p>No hay transferencias recientes</p>
+                        <p>No hay transferencias</p>
                     </div>
                 `;
                 return;
@@ -1336,12 +1307,12 @@
                 
                 let tiempo = '';
                 if (diffMins < 1) {
-                    tiempo = 'Hace unos segundos';
+                    tiempo = 'Ahora';
                 } else if (diffMins < 60) {
-                    tiempo = `Hace ${diffMins} min`;
+                    tiempo = `${diffMins} min`;
                 } else if (diffMins < 1440) {
                     const horas = Math.floor(diffMins / 60);
-                    tiempo = `Hace ${horas} h`;
+                    tiempo = `${horas} h`;
                 } else {
                     tiempo = fecha.toLocaleTimeString('es-ES', { 
                         hour: '2-digit', 
@@ -1381,7 +1352,7 @@
                         <div class="empty-icon">
                             <i class="fas fa-history"></i>
                         </div>
-                        <p>No hay historial de transferencias</p>
+                        <p>No hay historial</p>
                     </div>
                 `;
                 return;
@@ -1389,12 +1360,10 @@
             
             transferencias.forEach(transf => {
                 const fecha = new Date(transf.fecha);
-                const fechaStr = fecha.toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
+                const fechaStr = fecha.toLocaleTimeString('es-ES', {
                     hour: '2-digit',
-                    minute: '2-digit'
+                    minute: '2-digit',
+                    second: '2-digit'
                 });
                 
                 const tipoClase = transf.tipo === 'almacenToTienda' ? 'out' : 'in';
@@ -1410,11 +1379,11 @@
                     <div class="transfer-details">
                         <i class="fas ${icono}"></i> ${transf.origen} → ${transf.destino}
                     </div>
-                    <div class="transfer-details" style="margin-top: 5px;">
+                    <div class="transfer-details" style="margin-top: 4px;">
                         <i class="fas fa-barcode"></i> SKU: ${transf.sku}
                     </div>
                     <div class="transfer-time">
-                        <i class="far fa-calendar"></i> ${fechaStr}
+                        <i class="far fa-clock"></i> ${fechaStr}
                     </div>
                 `;
                 
@@ -1422,51 +1391,20 @@
             });
         }
 
-        // Código para simulación de escáner de cámara (opcional)
-        function iniciarEscaneoCamara() {
-            // Esto es solo para demostración - en producción usarías una librería como QuaggaJS o Instascan
-            Swal.fire({
-                title: 'Escanear con cámara',
-                text: 'Esta función requiere permisos de cámara',
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Continuar',
-                cancelButtonText: 'Cancelar',
-                customClass: {
-                    confirmButton: 'btn btn-primary',
-                    cancelButton: 'btn btn-secondary'
-                },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Simular escaneo
-                    simularEscaneoCamara();
-                }
-            });
+        // Función para integración con handheld scanner
+        function setupHandheldScanner() {
+            // Esta función es para integración con scanners físicos
+            // Los scanners handheld suelen simular teclado
+            console.log('Handheld scanner listo');
+            
+            // Sugerencia para integración:
+            // 1. El scanner enviará Enter después del código
+            // 2. Podemos capturar el código automáticamente
+            // 3. Ya lo hacemos con el evento keypress para Enter
         }
 
-        function simularEscaneoCamara() {
-            // Simular escaneo después de 2 segundos
-            setTimeout(() => {
-                // Elegir un producto aleatorio para simular
-                const productosDisponibles = productos.filter(p => p.almacen > 0 || p.tienda > 0);
-                if (productosDisponibles.length > 0) {
-                    const productoAleatorio = productosDisponibles[Math.floor(Math.random() * productosDisponibles.length)];
-                    scannerInput.value = productoAleatorio.sku;
-                    buscarProducto();
-                }
-            }, 2000);
-        }
-
-        // Añadir botón de cámara si está en móvil
-        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            const scannerButtons = document.querySelector('.scanner-buttons');
-            const btnCamera = document.createElement('button');
-            btnCamera.className = 'scanner-btn scanner-btn-success';
-            btnCamera.innerHTML = '<i class="fas fa-camera"></i> Usar cámara';
-            btnCamera.addEventListener('click', iniciarEscaneoCamara);
-            scannerButtons.insertBefore(btnCamera, scannerButtons.firstChild);
-        }
+        // Inicializar integración con handheld
+        setupHandheldScanner();
     </script>
 </body>
 </html>

@@ -1,0 +1,3528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- Firebase SDK Versión 9 (compatibilidad con navegador) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #9b59b6;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), #1a252f);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-right: 15px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .almacen-icon {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--secondary);
+        }
+        
+        .tienda-icon {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: var(--success);
+        }
+        
+        .proveedor-icon {
+            background-color: rgba(155, 89, 182, 0.1);
+            color: var(--info);
+        }
+        
+        .historial-icon {
+            background-color: rgba(243, 156, 18, 0.1);
+            color: var(--warning);
+        }
+        
+        .stat-info h3 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-info p {
+            color: #666;
+        }
+        
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-info {
+            background-color: var(--info);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .search-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .search-box {
+            flex-grow: 1;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .search-box input:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        .search-options {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .search-option {
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .search-option.active {
+            background-color: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+        
+        .proveedor-search-container {
+            margin-bottom: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .proveedor-search-box {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        
+        .proveedor-search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .proveedor-search-box input:focus {
+            border-color: var(--info);
+            outline: none;
+        }
+        
+        .proveedor-search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--info);
+        }
+        
+        .proveedor-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .proveedor-suggestion {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .proveedor-suggestion:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        
+        .tab-btn {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn:hover {
+            color: var(--secondary);
+        }
+        
+        .tab-btn.active {
+            color: var(--secondary);
+            border-bottom: 3px solid var(--secondary);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .inventory-table {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .stock-cell {
+            font-weight: bold;
+        }
+        
+        .ultimo-envio {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .ultimo-envio.reciente {
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        .ultimo-envio.antiguo {
+            color: var(--warning);
+        }
+        
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .edit-btn {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--secondary);
+        }
+        
+        .delete-btn {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+        }
+        
+        .transfer-btn {
+            background-color: rgba(155, 89, 182, 0.1);
+            color: var(--info);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-lg {
+            max-width: 800px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-modal {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: var(--danger);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .file-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .file-upload:hover {
+            border-color: var(--secondary);
+        }
+        
+        .file-upload i {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+        
+        .historial-item {
+            padding: 15px;
+            border-left: 4px solid var(--secondary);
+            background-color: white;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .historial-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .historial-fecha {
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .historial-tipo {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .tipo-transferencia {
+            background-color: rgba(155, 89, 182, 0.1);
+            color: var(--info);
+        }
+        
+        .tipo-importacion {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--secondary);
+        }
+        
+        .scanner-container {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .scanner-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        .scanner-input:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+        
+        .scanner-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .scanner-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            display: none;
+        }
+        
+        .scanner-result.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .product-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .product-icon {
+            font-size: 2.5rem;
+            color: var(--secondary);
+        }
+        
+        .product-details h4 {
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        
+        .product-details p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .stock-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .stock-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stock-item .label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .stock-item .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .proveedor-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .proveedor-info h4 {
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        
+        .proveedor-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .proveedor-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .search-options {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .actions-cell {
+                flex-direction: column;
+            }
+            
+            .tabs {
+                font-size: 0.9rem;
+            }
+            
+            .tab-btn {
+                padding: 10px 15px;
+            }
+            
+            .stock-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .proveedor-card {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .proveedor-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1><i class="fas fa-warehouse"></i> Sistema de Inventario</h1>
+                    <p class="subtitle">Gestión de almacén y tienda</p>
+                </div>
+                <div id="connectionStatus" class="connection-status">
+                    <i class="fas fa-sync fa-spin"></i> Conectando...
+                </div>
+            </div>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-icon almacen-icon">
+                    <i class="fas fa-warehouse"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalAlmacen">0</h3>
+                    <p>Productos en almacén</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon tienda-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalTienda">0</h3>
+                    <p>Productos en tienda</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon proveedor-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalProveedores">0</h3>
+                    <p>Proveedores</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon historial-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="totalMovimientos">0</h3>
+                    <p>Movimientos</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Buscar productos por SKU, nombre o código de barras...">
+            </div>
+            <div class="search-options">
+                <div class="search-option active" data-filter="all">Todo</div>
+                <div class="search-option" data-filter="sku">SKU</div>
+                <div class="search-option" data-filter="nombre">Nombre</div>
+                <div class="search-option" data-filter="barras">Cód. Barras</div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="inventario">
+                <i class="fas fa-boxes"></i> Inventario
+            </button>
+            <button class="tab-btn" data-tab="proveedores">
+                <i class="fas fa-truck"></i> Por Proveedor
+            </button>
+            <button class="tab-btn" data-tab="gestionProveedores">
+                <i class="fas fa-user-tie"></i> Gestión Proveedores
+            </button>
+            <button class="tab-btn" data-tab="actualizarStock">
+                <i class="fas fa-sync-alt"></i> Actualizar Stock
+            </button>
+            <button class="tab-btn" data-tab="historial">
+                <i class="fas fa-history"></i> Historial
+            </button>
+            <button class="tab-btn" data-tab="importar">
+                <i class="fas fa-file-import"></i> Importar/Exportar
+            </button>
+        </div>
+        
+        <div class="tab-content active" id="inventarioTab">
+            <div class="toolbar">
+                <button class="btn btn-primary" id="btnAddProduct">
+                    <i class="fas fa-plus"></i> Agregar Producto
+                </button>
+                <button class="btn btn-success" id="btnTransferScanner">
+                    <i class="fas fa-barcode"></i> Escanear para Transferir
+                </button>
+                <button class="btn btn-info" id="btnImportarRapido">
+                    <i class="fas fa-file-import"></i> Importar Rápido
+                </button>
+            </div>
+            
+            <div class="inventory-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Producto</th>
+                            <th>Cód. Barra</th>
+                            <th>Proveedor</th>
+                            <th>Stock Almacén</th>
+                            <th>Último Envío a Tienda</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <!-- Los productos se cargarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="proveedoresTab">
+            <div class="proveedor-search-container">
+                <div class="proveedor-search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="proveedorSearchInput" placeholder="Buscar proveedor...">
+                    <div class="proveedor-suggestions" id="proveedorSuggestions">
+                        <!-- Sugerencias de proveedores aparecerán aquí -->
+                    </div>
+                </div>
+                <div id="proveedorSelected" style="font-weight: 600; color: var(--info);">
+                    Mostrando todos los proveedores
+                </div>
+            </div>
+            
+            <div class="inventory-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Producto</th>
+                            <th>Cód. Barra</th>
+                            <th>Proveedor</th>
+                            <th>Stock Almacén</th>
+                            <th>Último Envío a Tienda</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="proveedorTableBody">
+                        <!-- Los productos filtrados por proveedor se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="gestionProveedoresTab">
+            <div class="toolbar">
+                <button class="btn btn-primary" id="btnAddProveedor">
+                    <i class="fas fa-plus"></i> Agregar Proveedor
+                </button>
+                <button class="btn btn-info" id="btnExportarProveedores">
+                    <i class="fas fa-file-export"></i> Exportar Proveedores
+                </button>
+            </div>
+            
+            <div id="proveedoresContainer">
+                <!-- Los proveedores se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+        
+        <div class="tab-content" id="actualizarStockTab">
+            <div class="form-group">
+                <h3><i class="fas fa-sync-alt"></i> Actualización Masiva de Stock</h3>
+                <p>Pega los datos en el formato: <strong>SKU | Existencia Almacén | Existencia Tienda</strong></p>
+                <p>Ejemplo: <code>DPI001 | 10 | 5</code></p>
+                <textarea id="actualizarStockData" rows="15" placeholder="DPI001 | 10 | 5&#10;DPI002 | 15 | 8&#10;DPI003 | 20 | 12"></textarea>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="actualizarSoloAlmacen">
+                <label for="actualizarSoloAlmacen">Actualizar solo stock de almacén (ignorar tienda)</label>
+            </div>
+            
+            <div class="form-group">
+                <button class="btn btn-warning" id="btnProcesarActualizacion" style="width: 100%;">
+                    <i class="fas fa-sync-alt"></i> Procesar Actualización de Stock
+                </button>
+            </div>
+            
+            <div id="actualizacionResultado" style="margin-top: 20px; display: none;">
+                <!-- Resultados de la actualización aparecerán aquí -->
+            </div>
+        </div>
+        
+        <div class="tab-content" id="historialTab">
+            <div class="toolbar">
+                <button class="btn btn-danger" id="btnLimpiarHistorial">
+                    <i class="fas fa-trash"></i> Limpiar Historial
+                </button>
+            </div>
+            
+            <div id="historialContainer">
+                <!-- El historial se cargará aquí dinámicamente -->
+            </div>
+        </div>
+        
+        <div class="tab-content" id="importarTab">
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <h3><i class="fas fa-file-import"></i> Importar Datos</h3>
+                    <p>Sube un archivo JSON con el formato correcto para cargar productos al sistema.</p>
+                    
+                    <div class="file-upload" id="fileUploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Arrastra y suelta tu archivo JSON aquí o haz clic para seleccionar</p>
+                        <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
+                        <p class="subtitle" style="margin-top: 10px;">Formato esperado: SKU | Producto | Cód. Barra | Existencia</p>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="importarActualizarStock">
+                        <label for="importarActualizarStock">Actualizar stock existente (en lugar de sumar)</label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="importProveedor">Proveedor (se aplicará a todos los productos)</label>
+                        <select id="importProveedor">
+                            <!-- Opciones de proveedores se cargarán dinámicamente -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button class="btn btn-success" id="btnImportarJSON" style="width: 100%;">
+                            <i class="fas fa-upload"></i> Importar Archivo JSON
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="flex: 1;">
+                    <h3><i class="fas fa-file-export"></i> Exportar Datos</h3>
+                    <p>Descarga los datos actuales del inventario en diferentes formatos.</p>
+                    
+                    <div class="form-group">
+                        <label for="exportFormat">Formato de Exportación</label>
+                        <select id="exportFormat">
+                            <option value="json">JSON Completo</option>
+                            <option value="formatoProveedor">Formato Proveedor</option>
+                            <option value="csv">CSV</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button class="btn btn-primary" id="btnExportarJSON" style="width: 100%;">
+                            <i class="fas fa-download"></i> Exportar Datos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para agregar/editar producto -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Agregar Producto</h2>
+                <span class="close-modal" id="closeModal">&times;</span>
+            </div>
+            <form id="productForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productSKU">SKU *</label>
+                        <input type="text" id="productSKU" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productBarCode">Código de Barras *</label>
+                        <input type="text" id="productBarCode" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productName">Nombre del Producto *</label>
+                    <input type="text" id="productName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productProveedor">Proveedor *</label>
+                    <select id="productProveedor" required>
+                        <!-- Opciones de proveedores se cargarán dinámicamente -->
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="stockAlmacen">Stock en Almacén *</label>
+                        <input type="number" id="stockAlmacen" min="0" value="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="stockTienda">Stock en Tienda *</label>
+                        <input type="number" id="stockTienda" min="0" value="0" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-save"></i> Guardar Producto
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para escanear/transferir -->
+    <div id="scannerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-barcode"></i> Escanear Producto</h2>
+                <span class="close-modal" id="closeScannerModal">&times;</span>
+            </div>
+            
+            <div class="scanner-container">
+                <p>Escanee el código de barras o ingrese el SKU del producto</p>
+                <input type="text" id="scannerInput" class="scanner-input" placeholder="Escanee o escriba el código..." autofocus>
+                
+                <div class="scanner-buttons">
+                    <button class="btn btn-info" id="btnBuscarProducto">
+                        <i class="fas fa-search"></i> Buscar Producto
+                    </button>
+                    <button class="btn btn-secondary" id="btnLimpiarScanner">
+                        <i class="fas fa-eraser"></i> Limpiar
+                    </button>
+                </div>
+                
+                <div id="scannerResult" class="scanner-result">
+                    <!-- Resultados de búsqueda aparecerán aquí -->
+                </div>
+            </div>
+            
+            <!-- Formulario de transferencia (se mostrará después de encontrar producto) -->
+            <div id="transferFormContainer" style="display: none;">
+                <hr>
+                <h3 style="margin-bottom: 20px;">Transferir Producto</h3>
+                <form id="transferForm">
+                    <input type="hidden" id="transferProductId">
+                    
+                    <div class="form-group">
+                        <label for="transferType">Tipo de Transferencia *</label>
+                        <select id="transferType" required>
+                            <option value="almacenToTienda">De Almacén a Tienda</option>
+                            <option value="tiendaToAlmacen">De Tienda a Almacén</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="transferQuantity">Cantidad a Transferir *</label>
+                        <input type="number" id="transferQuantity" min="1" value="1" required>
+                        <p id="availableStock" style="margin-top: 5px; font-size: 0.9rem; color: #666;"></p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success" style="width: 100%;">
+                            <i class="fas fa-exchange-alt"></i> Realizar Transferencia
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para importación rápida -->
+    <div id="importModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-import"></i> Importación Rápida</h2>
+                <span class="close-modal" id="closeImportModal">&times;</span>
+            </div>
+            <div class="form-group">
+                <p>Pega los datos en el formato: <strong>SKU | Producto | Cód. Barra | Existencia</strong></p>
+                <p>Ejemplo: <code>DPI001 | BACINICA PARA NIÑOS | DPI001 | 10</code></p>
+                <textarea id="importData" rows="10" placeholder="DPI001 | BACINICA PARA NIÑOS | DPI001 | 10&#10;DPI002 | JARRA 1LITRO SURTIDA C/TAPA | DPI002 | 15&#10;DPI003 | PRODUCTO EJEMPLO | DPI003 | 20"></textarea>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="importRapidoActualizarStock">
+                <label for="importRapidoActualizarStock">Actualizar stock existente (en lugar de sumar)</label>
+            </div>
+            
+            <div class="form-group">
+                <label for="importRapidoProveedor">Proveedor (se aplicará a todos los productos)</label>
+                <select id="importRapidoProveedor">
+                    <!-- Opciones de proveedores se cargarán dinámicamente -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <button class="btn btn-success" id="btnProcesarImportacion" style="width: 100%;">
+                    <i class="fas fa-bolt"></i> Procesar Importación
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para agregar/editar proveedor -->
+    <div id="proveedorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="proveedorModalTitle">Agregar Proveedor</h2>
+                <span class="close-modal" id="closeProveedorModal">&times;</span>
+            </div>
+            <form id="proveedorForm">
+                <div class="form-group">
+                    <label for="proveedorCodigo">Código *</label>
+                    <input type="text" id="proveedorCodigo" required placeholder="Ej: P00005">
+                </div>
+                
+                <div class="form-group">
+                    <label for="proveedorNombre">Nombre del Proveedor *</label>
+                    <input type="text" id="proveedorNombre" required placeholder="Ej: ROYALTEX S.A.">
+                </div>
+                
+                <div class="form-group">
+                    <label for="proveedorDescripcion">Descripción</label>
+                    <textarea id="proveedorDescripcion" rows="3" placeholder="Información adicional del proveedor..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="proveedorContacto">Contacto</label>
+                    <input type="text" id="proveedorContacto" placeholder="Nombre de contacto">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="proveedorTelefono">Teléfono</label>
+                        <input type="text" id="proveedorTelefono" placeholder="Teléfono">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="proveedorEmail">Email</label>
+                        <input type="email" id="proveedorEmail" placeholder="correo@ejemplo.com">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-save"></i> Guardar Proveedor
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC5PwQQrY02yhICT4hl6nzZTEvA-CLgC2g",
+            authDomain: "thogar-de74d.firebaseapp.com",
+            projectId: "thogar-de74d",
+            storageBucket: "thogar-de74d.firebasestorage.app",
+            messagingSenderId: "605168322064",
+            appId: "1:605168322064:web:e0d9a16c5e5bc230d9ac95"
+        };
+
+        // Inicializar Firebase
+        let app, db;
+        try {
+            // Usar la versión compat de Firebase (firebase-app-compat.js)
+            app = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log("Firebase inicializado correctamente");
+        } catch (error) {
+            console.error("Error inicializando Firebase:", error);
+        }
+
+        // Datos iniciales
+        let inventory = [];
+        let historial = [];
+        let proveedores = [];
+        let editingProductId = null;
+        let editingProveedorId = null;
+        let nextId = 1;
+        let nextHistorialId = 1;
+        let nextProveedorId = 1;
+        let currentSearchFilter = "all";
+        let currentProveedorFilter = null;
+        let isOnline = navigator.onLine;
+
+        // Elementos del DOM
+        const inventoryTableBody = document.getElementById('inventoryTableBody');
+        const proveedorTableBody = document.getElementById('proveedorTableBody');
+        const proveedorSearchInput = document.getElementById('proveedorSearchInput');
+        const proveedorSuggestions = document.getElementById('proveedorSuggestions');
+        const proveedorSelected = document.getElementById('proveedorSelected');
+        const proveedoresContainer = document.getElementById('proveedoresContainer');
+        const productModal = document.getElementById('productModal');
+        const scannerModal = document.getElementById('scannerModal');
+        const importModal = document.getElementById('importModal');
+        const proveedorModal = document.getElementById('proveedorModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const closeScannerModalBtn = document.getElementById('closeScannerModal');
+        const closeImportModalBtn = document.getElementById('closeImportModal');
+        const closeProveedorModalBtn = document.getElementById('closeProveedorModal');
+        const productForm = document.getElementById('productForm');
+        const proveedorForm = document.getElementById('proveedorForm');
+        const transferForm = document.getElementById('transferForm');
+        const btnAddProduct = document.getElementById('btnAddProduct');
+        const btnAddProveedor = document.getElementById('btnAddProveedor');
+        const btnTransferScanner = document.getElementById('btnTransferScanner');
+        const btnImportarRapido = document.getElementById('btnImportarRapido');
+        const btnExportarProveedores = document.getElementById('btnExportarProveedores');
+        const searchInput = document.getElementById('searchInput');
+        const searchOptions = document.querySelectorAll('.search-option');
+        const scannerInput = document.getElementById('scannerInput');
+        const btnBuscarProducto = document.getElementById('btnBuscarProducto');
+        const btnLimpiarScanner = document.getElementById('btnLimpiarScanner');
+        const scannerResult = document.getElementById('scannerResult');
+        const transferFormContainer = document.getElementById('transferFormContainer');
+        const transferProductIdInput = document.getElementById('transferProductId');
+        const transferTypeSelect = document.getElementById('transferType');
+        const transferQuantityInput = document.getElementById('transferQuantity');
+        const availableStockText = document.getElementById('availableStock');
+        const historialContainer = document.getElementById('historialContainer');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const jsonFileInput = document.getElementById('jsonFileInput');
+        const btnImportarJSON = document.getElementById('btnImportarJSON');
+        const btnProcesarImportacion = document.getElementById('btnProcesarImportacion');
+        const importDataTextarea = document.getElementById('importData');
+        const importRapidoActualizarStock = document.getElementById('importRapidoActualizarStock');
+        const importRapidoProveedor = document.getElementById('importRapidoProveedor');
+        const exportFormatSelect = document.getElementById('exportFormat');
+        const btnExportarJSON = document.getElementById('btnExportarJSON');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const actualizarStockData = document.getElementById('actualizarStockData');
+        const actualizarSoloAlmacen = document.getElementById('actualizarSoloAlmacen');
+        const btnProcesarActualizacion = document.getElementById('btnProcesarActualizacion');
+        const actualizacionResultado = document.getElementById('actualizacionResultado');
+        const importarActualizarStock = document.getElementById('importarActualizarStock');
+        const importProveedor = document.getElementById('importProveedor');
+
+        // Función para actualizar estado de conexión
+        function updateConnectionStatus(online) {
+            isOnline = online;
+            if (connectionStatus) {
+                if (online) {
+                    connectionStatus.innerHTML = '<i class="fas fa-wifi"></i> Conectado a Firebase';
+                    connectionStatus.style.color = 'var(--success)';
+                } else {
+                    connectionStatus.innerHTML = '<i class="fas fa-wifi-slash"></i> Sin conexión';
+                    connectionStatus.style.color = 'var(--warning)';
+                }
+            }
+        }
+
+        // Cargar datos de Firebase
+        async function loadDataFromFirebase() {
+            try {
+                if (!db) {
+                    updateConnectionStatus(false);
+                    console.log("Firebase no disponible");
+                    return false;
+                }
+                
+                // Cargar productos
+                const productsSnapshot = await db.collection('products').get();
+                inventory = [];
+                productsSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    inventory.push({
+                        id: data.id || doc.id,
+                        ...data
+                    });
+                });
+                
+                // Cargar historial
+                const historySnapshot = await db.collection('historial').orderBy('fecha', 'desc').limit(100).get();
+                historial = [];
+                historySnapshot.forEach(doc => {
+                    historial.push(doc.data());
+                });
+                
+                // Cargar proveedores
+                const proveedoresSnapshot = await db.collection('proveedores').orderBy('codigo').get();
+                proveedores = [];
+                proveedoresSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    proveedores.push({
+                        id: data.id || doc.id,
+                        ...data
+                    });
+                });
+                
+                // Actualizar nextId
+                if (inventory.length > 0) {
+                    const ids = inventory.map(p => {
+                        const id = parseInt(p.id);
+                        return isNaN(id) ? 0 : id;
+                    });
+                    nextId = Math.max(...ids) + 1;
+                }
+                
+                // Actualizar nextHistorialId
+                if (historial.length > 0) {
+                    const histIds = historial.map(h => {
+                        const id = parseInt(h.id);
+                        return isNaN(id) ? 0 : id;
+                    });
+                    nextHistorialId = Math.max(...histIds) + 1;
+                }
+                
+                // Actualizar nextProveedorId
+                if (proveedores.length > 0) {
+                    const provIds = proveedores.map(p => {
+                        const id = parseInt(p.id);
+                        return isNaN(id) ? 0 : id;
+                    });
+                    nextProveedorId = Math.max(...provIds) + 1;
+                }
+                
+                updateConnectionStatus(true);
+                console.log('Datos cargados desde Firebase:', { 
+                    productos: inventory.length, 
+                    historial: historial.length,
+                    proveedores: proveedores.length
+                });
+                
+                updateInventoryTable();
+                updateStats();
+                updateHistorial();
+                updateProveedorSelects();
+                updateProveedoresList();
+                
+                return true;
+            } catch (error) {
+                console.error('Error cargando datos de Firebase:', error);
+                updateConnectionStatus(false);
+                return false;
+            }
+        }
+
+        // Guardar producto en Firebase
+        async function saveProductToFirebase(productData, isUpdate = false) {
+            try {
+                if (!db) throw new Error("Firebase no disponible");
+                
+                const productRef = db.collection('products').doc(productData.id.toString());
+                
+                if (isUpdate) {
+                    await productRef.update(productData);
+                } else {
+                    await productRef.set(productData);
+                }
+                
+                console.log('Producto guardado en Firebase:', productData.id);
+                return true;
+            } catch (error) {
+                console.error('Error guardando producto en Firebase:', error);
+                throw error;
+            }
+        }
+
+        // Guardar historial en Firebase
+        async function saveHistoryToFirebase(historyItem) {
+            try {
+                if (!db) throw new Error("Firebase no disponible");
+                
+                await db.collection('historial').doc(historyItem.id.toString()).set(historyItem);
+                console.log('Historial guardado en Firebase:', historyItem.id);
+                return true;
+            } catch (error) {
+                console.error('Error guardando historial en Firebase:', error);
+                throw error;
+            }
+        }
+
+        // Guardar proveedor en Firebase
+        async function saveProveedorToFirebase(proveedorData, isUpdate = false) {
+            try {
+                if (!db) throw new Error("Firebase no disponible");
+                
+                const proveedorRef = db.collection('proveedores').doc(proveedorData.id.toString());
+                
+                if (isUpdate) {
+                    await proveedorRef.update(proveedorData);
+                } else {
+                    await proveedorRef.set(proveedorData);
+                }
+                
+                console.log('Proveedor guardado en Firebase:', proveedorData.id);
+                return true;
+            } catch (error) {
+                console.error('Error guardando proveedor en Firebase:', error);
+                throw error;
+            }
+        }
+
+        // Eliminar producto de Firebase
+        async function deleteProductFromFirebase(productId) {
+            try {
+                if (!db) throw new Error("Firebase no disponible");
+                
+                await db.collection('products').doc(productId.toString()).delete();
+                console.log('Producto eliminado de Firebase:', productId);
+                return true;
+            } catch (error) {
+                console.error('Error eliminando producto de Firebase:', error);
+                throw error;
+            }
+        }
+
+        // Eliminar proveedor de Firebase
+        async function deleteProveedorFromFirebase(proveedorId) {
+            try {
+                if (!db) throw new Error("Firebase no disponible");
+                
+                await db.collection('proveedores').doc(proveedorId.toString()).delete();
+                console.log('Proveedor eliminado de Firebase:', proveedorId);
+                return true;
+            } catch (error) {
+                console.error('Error eliminando proveedor de Firebase:', error);
+                throw error;
+            }
+        }
+
+        // Limpiar historial de Firebase
+        async function clearHistoryFromFirebase() {
+            try {
+                if (!db) throw new Error("Firebase no disponible");
+                
+                const batch = db.batch();
+                const snapshot = await db.collection('historial').get();
+                
+                snapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                await batch.commit();
+                console.log('Historial limpiado de Firebase');
+                return true;
+            } catch (error) {
+                console.error('Error limpiando historial de Firebase:', error);
+                throw error;
+            }
+        }
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Configurar eventos de conexión
+            window.addEventListener('online', async () => {
+                updateConnectionStatus(true);
+                // Recargar datos cuando se recupera la conexión
+                await loadDataFromFirebase();
+            });
+            
+            window.addEventListener('offline', () => {
+                updateConnectionStatus(false);
+            });
+
+            // Intentar cargar desde Firebase
+            const firebaseLoaded = await loadDataFromFirebase();
+            
+            if (!firebaseLoaded) {
+                console.log("No se pudo conectar a Firebase");
+                // Si no hay datos en Firebase, mostrar tablas vacías
+                updateInventoryTable();
+                updateStats();
+                updateHistorial();
+                updateProveedorSelects();
+                updateProveedoresList();
+            }
+            
+            // Configurar eventos de pestañas
+            setupTabs();
+            
+            // Configurar eventos de búsqueda
+            setupSearch();
+            
+            // Configurar búsqueda de proveedores
+            setupProveedorSearch();
+            
+            // Configurar eventos de los botones
+            setupEventListeners();
+        });
+
+        // Configurar sistema de pestañas
+        function setupTabs() {
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remover clase active de todos los botones y contenidos
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Agregar clase active al botón y contenido seleccionado
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                    
+                    // Actualizar según la pestaña seleccionada
+                    if (tabId === 'proveedores') {
+                        updateProveedorTable();
+                    } else if (tabId === 'gestionProveedores') {
+                        updateProveedoresList();
+                    }
+                });
+            });
+        }
+
+        // Configurar sistema de búsqueda
+        function setupSearch() {
+            // Configurar opciones de búsqueda
+            searchOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remover clase active de todas las opciones
+                    searchOptions.forEach(opt => opt.classList.remove('active'));
+                    // Agregar clase active a la opción seleccionado
+                    this.classList.add('active');
+                    currentSearchFilter = this.getAttribute('data-filter');
+                    // Actualizar tabla con la búsqueda actual
+                    updateInventoryTable(searchInput.value);
+                });
+            });
+            
+            // Configurar búsqueda en tiempo real
+            searchInput.addEventListener('input', function() {
+                updateInventoryTable(this.value);
+            });
+        }
+
+        // Configurar búsqueda de proveedores
+        function setupProveedorSearch() {
+            // Mostrar sugerencias al escribir
+            proveedorSearchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                const proveedoresList = getProveedoresUnicos();
+                
+                // Limpiar sugerencias anteriores
+                proveedorSuggestions.innerHTML = '';
+                proveedorSuggestions.style.display = 'none';
+                
+                if (searchTerm.length === 0) {
+                    currentProveedorFilter = null;
+                    proveedorSelected.textContent = "Mostrando todos los proveedores";
+                    updateProveedorTable();
+                    return;
+                }
+                
+                // Filtrar proveedores que coincidan
+                const filteredProveedores = proveedoresList.filter(proveedor => 
+                    proveedor.toLowerCase().includes(searchTerm)
+                );
+                
+                if (filteredProveedores.length > 0) {
+                    // Mostrar sugerencias
+                    filteredProveedores.forEach(proveedor => {
+                        const suggestion = document.createElement('div');
+                        suggestion.className = 'proveedor-suggestion';
+                        suggestion.textContent = proveedor;
+                        suggestion.addEventListener('click', function() {
+                            proveedorSearchInput.value = proveedor;
+                            proveedorSuggestions.style.display = 'none';
+                            currentProveedorFilter = proveedor;
+                            proveedorSelected.textContent = `Mostrando: ${proveedor}`;
+                            updateProveedorTable();
+                        });
+                        proveedorSuggestions.appendChild(suggestion);
+                    });
+                    
+                    proveedorSuggestions.style.display = 'block';
+                }
+                
+                // Si el usuario presiona Enter, buscar directamente
+                if (filteredProveedores.length === 1 && searchTerm.length > 2) {
+                    currentProveedorFilter = filteredProveedores[0];
+                    proveedorSelected.textContent = `Mostrando: ${filteredProveedores[0]}`;
+                    updateProveedorTable();
+                }
+            });
+            
+            // Ocultar sugerencias al hacer clic fuera
+            document.addEventListener('click', function(event) {
+                if (!proveedorSearchInput.contains(event.target) && !proveedorSuggestions.contains(event.target)) {
+                    proveedorSuggestions.style.display = 'none';
+                }
+            });
+            
+            // Limpiar filtro al hacer clic en la X
+            proveedorSearchInput.addEventListener('search', function() {
+                if (this.value === '') {
+                    currentProveedorFilter = null;
+                    proveedorSelected.textContent = "Mostrando todos los proveedores";
+                    updateProveedorTable();
+                }
+            });
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Botón agregar producto
+            btnAddProduct.addEventListener('click', function() {
+                editingProductId = null;
+                document.getElementById('modalTitle').textContent = 'Agregar Producto';
+                document.getElementById('productSKU').value = '';
+                document.getElementById('productBarCode').value = '';
+                document.getElementById('productName').value = '';
+                document.getElementById('productProveedor').selectedIndex = 0;
+                document.getElementById('stockAlmacen').value = '0';
+                document.getElementById('stockTienda').value = '0';
+                productModal.style.display = 'flex';
+            });
+
+            // Botón agregar proveedor
+            btnAddProveedor.addEventListener('click', function() {
+                editingProveedorId = null;
+                document.getElementById('proveedorModalTitle').textContent = 'Agregar Proveedor';
+                document.getElementById('proveedorCodigo').value = '';
+                document.getElementById('proveedorNombre').value = '';
+                document.getElementById('proveedorDescripcion').value = '';
+                document.getElementById('proveedorContacto').value = '';
+                document.getElementById('proveedorTelefono').value = '';
+                document.getElementById('proveedorEmail').value = '';
+                proveedorModal.style.display = 'flex';
+            });
+
+            // Botón exportar proveedores
+            btnExportarProveedores.addEventListener('click', function() {
+                exportarProveedores();
+            });
+
+            // Botón escanear transferencia
+            btnTransferScanner.addEventListener('click', function() {
+                openTransferScanner();
+            });
+
+            // Buscar producto en modal de scanner
+            btnBuscarProducto.addEventListener('click', function() {
+                const termino = scannerInput.value.trim();
+                if (!termino) {
+                    Swal.fire({
+                        title: 'Ingresa un código',
+                        text: 'Por favor, ingresa un SKU, nombre o código de barras',
+                        icon: 'info',
+                        confirmButtonText: 'Entendido',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                
+                const producto = buscarProducto(termino);
+                mostrarResultadoBusqueda(producto);
+            });
+
+            // Escanear automáticamente al presionar Enter
+            scannerInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    btnBuscarProducto.click();
+                }
+            });
+
+            // Limpiar scanner
+            btnLimpiarScanner.addEventListener('click', function() {
+                scannerInput.value = '';
+                scannerResult.classList.remove('active');
+                transferFormContainer.style.display = 'none';
+                scannerInput.focus();
+            });
+
+            // Cerrar modales
+            closeModalBtn.addEventListener('click', function() {
+                productModal.style.display = 'none';
+            });
+
+            closeScannerModalBtn.addEventListener('click', function() {
+                scannerModal.style.display = 'none';
+            });
+
+            closeImportModalBtn.addEventListener('click', function() {
+                importModal.style.display = 'none';
+            });
+
+            closeProveedorModalBtn.addEventListener('click', function() {
+                proveedorModal.style.display = 'none';
+            });
+
+            // Cerrar modales al hacer clic fuera de ellos
+            window.addEventListener('click', function(event) {
+                if (event.target === productModal) {
+                    productModal.style.display = 'none';
+                }
+                if (event.target === scannerModal) {
+                    scannerModal.style.display = 'none';
+                }
+                if (event.target === importModal) {
+                    importModal.style.display = 'none';
+                }
+                if (event.target === proveedorModal) {
+                    proveedorModal.style.display = 'none';
+                }
+            });
+
+            // Manejar envío del formulario de producto
+            productForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const productData = {
+                    id: editingProductId || nextId,
+                    sku: document.getElementById('productSKU').value,
+                    barcode: document.getElementById('productBarCode').value,
+                    name: document.getElementById('productName').value,
+                    proveedor: document.getElementById('productProveedor').value,
+                    almacen: parseInt(document.getElementById('stockAlmacen').value) || 0,
+                    tienda: parseInt(document.getElementById('stockTienda').value) || 0,
+                    ultimoEnvio: null
+                };
+                
+                // Validar que SKU y código de barras no estén duplicados
+                const skuExists = inventory.find(p => p.sku === productData.sku && p.id !== editingProductId);
+                const barcodeExists = inventory.find(p => p.barcode === productData.barcode && p.id !== editingProductId);
+                
+                if (skuExists) {
+                    Swal.fire({
+                        title: 'SKU duplicado',
+                        text: 'Ya existe un producto con este SKU',
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                
+                if (barcodeExists) {
+                    Swal.fire({
+                        title: 'Código duplicado',
+                        text: 'Ya existe un producto con este código de barras',
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                
+                try {
+                    const isUpdate = !!editingProductId;
+                    
+                    // Guardar en Firebase si está online
+                    if (isOnline && db) {
+                        await saveProductToFirebase(productData, isUpdate);
+                    }
+                    
+                    // Actualizar localmente
+                    if (isUpdate) {
+                        const index = inventory.findIndex(p => p.id === editingProductId);
+                        inventory[index] = productData;
+                        
+                        Swal.fire({
+                            title: 'Producto actualizado',
+                            text: `El producto ${productData.name} ha sido actualizado correctamente`,
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        });
+                    } else {
+                        inventory.push(productData);
+                        nextId++;
+                        
+                        // Registrar en historial
+                        await agregarAlHistorial(
+                            'importacion',
+                            productData.id,
+                            productData.almacen + productData.tienda,
+                            'sistema',
+                            'inventario'
+                        );
+                        
+                        Swal.fire({
+                            title: 'Producto agregado',
+                            text: `El producto ${productData.name} ha sido agregado correctamente`,
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                    
+                    updateInventoryTable(searchInput.value);
+                    updateStats();
+                    updateProveedorSelects();
+                    productModal.style.display = 'none';
+                    
+                } catch (error) {
+                    console.error('Error guardando producto:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo guardar el producto. Inténtalo de nuevo.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                }
+            });
+
+            // Manejar envío del formulario de proveedor
+            proveedorForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const proveedorData = {
+                    id: editingProveedorId || nextProveedorId,
+                    codigo: document.getElementById('proveedorCodigo').value,
+                    nombre: document.getElementById('proveedorNombre').value,
+                    descripcion: document.getElementById('proveedorDescripcion').value,
+                    contacto: document.getElementById('proveedorContacto').value,
+                    telefono: document.getElementById('proveedorTelefono').value,
+                    email: document.getElementById('proveedorEmail').value,
+                    fechaCreacion: new Date().toISOString()
+                };
+                
+                // Validar que código no esté duplicado
+                const codigoExists = proveedores.find(p => p.codigo === proveedorData.codigo && p.id !== editingProveedorId);
+                
+                if (codigoExists) {
+                    Swal.fire({
+                        title: 'Código duplicado',
+                        text: 'Ya existe un proveedor con este código',
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                
+                try {
+                    const isUpdate = !!editingProveedorId;
+                    
+                    // Guardar en Firebase si está online
+                    if (isOnline && db) {
+                        await saveProveedorToFirebase(proveedorData, isUpdate);
+                    }
+                    
+                    // Actualizar localmente
+                    if (isUpdate) {
+                        const index = proveedores.findIndex(p => p.id === editingProveedorId);
+                        proveedores[index] = proveedorData;
+                        
+                        Swal.fire({
+                            title: 'Proveedor actualizado',
+                            text: `El proveedor ${proveedorData.nombre} ha sido actualizado correctamente`,
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        });
+                    } else {
+                        proveedores.push(proveedorData);
+                        nextProveedorId++;
+                        
+                        Swal.fire({
+                            title: 'Proveedor agregado',
+                            text: `El proveedor ${proveedorData.nombre} ha sido agregado correctamente`,
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                    
+                    updateProveedorSelects();
+                    updateProveedoresList();
+                    proveedorModal.style.display = 'none';
+                    
+                } catch (error) {
+                    console.error('Error guardando proveedor:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo guardar el proveedor. Inténtalo de nuevo.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                }
+            });
+
+            // Manejar envío del formulario de transferencia
+            transferForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const productId = parseInt(transferProductIdInput.value);
+                const transferType = transferTypeSelect.value;
+                const quantity = parseInt(transferQuantityInput.value);
+                
+                const productIndex = inventory.findIndex(p => p.id === productId);
+                if (productIndex === -1) return;
+                
+                const product = inventory[productIndex];
+                
+                let origen, destino;
+                
+                if (transferType === 'almacenToTienda') {
+                    if (quantity > product.almacen) {
+                        Swal.fire({
+                            title: 'Stock insuficiente',
+                            text: `No hay suficiente stock en almacén. Disponible: ${product.almacen}`,
+                            icon: 'warning',
+                            confirmButtonText: 'Entendido',
+                            customClass: {
+                                confirmButton: 'btn btn-warning'
+                            },
+                            buttonsStyling: false
+                        });
+                        return;
+                    }
+                    product.almacen -= quantity;
+                    product.tienda += quantity;
+                    // Actualizar fecha de último envío
+                    product.ultimoEnvio = new Date().toISOString().split('T')[0];
+                    origen = 'almacen';
+                    destino = 'tienda';
+                } else {
+                    if (quantity > product.tienda) {
+                        Swal.fire({
+                            title: 'Stock insuficiente',
+                            text: `No hay suficiente stock en tienda. Disponible: ${product.tienda}`,
+                            icon: 'warning',
+                            confirmButtonText: 'Entendido',
+                            customClass: {
+                                confirmButton: 'btn btn-warning'
+                            },
+                            buttonsStyling: false
+                        });
+                        return;
+                    }
+                    product.tienda -= quantity;
+                    product.almacen += quantity;
+                    origen = 'tienda';
+                    destino = 'almacen';
+                }
+                
+                try {
+                    // Guardar cambios en Firebase si está online
+                    if (isOnline && db) {
+                        await saveProductToFirebase(product, true);
+                    }
+                    
+                    // Registrar en historial
+                    await agregarAlHistorial(
+                        'transferencia',
+                        productId,
+                        quantity,
+                        origen,
+                        destino
+                    );
+                    
+                    updateInventoryTable(searchInput.value);
+                    updateStats();
+                    
+                    // Cerrar modal y limpiar
+                    scannerModal.style.display = 'none';
+                    scannerInput.value = '';
+                    scannerResult.classList.remove('active');
+                    transferFormContainer.style.display = 'none';
+                    
+                    // Mostrar confirmación
+                    Swal.fire({
+                        title: 'Transferencia exitosa',
+                        html: `Se transfirieron <strong>${quantity} unidades</strong> de <strong>${product.name}</strong><br>de <strong>${origen}</strong> a <strong>${destino}</strong>`,
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-success'
+                        },
+                        buttonsStyling: false
+                    });
+                    
+                } catch (error) {
+                    console.error('Error en transferencia:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo completar la transferencia. Inténtalo de nuevo.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                }
+            });
+
+            // Actualizar stock disponible al cambiar tipo de transferencia
+            transferTypeSelect.addEventListener('change', function() {
+                const productId = parseInt(transferProductIdInput.value);
+                if (productId) {
+                    updateAvailableStockForProduct(productId);
+                }
+            });
+
+            // Abrir modal para importación rápida
+            btnImportarRapido.addEventListener('click', function() {
+                importModal.style.display = 'flex';
+            });
+
+            // Configurar área de carga de archivos
+            fileUploadArea.addEventListener('click', function() {
+                jsonFileInput.click();
+            });
+            
+            jsonFileInput.addEventListener('change', function(e) {
+                if (this.files.length > 0) {
+                    const fileName = this.files[0].name;
+                    fileUploadArea.innerHTML = `
+                        <i class="fas fa-file-check" style="color: var(--success);"></i>
+                        <p>Archivo seleccionado: <strong>${fileName}</strong></p>
+                        <p class="subtitle">Haz clic en "Importar Archivo JSON" para procesar</p>
+                    `;
+                }
+            });
+
+            // Importar archivo JSON con spinner
+            btnImportarJSON.addEventListener('click', async function() {
+                if (!jsonFileInput.files.length) {
+                    Swal.fire({
+                        title: 'Archivo requerido',
+                        text: 'Por favor, selecciona un archivo JSON primero',
+                        icon: 'info',
+                        confirmButtonText: 'Entendido',
+                        customClass: {
+                            confirmButton: 'btn btn-info'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                
+                const proveedor = importProveedor.value;
+                const actualizarStock = importarActualizarStock.checked;
+                
+                if (!proveedor) {
+                    Swal.fire({
+                        title: 'Proveedor requerido',
+                        text: 'Selecciona un proveedor para los productos',
+                        icon: 'warning',
+                        confirmButtonText: 'Entendido',
+                        customClass: {
+                            confirmButton: 'btn btn-warning'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                
+                // Deshabilitar botón y mostrar spinner
+                const originalText = btnImportarJSON.innerHTML;
+                btnImportarJSON.innerHTML = '<span class="spinner"></span> Procesando...';
+                btnImportarJSON.disabled = true;
+                
+                try {
+                    const file = jsonFileInput.files[0];
+                    const data = await readFileAsJSON(file);
+                    
+                    let productosImportados = 0;
+                    let productosActualizados = 0;
+                    
+                    // Procesar datos según diferentes formatos posibles
+                    if (Array.isArray(data)) {
+                        // Formato de array de productos
+                        for (const item of data) {
+                            let producto;
+                            
+                            if (item.SKU !== undefined) {
+                                // Formato con claves en mayúsculas
+                                producto = {
+                                    id: nextId++,
+                                    sku: item.SKU || item.sku || `IMP${nextId}`,
+                                    name: item.Producto || item.producto || item.Nombre || item.nombre || 'Producto sin nombre',
+                                    barcode: item['Cód. Barra'] || item.codigoBarra || item.barcode || item.SKU || '',
+                                    proveedor: item.Proveedor || item.proveedor || proveedor,
+                                    almacen: parseInt(item.Existencia) || parseInt(item.existencia) || parseInt(item.almacen) || 0,
+                                    tienda: parseInt(item.tienda) || 0,
+                                    ultimoEnvio: null
+                                };
+                            } else if (item.sku !== undefined) {
+                                // Formato con claves en minúsculas
+                                producto = {
+                                    id: nextId++,
+                                    sku: item.sku,
+                                    name: item.producto || item.nombre,
+                                    barcode: item.barcode || item.codigoBarra || item.sku,
+                                    proveedor: item.proveedor || proveedor,
+                                    almacen: parseInt(item.existencia) || parseInt(item.almacen) || 0,
+                                    tienda: parseInt(item.tienda) || 0,
+                                    ultimoEnvio: null
+                                };
+                            }
+                            
+                            if (producto) {
+                                // Verificar si ya existe
+                                const existingIndex = inventory.findIndex(p => p.sku === producto.sku);
+                                
+                                if (existingIndex >= 0) {
+                                    if (actualizarStock) {
+                                        // Actualizar existencias (sobrescribir)
+                                        inventory[existingIndex].almacen = producto.almacen;
+                                        inventory[existingIndex].tienda = producto.tienda;
+                                        inventory[existingIndex].proveedor = proveedor;
+                                    } else {
+                                        // Sumar existencias
+                                        inventory[existingIndex].almacen += producto.almacen;
+                                    }
+                                    productosActualizados++;
+                                    
+                                    // Actualizar en Firebase si está online
+                                    if (isOnline && db) {
+                                        await saveProductToFirebase(inventory[existingIndex], true);
+                                    }
+                                } else {
+                                    // Guardar en Firebase si está online
+                                    if (isOnline && db) {
+                                        await saveProductToFirebase(producto, false);
+                                    }
+                                    
+                                    inventory.push(producto);
+                                    productosImportados++;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (productosImportados > 0 || productosActualizados > 0) {
+                        // Registrar en historial
+                        await agregarAlHistorial(
+                            'importacion',
+                            null,
+                            productosImportados + productosActualizados,
+                            'archivo_json',
+                            'inventario'
+                        );
+                        
+                        updateInventoryTable(searchInput.value);
+                        updateStats();
+                        updateProveedorSelects();
+                        
+                        // Restaurar área de carga
+                        fileUploadArea.innerHTML = `
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Arrastra y suelta tu archivo JSON aquí o haz clic para seleccionar</p>
+                            <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
+                            <p class="subtitle" style="margin-top: 10px;">Formato esperado: SKU, Producto, Cód. Barra, Existencia</p>
+                        `;
+                        jsonFileInput.value = '';
+                        
+                        // Reconfigurar evento
+                        document.getElementById('jsonFileInput').addEventListener('change', function(e) {
+                            if (this.files.length > 0) {
+                                const fileName = this.files[0].name;
+                                fileUploadArea.innerHTML = `
+                                    <i class="fas fa-file-check" style="color: var(--success);"></i>
+                                    <p>Archivo seleccionado: <strong>${fileName}</strong></p>
+                                    <p class="subtitle">Haz clic en "Importar Archivo JSON" para procesar</p>
+                                `;
+                            }
+                        });
+                        
+                        Swal.fire({
+                            title: 'Importación exitosa',
+                            html: `Se procesaron <strong>${productosImportados + productosActualizados}</strong> productos del archivo JSON<br>
+                                  <strong>${productosImportados}</strong> nuevos<br>
+                                  <strong>${productosActualizados}</strong> actualizados`,
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error en formato',
+                            text: 'No se pudieron procesar los datos del archivo JSON. Verifica el formato.',
+                            icon: 'error',
+                            confirmButtonText: 'Entendido',
+                            customClass: {
+                                confirmButton: 'btn btn-danger'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        title: 'Error al procesar',
+                        text: 'Error al procesar el archivo JSON: ' + error.message,
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                } finally {
+                    // Restaurar botón
+                    btnImportarJSON.innerHTML = originalText;
+                    btnImportarJSON.disabled = false;
+                }
+            });
+
+            // Procesar importación rápida con spinner
+            btnProcesarImportacion.addEventListener('click', async function() {
+                const datos = importDataTextarea.value.trim();
+                const proveedor = importRapidoProveedor.value;
+                const actualizarStock = importRapidoActualizarStock.checked;
+                
+                if (!datos) {
+                    Swal.fire({
+                        title: 'Datos vacíos',
+                        text: 'Por favor, ingresa datos para importar',
+                        icon: 'info',
+                        confirmButtonText: 'Entendido',
+                        customClass: {
+                            confirmButton: 'btn btn-info'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                
+                if (!proveedor) {
+                    Swal.fire({
+                        title: 'Proveedor requerido',
+                        text: 'Selecciona un proveedor para los productos',
+                        icon: 'warning',
+                        confirmButtonText: 'Entendido',
+                        customClass: {
+                            confirmButton: 'btn btn-warning'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                
+                // Deshabilitar botón y mostrar spinner
+                const originalText = btnProcesarImportacion.innerHTML;
+                btnProcesarImportacion.innerHTML = '<span class="spinner"></span> Procesando...';
+                btnProcesarImportacion.disabled = true;
+                
+                try {
+                    const lineas = datos.split('\n');
+                    let productosImportados = 0;
+                    let productosActualizados = 0;
+                    
+                    for (const linea of lineas) {
+                        const lineaTrim = linea.trim();
+                        if (!lineaTrim) continue;
+                        
+                        // Intentar diferentes separadores
+                        let partes;
+                        if (lineaTrim.includes('|')) {
+                            partes = lineaTrim.split('|').map(p => p.trim());
+                        } else if (lineaTrim.includes('\t')) {
+                            partes = lineaTrim.split('\t').map(p => p.trim());
+                        } else {
+                            partes = lineaTrim.split(/\s{2,}/).map(p => p.trim());
+                        }
+                        
+                        if (partes.length >= 4) {
+                            const [sku, nombre, barcode, existencia] = partes;
+                            
+                            // Verificar si el producto ya existe
+                            const existingIndex = inventory.findIndex(p => p.sku === sku);
+                            
+                            if (existingIndex >= 0) {
+                                if (actualizarStock) {
+                                    // Actualizar producto existente (sobrescribir)
+                                    inventory[existingIndex].almacen = parseInt(existencia) || 0;
+                                    inventory[existingIndex].tienda = 0;
+                                    inventory[existingIndex].proveedor = proveedor;
+                                } else {
+                                    // Sumar al stock existente
+                                    inventory[existingIndex].almacen += parseInt(existencia) || 0;
+                                }
+                                productosActualizados++;
+                                
+                                // Actualizar en Firebase si está online
+                                if (isOnline && db) {
+                                    await saveProductToFirebase(inventory[existingIndex], true);
+                                }
+                            } else {
+                                // Crear nuevo producto
+                                const nuevoProducto = {
+                                    id: nextId++,
+                                    sku: sku,
+                                    name: nombre,
+                                    barcode: barcode,
+                                    proveedor: proveedor,
+                                    almacen: parseInt(existencia) || 0,
+                                    tienda: 0,
+                                    ultimoEnvio: null
+                                };
+                                
+                                // Guardar en Firebase si está online
+                                if (isOnline && db) {
+                                    await saveProductToFirebase(nuevoProducto, false);
+                                }
+                                
+                                inventory.push(nuevoProducto);
+                                productosImportados++;
+                            }
+                        }
+                    }
+                    
+                    if (productosImportados > 0 || productosActualizados > 0) {
+                        // Registrar en historial
+                        await agregarAlHistorial(
+                            'importacion',
+                            null,
+                            productosImportados + productosActualizados,
+                            'importacion_rapida',
+                            'inventario'
+                        );
+                        
+                        updateInventoryTable(searchInput.value);
+                        updateStats();
+                        updateProveedorSelects();
+                        importModal.style.display = 'none';
+                        
+                        Swal.fire({
+                            title: 'Importación exitosa',
+                            html: `Se procesaron <strong>${productosImportados + productosActualizados}</strong> productos<br>
+                                  <strong>${productosImportados}</strong> nuevos<br>
+                                  <strong>${productosActualizados}</strong> actualizados`,
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error en formato',
+                            text: 'No se pudieron procesar los datos. Verifica el formato.',
+                            icon: 'error',
+                            confirmButtonText: 'Entendido',
+                            customClass: {
+                                confirmButton: 'btn btn-danger'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error en importación rápida:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo completar la importación. Inténtalo de nuevo.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                } finally {
+                    // Restaurar botón
+                    btnProcesarImportacion.innerHTML = originalText;
+                    btnProcesarImportacion.disabled = false;
+                }
+            });
+
+            // Procesar actualización de stock
+            btnProcesarActualizacion.addEventListener('click', async function() {
+                const datos = actualizarStockData.value.trim();
+                const soloAlmacen = actualizarSoloAlmacen.checked;
+                
+                if (!datos) {
+                    Swal.fire({
+                        title: 'Datos vacíos',
+                        text: 'Por favor, ingresa datos para actualizar stock',
+                        icon: 'info',
+                        confirmButtonText: 'Entendido',
+                        customClass: {
+                            confirmButton: 'btn btn-info'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                }
+                
+                // Deshabilitar botón y mostrar spinner
+                const originalText = btnProcesarActualizacion.innerHTML;
+                btnProcesarActualizacion.innerHTML = '<span class="spinner"></span> Procesando...';
+                btnProcesarActualizacion.disabled = true;
+                
+                try {
+                    const lineas = datos.split('\n');
+                    let productosActualizados = 0;
+                    let productosNoEncontrados = 0;
+                    let resultados = [];
+                    
+                    for (const linea of lineas) {
+                        const lineaTrim = linea.trim();
+                        if (!lineaTrim) continue;
+                        
+                        // Intentar diferentes separadores
+                        let partes;
+                        if (lineaTrim.includes('|')) {
+                            partes = lineaTrim.split('|').map(p => p.trim());
+                        } else if (lineaTrim.includes('\t')) {
+                            partes = lineaTrim.split('\t').map(p => p.trim());
+                        } else {
+                            partes = lineaTrim.split(/\s{2,}/).map(p => p.trim());
+                        }
+                        
+                        if (partes.length >= 2) {
+                            const [sku, existenciaAlmacen, existenciaTienda] = partes;
+                            
+                            // Verificar si el producto existe
+                            const existingIndex = inventory.findIndex(p => p.sku === sku);
+                            
+                            if (existingIndex >= 0) {
+                                const producto = inventory[existingIndex];
+                                const viejoAlmacen = producto.almacen;
+                                const viejoTienda = producto.tienda;
+                                
+                                if (soloAlmacen) {
+                                    // Solo actualizar almacén
+                                    producto.almacen = parseInt(existenciaAlmacen) || 0;
+                                } else {
+                                    // Actualizar ambos
+                                    producto.almacen = parseInt(existenciaAlmacen) || 0;
+                                    producto.tienda = parseInt(existenciaTienda) || 0;
+                                }
+                                
+                                // Actualizar en Firebase si está online
+                                if (isOnline && db) {
+                                    await saveProductToFirebase(producto, true);
+                                }
+                                
+                                productosActualizados++;
+                                resultados.push({
+                                    sku: sku,
+                                    nombre: producto.name,
+                                    viejoAlmacen: viejoAlmacen,
+                                    viejoTienda: viejoTienda,
+                                    nuevoAlmacen: producto.almacen,
+                                    nuevoTienda: producto.tienda
+                                });
+                            } else {
+                                productosNoEncontrados++;
+                                resultados.push({
+                                    sku: sku,
+                                    error: 'Producto no encontrado'
+                                });
+                            }
+                        }
+                    }
+                    
+                    if (productosActualizados > 0) {
+                        // Registrar en historial
+                        await agregarAlHistorial(
+                            'actualizacion_stock',
+                            null,
+                            productosActualizados,
+                            'sistema',
+                            'inventario'
+                        );
+                        
+                        updateInventoryTable(searchInput.value);
+                        updateStats();
+                        
+                        // Mostrar resultados
+                        mostrarResultadosActualizacion(resultados, productosActualizados, productosNoEncontrados);
+                        
+                        Swal.fire({
+                            title: 'Actualización exitosa',
+                            html: `Se actualizaron <strong>${productosActualizados}</strong> productos<br>
+                                  <strong>${productosNoEncontrados}</strong> productos no encontrados`,
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        });
+                    } else if (productosNoEncontrados > 0) {
+                        Swal.fire({
+                            title: 'Productos no encontrados',
+                            text: `No se encontraron ${productosNoEncontrados} productos en el inventario.`,
+                            icon: 'warning',
+                            confirmButtonText: 'Entendido',
+                            customClass: {
+                                confirmButton: 'btn btn-warning'
+                            },
+                            buttonsStyling: false
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error en formato',
+                            text: 'No se pudieron procesar los datos. Verifica el formato.',
+                            icon: 'error',
+                            confirmButtonText: 'Entendido',
+                            customClass: {
+                                confirmButton: 'btn btn-danger'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error en actualización de stock:', error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo completar la actualización. Inténtalo de nuevo.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                } finally {
+                    // Restaurar botón
+                    btnProcesarActualizacion.innerHTML = originalText;
+                    btnProcesarActualizacion.disabled = false;
+                }
+            });
+
+            // Exportar datos
+            btnExportarJSON.addEventListener('click', function() {
+                const format = exportFormatSelect.value;
+                let data, filename, contentType;
+                
+                if (format === 'json') {
+                    // Exportar JSON completo
+                    data = JSON.stringify({
+                        inventario: inventory,
+                        historial: historial,
+                        proveedores: proveedores,
+                        exportado: new Date().toISOString(),
+                        totalProductos: inventory.length,
+                        totalMovimientos: historial.length,
+                        totalProveedores: proveedores.length
+                    }, null, 2);
+                    filename = `inventario_completo_${new Date().toISOString().split('T')[0]}.json`;
+                    contentType = 'application/json';
+                } else if (format === 'formatoProveedor') {
+                    // Exportar en formato proveedor
+                    let contenido = `Proveedor: P00111 - STAMPO INTERNACIONAL, S.A\n\n`;
+                    contenido += `SKU\tProducto\tCód. Barra\tExistencia\n`;
+                    
+                    inventory.forEach(producto => {
+                        contenido += `${producto.sku}\t${producto.name}\t${producto.barcode}\t${producto.almacen + producto.tienda}\n`;
+                    });
+                    
+                    data = contenido;
+                    filename = `inventario_proveedor_${new Date().toISOString().split('T')[0]}.txt`;
+                    contentType = 'text/plain';
+                } else if (format === 'csv') {
+                    // Exportar CSV
+                    let contenido = 'SKU,Producto,Cód. Barra,Proveedor,Almacén,Tienda,Último Envío,Total\n';
+                    
+                    inventory.forEach(producto => {
+                        contenido += `${producto.sku},${producto.name},${producto.barcode},${producto.proveedor},${producto.almacen},${producto.tienda},${producto.ultimoEnvio || ""},${producto.almacen + producto.tienda}\n`;
+                    });
+                    
+                    data = contenido;
+                    filename = `inventario_${new Date().toISOString().split('T')[0]}.csv`;
+                    contentType = 'text/csv';
+                }
+                
+                // Crear y descargar archivo
+                const blob = new Blob([data], { type: contentType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                // Registrar en historial
+                agregarAlHistorial(
+                    'exportacion',
+                    null,
+                    inventory.length,
+                    'sistema',
+                    'archivo'
+                );
+                
+                Swal.fire({
+                    title: 'Exportación exitosa',
+                    text: `Los datos se han exportado en formato ${format.toUpperCase()}`,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-success'
+                    },
+                    buttonsStyling: false
+                });
+            });
+
+            // Limpiar historial
+            document.getElementById('btnLimpiarHistorial').addEventListener('click', async function() {
+                Swal.fire({
+                    title: '¿Limpiar historial?',
+                    text: 'Todos los registros de movimientos serán eliminados',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, limpiar',
+                    cancelButtonText: 'Cancelar',
+                    customClass: {
+                        confirmButton: 'btn btn-danger',
+                        cancelButton: 'btn btn-secondary'
+                    },
+                    buttonsStyling: false
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            // Limpiar en Firebase si está online
+                            if (isOnline && db) {
+                                await clearHistoryFromFirebase();
+                            }
+                            
+                            historial = [];
+                            updateHistorial();
+                            updateStats();
+                            
+                            Swal.fire({
+                                title: 'Historial limpiado',
+                                text: 'Todos los registros han sido eliminados',
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    confirmButton: 'btn btn-success'
+                                },
+                                buttonsStyling: false
+                            });
+                        } catch (error) {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'No se pudo limpiar el historial. Inténtalo de nuevo.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    confirmButton: 'btn btn-danger'
+                                },
+                                buttonsStyling: false
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        // Función para leer archivo como JSON
+        function readFileAsJSON(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        resolve(data);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        // Función para mostrar resultados de actualización
+        function mostrarResultadosActualizacion(resultados, actualizados, noEncontrados) {
+            actualizacionResultado.innerHTML = '';
+            actualizacionResultado.style.display = 'block';
+            
+            let html = `
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h4 style="margin-bottom: 15px; color: var(--primary);">
+                        <i class="fas fa-clipboard-check"></i> Resultados de la Actualización
+                    </h4>
+                    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                        <div style="flex: 1; text-align: center; padding: 10px; background: #e8f5e9; border-radius: 6px;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);">${actualizados}</div>
+                            <div style="font-size: 0.9rem; color: #666;">Actualizados</div>
+                        </div>
+                        <div style="flex: 1; text-align: center; padding: 10px; background: #fff3e0; border-radius: 6px;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--warning);">${noEncontrados}</div>
+                            <div style="font-size: 0.9rem; color: #666;">No encontrados</div>
+                        </div>
+                    </div>
+            `;
+            
+            if (resultados.length > 0) {
+                html += `<div style="max-height: 300px; overflow-y: auto;">`;
+                resultados.forEach((resultado, index) => {
+                    if (resultado.error) {
+                        html += `
+                            <div style="padding: 10px; margin-bottom: 8px; background: #ffebee; border-left: 4px solid var(--danger); border-radius: 0 4px 4px 0;">
+                                <div style="font-weight: bold; color: var(--danger);">${resultado.sku}</div>
+                                <div style="font-size: 0.9rem; color: #666;">${resultado.error}</div>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div style="padding: 10px; margin-bottom: 8px; background: #f9f9f9; border-left: 4px solid var(--success); border-radius: 0 4px 4px 0;">
+                                <div style="font-weight: bold; color: var(--primary);">${resultado.sku} - ${resultado.nombre}</div>
+                                <div style="display: flex; gap: 15px; margin-top: 5px; font-size: 0.9rem;">
+                                    <div>
+                                        <span style="color: #666;">Almacén:</span>
+                                        <span style="margin-left: 5px; font-weight: bold; ${resultado.viejoAlmacen !== resultado.nuevoAlmacen ? 'color: var(--secondary);' : 'color: #666;'}">
+                                            ${resultado.viejoAlmacen} → ${resultado.nuevoAlmacen}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span style="color: #666;">Tienda:</span>
+                                        <span style="margin-left: 5px; font-weight: bold; ${resultado.viejoTienda !== resultado.nuevoTienda ? 'color: var(--secondary);' : 'color: #666;'}">
+                                            ${resultado.viejoTienda} → ${resultado.nuevoTienda}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                html += `</div>`;
+            }
+            
+            html += `</div>`;
+            actualizacionResultado.innerHTML = html;
+        }
+
+        // Función para exportar proveedores
+        function exportarProveedores() {
+            let contenido = 'Código\tNombre\tDescripción\tContacto\tTeléfono\tEmail\n';
+            
+            proveedores.forEach(proveedor => {
+                contenido += `${proveedor.codigo}\t${proveedor.nombre}\t${proveedor.descripcion || ''}\t${proveedor.contacto || ''}\t${proveedor.telefono || ''}\t${proveedor.email || ''}\n`;
+            });
+            
+            const blob = new Blob([contenido], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `proveedores_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            Swal.fire({
+                title: 'Proveedores exportados',
+                text: 'La lista de proveedores se ha exportado correctamente',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'btn btn-success'
+                },
+                buttonsStyling: false
+            });
+        }
+
+        // Obtener lista única de proveedores
+        function getProveedoresUnicos() {
+            // Combinar proveedores de la colección y de los productos
+            const proveedoresDeProductos = inventory.map(product => product.proveedor);
+            const proveedoresDeLista = proveedores.map(proveedor => `${proveedor.codigo} - ${proveedor.nombre}`);
+            const todosProveedores = [...new Set([...proveedoresDeProductos, ...proveedoresDeLista])];
+            return todosProveedores.sort();
+        }
+
+        // Obtener último envío formateado
+        function getUltimoEnvioFormateado(producto) {
+            if (!producto.ultimoEnvio) return "Nunca";
+            
+            const fecha = new Date(producto.ultimoEnvio);
+            const hoy = new Date();
+            const diffTime = Math.abs(hoy - fecha);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return "Hoy";
+            if (diffDays === 1) return "Ayer";
+            if (diffDays < 7) return `Hace ${diffDays} días`;
+            if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
+            
+            return fecha.toLocaleDateString('es-ES');
+        }
+
+        // Obtener clase CSS para último envío
+        function getClaseUltimoEnvio(producto) {
+            if (!producto.ultimoEnvio) return "antiguo";
+            
+            const fecha = new Date(producto.ultimoEnvio);
+            const hoy = new Date();
+            const diffTime = Math.abs(hoy - fecha);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays <= 7) return "reciente";
+            if (diffDays <= 30) return "";
+            return "antiguo";
+        }
+
+        // Actualizar selects de proveedores en formularios
+        function updateProveedorSelects() {
+            const productProveedorSelect = document.getElementById('productProveedor');
+            const importProveedorSelect = document.getElementById('importProveedor');
+            const importRapidoProveedorSelect = document.getElementById('importRapidoProveedor');
+            
+            // Limpiar selects
+            productProveedorSelect.innerHTML = '<option value="">Seleccionar proveedor</option>';
+            importProveedorSelect.innerHTML = '<option value="">Seleccionar proveedor</option>';
+            importRapidoProveedorSelect.innerHTML = '<option value="">Seleccionar proveedor</option>';
+            
+            // Agregar opción para nuevo proveedor
+            const nuevaOpcion = document.createElement('option');
+            nuevaOpcion.value = "nuevo";
+            nuevaOpcion.textContent = "[+] Agregar nuevo proveedor";
+            productProveedorSelect.appendChild(nuevaOpcion.cloneNode(true));
+            importProveedorSelect.appendChild(nuevaOpcion.cloneNode(true));
+            importRapidoProveedorSelect.appendChild(nuevaOpcion);
+            
+            // Agregar proveedores existentes
+            const proveedoresList = proveedores.map(p => `${p.codigo} - ${p.nombre}`);
+            proveedoresList.forEach(proveedor => {
+                const option = document.createElement('option');
+                option.value = proveedor;
+                option.textContent = proveedor;
+                productProveedorSelect.appendChild(option.cloneNode(true));
+                importProveedorSelect.appendChild(option.cloneNode(true));
+                importRapidoProveedorSelect.appendChild(option.cloneNode(true));
+            });
+            
+            // Configurar evento para agregar nuevo proveedor
+            const proveedorSelects = [productProveedorSelect, importProveedorSelect, importRapidoProveedorSelect];
+            proveedorSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    if (this.value === "nuevo") {
+                        Swal.fire({
+                            title: 'Nuevo Proveedor',
+                            input: 'text',
+                            inputLabel: 'Ingrese el nombre del nuevo proveedor',
+                            inputPlaceholder: 'Ej: P00005 - ROYALTEX S.A.',
+                            showCancelButton: true,
+                            confirmButtonText: 'Agregar',
+                            cancelButtonText: 'Cancelar',
+                            icon: 'question',
+                            customClass: {
+                                confirmButton: 'btn btn-success',
+                                cancelButton: 'btn btn-danger'
+                            },
+                            buttonsStyling: false
+                        }).then((result) => {
+                            if (result.isConfirmed && result.value.trim()) {
+                                const nuevoProveedor = result.value.trim();
+                                
+                                // Agregar nueva opción
+                                const option = document.createElement('option');
+                                option.value = nuevoProveedor;
+                                option.textContent = nuevoProveedor;
+                                option.selected = true;
+                                
+                                // Agregar a todos los selects
+                                proveedorSelects.forEach(sel => {
+                                    sel.insertBefore(option.cloneNode(true), sel.lastChild);
+                                });
+                            } else {
+                                this.selectedIndex = 0;
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        // Actualizar lista de proveedores en la pestaña de gestión
+        function updateProveedoresList() {
+            proveedoresContainer.innerHTML = '';
+            
+            if (proveedores.length === 0) {
+                proveedoresContainer.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-truck" style="font-size: 3rem; margin-bottom: 15px; display: block; color: #ccc;"></i>
+                        No hay proveedores registrados. Agrega tu primer proveedor.
+                    </div>
+                `;
+                return;
+            }
+            
+            proveedores.forEach(proveedor => {
+                const card = document.createElement('div');
+                card.className = 'proveedor-card';
+                card.innerHTML = `
+                    <div class="proveedor-info">
+                        <h4>${proveedor.codigo} - ${proveedor.nombre}</h4>
+                        ${proveedor.descripcion ? `<p>${proveedor.descripcion}</p>` : ''}
+                        <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 0.9rem;">
+                            ${proveedor.contacto ? `<div><i class="fas fa-user"></i> ${proveedor.contacto}</div>` : ''}
+                            ${proveedor.telefono ? `<div><i class="fas fa-phone"></i> ${proveedor.telefono}</div>` : ''}
+                            ${proveedor.email ? `<div><i class="fas fa-envelope"></i> ${proveedor.email}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="proveedor-actions">
+                        <button class="action-btn edit-btn" onclick="window.editProveedor(${proveedor.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="window.deleteProveedor(${proveedor.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                proveedoresContainer.appendChild(card);
+            });
+        }
+
+        // Actualizar la tabla de inventario con filtro
+        function updateInventoryTable(searchTerm = '') {
+            inventoryTableBody.innerHTML = '';
+            
+            // Filtrar productos según el término de búsqueda y filtro seleccionado
+            const filteredProducts = inventory.filter(product => {
+                if (!searchTerm) return true;
+                
+                const term = searchTerm.toLowerCase();
+                
+                switch(currentSearchFilter) {
+                    case 'sku':
+                        return product.sku.toLowerCase().includes(term);
+                    case 'nombre':
+                        return product.name.toLowerCase().includes(term);
+                    case 'barras':
+                        return product.barcode.toLowerCase().includes(term);
+                    case 'all':
+                    default:
+                        return product.sku.toLowerCase().includes(term) ||
+                               product.name.toLowerCase().includes(term) ||
+                               product.barcode.toLowerCase().includes(term) ||
+                               product.proveedor.toLowerCase().includes(term);
+                }
+            });
+            
+            // Mostrar productos filtrados
+            filteredProducts.forEach(product => {
+                const ultimoEnvio = getUltimoEnvioFormateado(product);
+                const claseEnvio = getClaseUltimoEnvio(product);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${product.sku}</strong></td>
+                    <td>${product.name}</td>
+                    <td>${product.barcode}</td>
+                    <td>${product.proveedor}</td>
+                    <td class="stock-cell">${product.almacen}</td>
+                    <td><span class="ultimo-envio ${claseEnvio}">${ultimoEnvio}</span></td>
+                    <td class="actions-cell">
+                        <button class="action-btn edit-btn" onclick="window.editProduct(${product.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn transfer-btn" onclick="window.openTransferScanner(${product.id})">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="window.deleteProduct(${product.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                inventoryTableBody.appendChild(row);
+            });
+            
+            // Mostrar mensaje si no hay resultados
+            if (filteredProducts.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 10px; display: block; color: #ccc;"></i>
+                        ${inventory.length === 0 ? 'No hay productos en el inventario. Agrega tu primer producto.' : 'No se encontraron productos que coincidan'}
+                    </td>
+                `;
+                inventoryTableBody.appendChild(row);
+            }
+        }
+
+        // Actualizar tabla de proveedores
+        function updateProveedorTable() {
+            proveedorTableBody.innerHTML = '';
+            
+            // Filtrar productos por proveedor
+            let filteredProducts;
+            if (!currentProveedorFilter) {
+                filteredProducts = [...inventory];
+            } else {
+                filteredProducts = inventory.filter(product => product.proveedor === currentProveedorFilter);
+            }
+            
+            // Mostrar productos filtrados
+            filteredProducts.forEach(product => {
+                const ultimoEnvio = getUltimoEnvioFormateado(product);
+                const claseEnvio = getClaseUltimoEnvio(product);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${product.sku}</strong></td>
+                    <td>${product.name}</td>
+                    <td>${product.barcode}</td>
+                    <td>${product.proveedor}</td>
+                    <td class="stock-cell">${product.almacen}</td>
+                    <td><span class="ultimo-envio ${claseEnvio}">${ultimoEnvio}</span></td>
+                    <td class="actions-cell">
+                        <button class="action-btn edit-btn" onclick="window.editProduct(${product.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn transfer-btn" onclick="window.openTransferScanner(${product.id})">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="window.deleteProduct(${product.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                proveedorTableBody.appendChild(row);
+            });
+            
+            // Mostrar mensaje si no hay resultados
+            if (filteredProducts.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 10px; display: block; color: #ccc;"></i>
+                        ${!currentProveedorFilter ? 'No hay productos en el inventario' : `No hay productos del proveedor: ${currentProveedorFilter}`}
+                    </td>
+                `;
+                proveedorTableBody.appendChild(row);
+            }
+        }
+
+        // Actualizar estadísticas
+        function updateStats() {
+            const totalAlmacen = inventory.reduce((sum, product) => sum + product.almacen, 0);
+            const totalTienda = inventory.reduce((sum, product) => sum + product.tienda, 0);
+            const totalProveedores = getProveedoresUnicos().length;
+            
+            document.getElementById('totalAlmacen').textContent = totalAlmacen;
+            document.getElementById('totalTienda').textContent = totalTienda;
+            document.getElementById('totalProveedores').textContent = totalProveedores;
+            document.getElementById('totalMovimientos').textContent = historial.length;
+        }
+
+        // Actualizar historial de movimientos
+        function updateHistorial() {
+            historialContainer.innerHTML = '';
+            
+            // Ordenar historial por fecha (más reciente primero)
+            const historialOrdenado = [...historial].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            if (historialOrdenado.length === 0) {
+                historialContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><i class="fas fa-history" style="font-size: 3rem; margin-bottom: 15px; display: block; color: #ccc;"></i>No hay movimientos registrados</div>';
+                return;
+            }
+            
+            historialOrdenado.forEach(movimiento => {
+                const item = document.createElement('div');
+                item.className = `historial-item`;
+                
+                let tipoBadge = '';
+                let icon = '';
+                let detalles = '';
+                
+                if (movimiento.tipo === 'transferencia') {
+                    tipoBadge = '<span class="historial-tipo tipo-transferencia">TRANSFERENCIA</span>';
+                    icon = '<i class="fas fa-exchange-alt"></i>';
+                    detalles = `De <strong>${movimiento.origen}</strong> a <strong>${movimiento.destino}</strong>`;
+                } else if (movimiento.tipo === 'importacion') {
+                    tipoBadge = '<span class="historial-tipo tipo-importacion">IMPORTACIÓN</span>';
+                    icon = '<i class="fas fa-file-import"></i>';
+                    detalles = `Origen: <strong>${movimiento.origen}</strong>`;
+                } else if (movimiento.tipo === 'actualizacion_stock') {
+                    tipoBadge = '<span class="historial-tipo tipo-importacion" style="background-color: rgba(243, 156, 18, 0.1); color: var(--warning);">ACTUALIZACIÓN</span>';
+                    icon = '<i class="fas fa-sync-alt"></i>';
+                    detalles = `Tipo: <strong>${movimiento.origen}</strong>`;
+                } else {
+                    tipoBadge = '<span class="historial-tipo tipo-importacion">SISTEMA</span>';
+                    icon = '<i class="fas fa-cog"></i>';
+                    detalles = `Tipo: <strong>${movimiento.origen}</strong>`;
+                }
+                
+                item.innerHTML = `
+                    <div class="historial-header">
+                        <div>
+                            <span class="historial-fecha">${movimiento.fecha}</span>
+                            ${tipoBadge}
+                        </div>
+                        <div style="font-weight: bold; color: var(--primary);">
+                            ${icon} ${movimiento.cantidad} unidades
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>${movimiento.producto}</strong> (SKU: ${movimiento.sku})
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        ${detalles}
+                    </div>
+                    <div style="color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-user"></i> ${movimiento.usuario}
+                    </div>
+                `;
+                
+                historialContainer.appendChild(item);
+            });
+        }
+
+        // Buscar producto por SKU, nombre o código de barras
+        function buscarProducto(termino) {
+            if (!termino) return null;
+            
+            const term = termino.toLowerCase().trim();
+            
+            // Buscar en todos los campos
+            return inventory.find(product => 
+                product.sku.toLowerCase() === term ||
+                product.barcode.toLowerCase() === term ||
+                product.sku.toLowerCase().includes(term) ||
+                product.name.toLowerCase().includes(term) ||
+                product.barcode.toLowerCase().includes(term)
+            );
+        }
+
+        // Mostrar resultado de búsqueda en modal de scanner
+        function mostrarResultadoBusqueda(producto) {
+            if (!producto) {
+                scannerResult.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--danger);">
+                        <i class="fas fa-times-circle" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <h4>Producto no encontrado</h4>
+                        <p>No se encontró ningún producto con el código: ${scannerInput.value}</p>
+                        <p>Intenta con el SKU, nombre o código de barras.</p>
+                    </div>
+                `;
+                scannerResult.classList.add('active');
+                transferFormContainer.style.display = 'none';
+                return;
+            }
+            
+            scannerResult.innerHTML = `
+                <div class="product-info">
+                    <div class="product-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="product-details">
+                        <h4>${producto.name}</h4>
+                        <p><strong>SKU:</strong> ${producto.sku} | <strong>Código:</strong> ${producto.barcode}</p>
+                        <p><strong>Proveedor:</strong> ${producto.proveedor}</p>
+                    </div>
+                </div>
+                
+                <div class="stock-info">
+                    <div class="stock-item">
+                        <div class="label">Stock Almacén</div>
+                        <div class="value">${producto.almacen}</div>
+                    </div>
+                    <div class="stock-item">
+                        <div class="label">Stock Tienda</div>
+                        <div class="value">${producto.tienda}</div>
+                    </div>
+                    <div class="stock-item">
+                        <div class="label">Último Envío</div>
+                        <div class="value">${getUltimoEnvioFormateado(producto)}</div>
+                    </div>
+                </div>
+            `;
+            
+            scannerResult.classList.add('active');
+            
+            // Configurar formulario de transferencia
+            transferProductIdInput.value = producto.id;
+            transferQuantityInput.value = 1;
+            transferTypeSelect.value = 'almacenToTienda';
+            updateAvailableStockForProduct(producto.id);
+            
+            // Mostrar formulario de transferencia
+            transferFormContainer.style.display = 'block';
+        }
+
+        // Actualizar stock disponible para producto específico
+        function updateAvailableStockForProduct(productId) {
+            const producto = inventory.find(p => p.id === productId);
+            if (!producto) return;
+            
+            const transferType = transferTypeSelect.value;
+            
+            if (transferType === 'almacenToTienda') {
+                availableStockText.textContent = `Disponible en almacén: ${producto.almacen} unidades`;
+                availableStockText.style.color = '#3498db';
+                transferQuantityInput.max = producto.almacen;
+            } else {
+                availableStockText.textContent = `Disponible en tienda: ${producto.tienda} unidades`;
+                availableStockText.style.color = '#27ae60';
+                transferQuantityInput.max = producto.tienda;
+            }
+        }
+
+        // Agregar registro al historial
+        async function agregarAlHistorial(tipo, productoId, cantidad, origen, destino) {
+            const producto = inventory.find(p => p.id === productoId);
+            
+            const nuevoRegistro = {
+                id: nextHistorialId++,
+                fecha: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                tipo: tipo,
+                producto: producto ? producto.name : 'Importación múltiple',
+                sku: producto ? producto.sku : 'N/A',
+                cantidad: cantidad,
+                origen: origen,
+                destino: destino,
+                usuario: 'admin'
+            };
+            
+            try {
+                // Guardar en Firebase si está online
+                if (isOnline && db) {
+                    await saveHistoryToFirebase(nuevoRegistro);
+                }
+                
+                historial.unshift(nuevoRegistro);
+                updateHistorial();
+                updateStats();
+                
+                return true;
+            } catch (error) {
+                console.error('Error guardando historial:', error);
+                // Guardar localmente aunque falle Firebase
+                historial.unshift(nuevoRegistro);
+                updateHistorial();
+                updateStats();
+                return false;
+            }
+        }
+
+        // Función para abrir modal de scanner
+        function openTransferScanner(productId = null) {
+            scannerInput.value = '';
+            scannerResult.classList.remove('active');
+            transferFormContainer.style.display = 'none';
+            
+            // Si se proporciona un ID de producto, buscarlo y mostrarlo
+            if (productId) {
+                const producto = inventory.find(p => p.id === productId);
+                if (producto) {
+                    scannerInput.value = producto.sku;
+                    mostrarResultadoBusqueda(producto);
+                }
+            }
+            
+            scannerModal.style.display = 'flex';
+            scannerInput.focus();
+        }
+
+        // Función para editar producto
+        function editProduct(id) {
+            const product = inventory.find(p => p.id === id);
+            if (!product) return;
+            
+            editingProductId = id;
+            document.getElementById('modalTitle').textContent = 'Editar Producto';
+            document.getElementById('productSKU').value = product.sku;
+            document.getElementById('productBarCode').value = product.barcode;
+            document.getElementById('productName').value = product.name;
+            
+            // Seleccionar el proveedor correcto
+            const proveedorSelect = document.getElementById('productProveedor');
+            const options = Array.from(proveedorSelect.options);
+            const index = options.findIndex(option => option.value === product.proveedor);
+            if (index !== -1) {
+                proveedorSelect.selectedIndex = index;
+            }
+            
+            document.getElementById('stockAlmacen').value = product.almacen;
+            document.getElementById('stockTienda').value = product.tienda;
+            productModal.style.display = 'flex';
+        }
+
+        // Función para editar proveedor
+        function editProveedor(id) {
+            const proveedor = proveedores.find(p => p.id === id);
+            if (!proveedor) return;
+            
+            editingProveedorId = id;
+            document.getElementById('proveedorModalTitle').textContent = 'Editar Proveedor';
+            document.getElementById('proveedorCodigo').value = proveedor.codigo;
+            document.getElementById('proveedorNombre').value = proveedor.nombre;
+            document.getElementById('proveedorDescripcion').value = proveedor.descripcion || '';
+            document.getElementById('proveedorContacto').value = proveedor.contacto || '';
+            document.getElementById('proveedorTelefono').value = proveedor.telefono || '';
+            document.getElementById('proveedorEmail').value = proveedor.email || '';
+            proveedorModal.style.display = 'flex';
+        }
+
+        // Función para eliminar producto
+        async function deleteProduct(id) {
+            Swal.fire({
+                title: '¿Eliminar producto?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const producto = inventory.find(p => p.id === id);
+                    if (producto) {
+                        try {
+                            // Eliminar de Firebase si está online
+                            if (isOnline && db) {
+                                await deleteProductFromFirebase(id);
+                            }
+                            
+                            // Registrar en historial
+                            await agregarAlHistorial(
+                                'eliminacion',
+                                id,
+                                producto.almacen + producto.tienda,
+                                'inventario',
+                                'eliminado'
+                            );
+                            
+                            inventory = inventory.filter(p => p.id !== id);
+                            updateInventoryTable(searchInput.value);
+                            updateStats();
+                            updateProveedorSelects();
+                            
+                            Swal.fire({
+                                title: 'Producto eliminado',
+                                text: `El producto ${producto.name} ha sido eliminado`,
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    confirmButton: 'btn btn-success'
+                                },
+                                buttonsStyling: false
+                            });
+                        } catch (error) {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'No se pudo eliminar el producto. Inténtalo de nuevo.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    confirmButton: 'btn btn-danger'
+                                },
+                                buttonsStyling: false
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        // Función para eliminar proveedor
+        async function deleteProveedor(id) {
+            Swal.fire({
+                title: '¿Eliminar proveedor?',
+                text: 'Esta acción no se puede deshacer. Los productos asociados a este proveedor no se eliminarán.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const proveedor = proveedores.find(p => p.id === id);
+                    if (proveedor) {
+                        try {
+                            // Eliminar de Firebase si está online
+                            if (isOnline && db) {
+                                await deleteProveedorFromFirebase(id);
+                            }
+                            
+                            proveedores = proveedores.filter(p => p.id !== id);
+                            updateProveedorSelects();
+                            updateProveedoresList();
+                            updateStats();
+                            
+                            Swal.fire({
+                                title: 'Proveedor eliminado',
+                                text: `El proveedor ${proveedor.nombre} ha sido eliminado`,
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    confirmButton: 'btn btn-success'
+                                },
+                                buttonsStyling: false
+                            });
+                        } catch (error) {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'No se pudo eliminar el proveedor. Inténtalo de nuevo.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    confirmButton: 'btn btn-danger'
+                                },
+                                buttonsStyling: false
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        // Hacer funciones disponibles globalmente para los botones onclick
+        window.editProduct = editProduct;
+        window.editProveedor = editProveedor;
+        window.deleteProduct = deleteProduct;
+        window.deleteProveedor = deleteProveedor;
+        window.openTransferScanner = openTransferScanner;
+
+    </script>
+</body>
+</html>

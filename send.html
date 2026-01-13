@@ -226,179 +226,6 @@
             -webkit-overflow-scrolling: touch;
         }
         
-        .product-info-section {
-            padding: 15px;
-            background: white;
-            margin: 0 0 10px 0;
-            border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-            display: none;
-            animation: fadeIn 0.3s;
-        }
-        
-        .product-info-section.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .product-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .product-icon {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, var(--secondary), var(--info));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.3rem;
-        }
-        
-        .product-details h3 {
-            font-size: 1.1rem;
-            color: var(--primary);
-            margin-bottom: 4px;
-            word-break: break-word;
-        }
-        
-        .product-details p {
-            color: #666;
-            font-size: 0.85rem;
-        }
-        
-        .stock-info {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .stock-card {
-            background: var(--light);
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .stock-label {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 4px;
-        }
-        
-        .stock-value {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        
-        .transfer-form {
-            margin-top: 15px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: var(--primary);
-        }
-        
-        .form-select {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1rem;
-            background: var(--light);
-            transition: border-color 0.3s;
-        }
-        
-        .form-select:focus {
-            outline: none;
-            border-color: var(--secondary);
-        }
-        
-        .quantity-control {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--light);
-            padding: 8px;
-            border-radius: 10px;
-        }
-        
-        .quantity-btn {
-            width: 45px;
-            height: 45px;
-            background: var(--secondary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.3rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-        }
-        
-        .quantity-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .quantity-input {
-            flex: 1;
-            text-align: center;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--primary);
-            background: none;
-            border: none;
-            outline: none;
-        }
-        
-        .transfer-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, var(--success), #2ecc71);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: transform 0.2s;
-        }
-        
-        .transfer-btn:active {
-            transform: scale(0.98);
-        }
-        
-        .transfer-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
         /* Modal para configuración */
         .modal {
             display: none;
@@ -495,7 +322,7 @@
         }
         
         /* Touch improvements */
-        button, .header-btn, .quantity-btn {
+        button, .header-btn {
             -webkit-user-select: none;
             user-select: none;
             touch-action: manipulation;
@@ -544,20 +371,6 @@
             .scanner-section {
                 padding: 10px;
                 margin: 8px;
-            }
-            
-            .product-info-section {
-                padding: 12px;
-            }
-            
-            .stock-info {
-                grid-template-columns: 1fr;
-            }
-            
-            .product-icon {
-                width: 40px;
-                height: 40px;
-                font-size: 1.1rem;
             }
         }
         
@@ -702,6 +515,109 @@
             color: #666;
             margin-top: 15px;
         }
+        
+        /* Cantidad selector en modal */
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 10px;
+        }
+        
+        .quantity-btn-modal {
+            width: 50px;
+            height: 50px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        
+        .quantity-btn-modal:active {
+            transform: scale(0.95);
+        }
+        
+        .quantity-input-modal {
+            width: 80px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: none;
+            border: none;
+            outline: none;
+        }
+        
+        .direction-selector {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .direction-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .direction-option {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .direction-option:hover {
+            border-color: var(--secondary);
+        }
+        
+        .direction-option.active {
+            border-color: var(--success);
+            background: rgba(39, 174, 96, 0.1);
+        }
+        
+        .direction-icon {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--secondary);
+        }
+        
+        .direction-option.active .direction-icon {
+            color: var(--success);
+        }
+        
+        .direction-text {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .stock-info-modal {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .available-stock {
+            color: var(--success);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -756,68 +672,7 @@
         </section>
         
         <div class="content-area">
-            <!-- Información del producto encontrado -->
-            <section class="product-info-section" id="productInfoSection">
-                <div class="product-header">
-                    <div class="product-icon">
-                        <i class="fas fa-box"></i>
-                    </div>
-                    <div class="product-details">
-                        <h3 id="productName">Nombre del producto</h3>
-                        <p id="productSku">SKU: <span id="skuValue"></span></p>
-                        <p id="productProveedor">Proveedor: <span id="proveedorValue"></span></p>
-                    </div>
-                </div>
-                
-                <div class="stock-info">
-                    <div class="stock-card">
-                        <div class="stock-label">Stock Almacén</div>
-                        <div class="stock-value" id="stockAlmacen">0</div>
-                    </div>
-                    <div class="stock-card">
-                        <div class="stock-label">Stock Tienda</div>
-                        <div class="stock-value" id="stockTienda">0</div>
-                    </div>
-                </div>
-                
-                <form class="transfer-form" id="transferForm">
-                    <input type="hidden" id="productId">
-                    
-                    <div class="form-group">
-                        <label class="form-label">Tipo de traslado</label>
-                        <select class="form-select" id="transferType" required>
-                            <option value="almacenToTienda">Almacén → Tienda</option>
-                            <option value="tiendaToAlmacen">Tienda → Almacén</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Cantidad a trasladar</label>
-                        <div class="quantity-control">
-                            <button type="button" class="quantity-btn" id="btnDecrease">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <input type="number" 
-                                   class="quantity-input" 
-                                   id="transferQuantity" 
-                                   value="1" 
-                                   min="1" 
-                                   max="100"
-                                   readonly>
-                            <button type="button" class="quantity-btn" id="btnIncrease">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div style="text-align: center; margin-top: 8px; font-size: 0.85rem; color: #666;">
-                            Disponible: <span id="availableStock">0</span>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" class="transfer-btn" id="btnTransfer">
-                        <i class="fas fa-exchange-alt"></i> Trasladar
-                    </button>
-                </form>
-            </section>
+            <!-- El contenido principal ahora es el modal -->
         </div>
     </div>
     
@@ -856,15 +711,6 @@
                     </select>
                 </div>
                 
-                <div class="config-item">
-                    <label class="config-label">Cantidad predeterminada</label>
-                    <select class="config-input" id="defaultQuantity">
-                        <option value="1">1 unidad</option>
-                        <option value="5">5 unidades</option>
-                        <option value="10">10 unidades</option>
-                    </select>
-                </div>
-                
                 <button class="scanner-btn scanner-btn-success" style="margin-top: 15px;" id="btnSaveSettings">
                     <i class="fas fa-save"></i> Guardar configuración
                 </button>
@@ -889,39 +735,69 @@
         </div>
     </div>
     
-    <!-- Modal de confirmación de traslado -->
-    <div class="modal confirm-modal" id="confirmModal">
+    <!-- Modal principal de traslado (se abre al escanear) -->
+    <div class="modal confirm-modal" id="trasladoModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">
-                    <i class="fas fa-exchange-alt"></i> Confirmar Traslado
+                    <i class="fas fa-exchange-alt"></i> Trasladar Producto
                 </h3>
-                <button class="modal-close" id="closeConfirm">&times;</button>
+                <button class="modal-close" id="closeTraslado">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="confirm-icon">
-                    <i class="fas fa-boxes"></i>
+                    <i class="fas fa-boxes" id="modalProductIcon"></i>
                 </div>
                 
                 <div class="confirm-details">
-                    <div class="confirm-amount" id="confirmAmount">0 unidades</div>
-                    <div class="confirm-product" id="confirmProduct">Nombre del producto</div>
-                    <div class="confirm-sku" id="confirmSku">SKU: 000000</div>
+                    <div class="confirm-product" id="modalProductName">Nombre del producto</div>
+                    <div class="confirm-sku" id="modalProductSku">SKU: 000000</div>
                     
-                    <div class="confirm-direction">
-                        <div class="confirm-origin">
-                            <div class="confirm-direction-label">Origen</div>
-                            <div class="confirm-direction-value" id="confirmOrigin">Almacén</div>
-                            <div class="confirm-direction-stock" id="confirmOriginStock">Stock: 0</div>
+                    <div class="direction-selector">
+                        <div class="confirm-direction-label">Dirección del traslado</div>
+                        <div class="direction-options">
+                            <div class="direction-option active" id="optionBodegaToTienda">
+                                <div class="direction-icon">
+                                    <i class="fas fa-arrow-right"></i>
+                                </div>
+                                <div class="direction-text">Bodega → Tienda</div>
+                            </div>
+                            <div class="direction-option" id="optionTiendaToBodega">
+                                <div class="direction-icon">
+                                    <i class="fas fa-arrow-left"></i>
+                                </div>
+                                <div class="direction-text">Tienda → Bodega</div>
+                            </div>
                         </div>
-                        <div class="confirm-arrow">
-                            <i class="fas fa-arrow-right"></i>
+                        <div class="stock-info-modal">
+                            <div>
+                                <span id="stockBodegaLabel">Bodega:</span>
+                                <span class="available-stock" id="stockBodega">0</span>
+                            </div>
+                            <div>
+                                <span id="stockTiendaLabel">Tienda:</span>
+                                <span class="available-stock" id="stockTienda">0</span>
+                            </div>
                         </div>
-                        <div class="confirm-destination">
-                            <div class="confirm-direction-label">Destino</div>
-                            <div class="confirm-direction-value" id="confirmDestination">Tienda</div>
-                            <div class="confirm-direction-stock" id="confirmDestinationStock">Stock: 0</div>
-                        </div>
+                    </div>
+                    
+                    <div class="quantity-selector">
+                        <button class="quantity-btn-modal" id="btnDecreaseModal">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" 
+                               class="quantity-input-modal" 
+                               id="modalQuantity" 
+                               value="1" 
+                               min="1" 
+                               max="100"
+                               readonly>
+                        <button class="quantity-btn-modal" id="btnIncreaseModal">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div style="text-align: center; font-size: 0.9rem; color: #666;">
+                        Disponible: <span id="modalAvailableStock">0</span> unidades
                     </div>
                     
                     <div class="confirm-note">
@@ -931,11 +807,11 @@
                 </div>
                 
                 <div class="confirm-actions">
-                    <button class="scanner-btn scanner-btn-danger" id="btnCancelTransfer">
+                    <button class="scanner-btn scanner-btn-danger" id="btnCancelTraslado">
                         <i class="fas fa-times"></i> Cancelar
                     </button>
-                    <button class="scanner-btn scanner-btn-success" id="btnConfirmTransfer">
-                        <i class="fas fa-check"></i> Confirmar
+                    <button class="scanner-btn scanner-btn-success" id="btnConfirmTraslado">
+                        <i class="fas fa-check"></i> Trasladar
                     </button>
                 </div>
             </div>
@@ -966,41 +842,26 @@
 
         // Variables globales
         let productos = [];
-        let traslados = []; // Cambiado de transferencias a traslados
+        let traslados = [];
         let config = {
             vibrationMode: "on",
-            soundMode: "on",
-            defaultQuantity: "1"
+            soundMode: "on"
         };
         let isOnline = navigator.onLine;
         let currentProduct = null;
         let syncInProgress = false;
+        let currentDirection = "bodegaToTienda"; // Dirección actual
 
         // Elementos del DOM
         const scannerInput = document.getElementById('scannerInput');
         const btnScan = document.getElementById('btnScan');
         const btnClear = document.getElementById('btnClear');
-        const productInfoSection = document.getElementById('productInfoSection');
-        const productName = document.getElementById('productName');
-        const skuValue = document.getElementById('skuValue');
-        const proveedorValue = document.getElementById('proveedorValue');
-        const stockAlmacen = document.getElementById('stockAlmacen');
-        const stockTienda = document.getElementById('stockTienda');
-        const productIdInput = document.getElementById('productId');
-        const transferType = document.getElementById('transferType');
-        const transferQuantity = document.getElementById('transferQuantity');
-        const btnDecrease = document.getElementById('btnDecrease');
-        const btnIncrease = document.getElementById('btnIncrease');
-        const availableStock = document.getElementById('availableStock');
-        const btnTransfer = document.getElementById('btnTransfer');
-        const transferForm = document.getElementById('transferForm');
         const btnSync = document.getElementById('btnSync');
         const btnSettings = document.getElementById('btnSettings');
         const settingsModal = document.getElementById('settingsModal');
         const closeSettings = document.getElementById('closeSettings');
         const vibrationMode = document.getElementById('vibrationMode');
         const soundMode = document.getElementById('soundMode');
-        const defaultQuantity = document.getElementById('defaultQuantity');
         const btnSaveSettings = document.getElementById('btnSaveSettings');
         const btnSyncNow = document.getElementById('btnSyncNow');
         const btnClearLocal = document.getElementById('btnClearLocal');
@@ -1011,17 +872,23 @@
         const firebaseStatus = document.getElementById('firebaseStatus');
         const productCount = document.getElementById('productCount');
         const lastSync = document.getElementById('lastSync');
-        const confirmModal = document.getElementById('confirmModal');
-        const closeConfirm = document.getElementById('closeConfirm');
-        const btnCancelTransfer = document.getElementById('btnCancelTransfer');
-        const btnConfirmTransfer = document.getElementById('btnConfirmTransfer');
-        const confirmAmount = document.getElementById('confirmAmount');
-        const confirmProduct = document.getElementById('confirmProduct');
-        const confirmSku = document.getElementById('confirmSku');
-        const confirmOrigin = document.getElementById('confirmOrigin');
-        const confirmOriginStock = document.getElementById('confirmOriginStock');
-        const confirmDestination = document.getElementById('confirmDestination');
-        const confirmDestinationStock = document.getElementById('confirmDestinationStock');
+        
+        // Modal de traslado
+        const trasladoModal = document.getElementById('trasladoModal');
+        const closeTraslado = document.getElementById('closeTraslado');
+        const btnCancelTraslado = document.getElementById('btnCancelTraslado');
+        const btnConfirmTraslado = document.getElementById('btnConfirmTraslado');
+        const modalProductIcon = document.getElementById('modalProductIcon');
+        const modalProductName = document.getElementById('modalProductName');
+        const modalProductSku = document.getElementById('modalProductSku');
+        const modalQuantity = document.getElementById('modalQuantity');
+        const btnDecreaseModal = document.getElementById('btnDecreaseModal');
+        const btnIncreaseModal = document.getElementById('btnIncreaseModal');
+        const modalAvailableStock = document.getElementById('modalAvailableStock');
+        const optionBodegaToTienda = document.getElementById('optionBodegaToTienda');
+        const optionTiendaToBodega = document.getElementById('optionTiendaToBodega');
+        const stockBodega = document.getElementById('stockBodega');
+        const stockTienda = document.getElementById('stockTienda');
 
         // Inicializar la aplicación
         document.addEventListener('DOMContentLoaded', async function() {
@@ -1032,7 +899,7 @@
             // Enfocar el input de escaneo
             scannerInput.focus();
             
-            // Configurar escáner handheld (simula teclado)
+            // Configurar escáner handheld
             setupHandheldScanner();
         });
 
@@ -1043,7 +910,6 @@
                 config = JSON.parse(savedConfig);
                 vibrationMode.value = config.vibrationMode;
                 soundMode.value = config.soundMode;
-                defaultQuantity.value = config.defaultQuantity || "1";
             }
             
             // Cargar datos locales
@@ -1051,19 +917,14 @@
             if (savedProductos) {
                 productos = JSON.parse(savedProductos);
             }
-            
-            // Configurar cantidad predeterminada
-            transferQuantity.value = config.defaultQuantity || "1";
         }
 
         // Guardar configuración
         function guardarConfiguracion() {
             config.vibrationMode = vibrationMode.value;
             config.soundMode = soundMode.value;
-            config.defaultQuantity = defaultQuantity.value;
             
             localStorage.setItem('handheldConfig', JSON.stringify(config));
-            transferQuantity.value = config.defaultQuantity;
             
             mostrarNotificacion('Configuración guardada', 'success');
         }
@@ -1091,33 +952,9 @@
             });
             
             // Limpiar escáner
-            btnClear.addEventListener('click', limpiarEscanner);
-            
-            // Control de cantidad
-            btnDecrease.addEventListener('click', function() {
-                let value = parseInt(transferQuantity.value);
-                if (value > 1) {
-                    transferQuantity.value = value - 1;
-                    actualizarStockDisponible();
-                }
-            });
-            
-            btnIncrease.addEventListener('click', function() {
-                let value = parseInt(transferQuantity.value);
-                const max = parseInt(transferQuantity.max);
-                if (value < max) {
-                    transferQuantity.value = value + 1;
-                    actualizarStockDisponible();
-                }
-            });
-            
-            // Cambiar tipo de traslado
-            transferType.addEventListener('change', actualizarStockDisponible);
-            
-            // Enviar traslado (abrir modal de confirmación)
-            transferForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                abrirModalConfirmacion();
+            btnClear.addEventListener('click', function() {
+                scannerInput.value = '';
+                scannerInput.focus();
             });
             
             // Sincronizar
@@ -1175,18 +1012,55 @@
                 });
             });
             
-            // Modal de confirmación de traslado
-            btnCancelTransfer.addEventListener('click', function() {
-                confirmModal.style.display = 'none';
+            // Modal de traslado - Control de cantidad
+            btnDecreaseModal.addEventListener('click', function() {
+                let value = parseInt(modalQuantity.value);
+                if (value > 1) {
+                    modalQuantity.value = value - 1;
+                    actualizarDisponibleEnModal();
+                }
+            });
+            
+            btnIncreaseModal.addEventListener('click', function() {
+                let value = parseInt(modalQuantity.value);
+                const max = parseInt(modalQuantity.max);
+                if (value < max) {
+                    modalQuantity.value = value + 1;
+                    actualizarDisponibleEnModal();
+                }
+            });
+            
+            // Cambiar dirección del traslado
+            optionBodegaToTienda.addEventListener('click', function() {
+                optionBodegaToTienda.classList.add('active');
+                optionTiendaToBodega.classList.remove('active');
+                currentDirection = "bodegaToTienda";
+                actualizarDisponibleEnModal();
+            });
+            
+            optionTiendaToBodega.addEventListener('click', function() {
+                optionTiendaToBodega.classList.add('active');
+                optionBodegaToTienda.classList.remove('active');
+                currentDirection = "tiendaToBodega";
+                actualizarDisponibleEnModal();
+            });
+            
+            // Modal de traslado - Botones
+            btnCancelTraslado.addEventListener('click', function() {
+                trasladoModal.style.display = 'none';
+                scannerInput.value = '';
+                scannerInput.focus();
                 delete window.pendingTraslado;
             });
             
-            closeConfirm.addEventListener('click', function() {
-                confirmModal.style.display = 'none';
+            closeTraslado.addEventListener('click', function() {
+                trasladoModal.style.display = 'none';
+                scannerInput.value = '';
+                scannerInput.focus();
                 delete window.pendingTraslado;
             });
             
-            btnConfirmTransfer.addEventListener('click', async function() {
+            btnConfirmTraslado.addEventListener('click', async function() {
                 await ejecutarTrasladoConfirmado();
             });
             
@@ -1195,8 +1069,10 @@
                 if (e.target === settingsModal) {
                     settingsModal.style.display = 'none';
                 }
-                if (e.target === confirmModal) {
-                    confirmModal.style.display = 'none';
+                if (e.target === trasladoModal) {
+                    trasladoModal.style.display = 'none';
+                    scannerInput.value = '';
+                    scannerInput.focus();
                     delete window.pendingTraslado;
                 }
             });
@@ -1211,22 +1087,6 @@
             window.addEventListener('offline', () => {
                 isOnline = false;
                 actualizarEstadoConexion();
-            });
-            
-            // Swipe para recargar (para móviles)
-            let touchStartY = 0;
-            document.addEventListener('touchstart', function(e) {
-                touchStartY = e.touches[0].clientY;
-            });
-            
-            document.addEventListener('touchend', function(e) {
-                const touchEndY = e.changedTouches[0].clientY;
-                const diff = touchStartY - touchEndY;
-                
-                // Swipe down desde el top para recargar
-                if (touchStartY < 50 && diff > 100) {
-                    sincronizarConFirebase();
-                }
             });
         }
 
@@ -1292,7 +1152,7 @@
                         name: data.name,
                         barcode: data.barcode,
                         proveedor: data.proveedor,
-                        almacen: data.almacen || 0,
+                        bodega: data.almacen || data.bodega || 0, // Compatible con ambos nombres
                         tienda: data.tienda || 0
                     });
                 });
@@ -1371,7 +1231,7 @@
                             name: data.name,
                             barcode: data.barcode,
                             proveedor: data.proveedor,
-                            almacen: data.almacen || 0,
+                            bodega: data.almacen || data.bodega || 0,
                             tienda: data.tienda || 0
                         };
                         
@@ -1387,7 +1247,7 @@
             }
             
             if (producto) {
-                mostrarProducto(producto);
+                mostrarModalTraslado(producto);
                 vibrar('success');
                 reproducirSonido('success');
             } else {
@@ -1429,8 +1289,6 @@
                 } else if (tipo === 'error') {
                     oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
                     oscillator.frequency.setValueAtTime(200, audioContext.currentTime + 0.1);
-                } else if (tipo === 'scan') {
-                    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
                 }
                 
                 gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
@@ -1443,138 +1301,101 @@
             }
         }
 
-        // Mostrar información del producto
-        function mostrarProducto(producto) {
+        // Mostrar modal de traslado
+        function mostrarModalTraslado(producto) {
             currentProduct = producto;
             
-            productName.textContent = producto.name;
-            skuValue.textContent = producto.sku;
-            proveedorValue.textContent = producto.proveedor;
-            stockAlmacen.textContent = producto.almacen;
+            // Actualizar información del producto en el modal
+            modalProductName.textContent = producto.name;
+            modalProductSku.textContent = `SKU: ${producto.sku}`;
+            stockBodega.textContent = producto.bodega;
             stockTienda.textContent = producto.tienda;
-            productIdInput.value = producto.id;
             
             // Resetear valores
-            transferQuantity.value = config.defaultQuantity || "1";
-            transferType.value = 'almacenToTienda';
+            modalQuantity.value = "1";
+            optionBodegaToTienda.classList.add('active');
+            optionTiendaToBodega.classList.remove('active');
+            currentDirection = "bodegaToTienda";
             
-            // Actualizar stock disponible
-            actualizarStockDisponible();
-            
-            // Mostrar sección
-            productInfoSection.classList.add('active');
-            
-            // Desplazar hacia la sección
-            setTimeout(() => {
-                productInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
-        }
-
-        // Actualizar stock disponible
-        function actualizarStockDisponible() {
-            if (!currentProduct) return;
-            
-            const tipo = transferType.value;
-            
-            if (tipo === 'almacenToTienda') {
-                availableStock.textContent = currentProduct.almacen;
-                transferQuantity.max = currentProduct.almacen;
-                availableStock.style.color = '#3498db';
-            } else {
-                availableStock.textContent = currentProduct.tienda;
-                transferQuantity.max = currentProduct.tienda;
-                availableStock.style.color = '#27ae60';
-            }
-            
-            // Ajustar cantidad si es mayor al disponible
-            const cantidad = parseInt(transferQuantity.value);
-            const max = parseInt(transferQuantity.max);
-            if (cantidad > max) {
-                transferQuantity.value = max;
-            }
-        }
-
-        // Abrir modal de confirmación de traslado
-        function abrirModalConfirmacion() {
-            if (!currentProduct) {
-                mostrarNotificacion('Primero escanee un producto', 'warning');
-                return;
-            }
-            
-            const productoId = currentProduct.id;
-            const tipo = transferType.value;
-            const cantidad = parseInt(transferQuantity.value);
-            const producto = currentProduct;
-            
-            let origen, destino, origenNombre, destinoNombre;
-            
-            if (tipo === 'almacenToTienda') {
-                if (cantidad > producto.almacen) {
-                    mostrarNotificacion(`Solo hay ${producto.almacen} unidades en almacén`, 'error');
-                    vibrar('error');
-                    return;
-                }
-                origen = 'almacen';
-                destino = 'tienda';
-                origenNombre = 'Almacén';
-                destinoNombre = 'Tienda';
-            } else {
-                if (cantidad > producto.tienda) {
-                    mostrarNotificacion(`Solo hay ${producto.tienda} unidades en tienda`, 'error');
-                    vibrar('error');
-                    return;
-                }
-                origen = 'tienda';
-                destino = 'almacen';
-                origenNombre = 'Tienda';
-                destinoNombre = 'Almacén';
-            }
-            
-            // Mostrar detalles en el modal
-            confirmAmount.textContent = `${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}`;
-            confirmProduct.textContent = producto.name;
-            confirmSku.textContent = `SKU: ${producto.sku}`;
-            confirmOrigin.textContent = origenNombre;
-            confirmDestination.textContent = destinoNombre;
-            confirmOriginStock.textContent = `Stock: ${origen === 'almacen' ? producto.almacen : producto.tienda}`;
-            confirmDestinationStock.textContent = `Stock: ${destino === 'almacen' ? producto.almacen : producto.tienda}`;
-            
-            // Guardar datos para el traslado
-            window.pendingTraslado = {
-                productoId,
-                tipo,
-                cantidad,
-                origen,
-                destino
-            };
+            // Actualizar disponibilidad
+            actualizarDisponibleEnModal();
             
             // Mostrar modal
-            confirmModal.style.display = 'flex';
+            trasladoModal.style.display = 'flex';
+            
+            // Limpiar input de escaneo
+            scannerInput.value = '';
+        }
+
+        // Actualizar stock disponible en el modal
+        function actualizarDisponibleEnModal() {
+            if (!currentProduct) return;
+            
+            let disponible, max;
+            
+            if (currentDirection === "bodegaToTienda") {
+                disponible = currentProduct.bodega;
+                max = currentProduct.bodega;
+                modalAvailableStock.textContent = disponible;
+                modalAvailableStock.style.color = '#3498db';
+            } else {
+                disponible = currentProduct.tienda;
+                max = currentProduct.tienda;
+                modalAvailableStock.textContent = disponible;
+                modalAvailableStock.style.color = '#27ae60';
+            }
+            
+            // Actualizar max del input
+            modalQuantity.max = max;
+            
+            // Ajustar cantidad si es mayor al disponible
+            const cantidad = parseInt(modalQuantity.value);
+            if (cantidad > max) {
+                modalQuantity.value = max;
+            }
+            
+            // Habilitar/deshabilitar botón de incremento
+            btnIncreaseModal.disabled = cantidad >= max;
+            btnIncreaseModal.style.opacity = cantidad >= max ? "0.5" : "1";
+            btnIncreaseModal.style.cursor = cantidad >= max ? "not-allowed" : "pointer";
         }
 
         // Ejecutar traslado confirmado
         async function ejecutarTrasladoConfirmado() {
-            const pending = window.pendingTraslado;
-            if (!pending) return;
+            if (!currentProduct) return;
+            
+            const productoId = currentProduct.id;
+            const cantidad = parseInt(modalQuantity.value);
+            
+            let origen, destino;
+            
+            if (currentDirection === "bodegaToTienda") {
+                if (cantidad > currentProduct.bodega) {
+                    mostrarNotificacion(`Solo hay ${currentProduct.bodega} unidades en bodega`, 'error');
+                    vibrar('error');
+                    return;
+                }
+                origen = "bodega";
+                destino = "tienda";
+            } else {
+                if (cantidad > currentProduct.tienda) {
+                    mostrarNotificacion(`Solo hay ${currentProduct.tienda} unidades en tienda`, 'error');
+                    vibrar('error');
+                    return;
+                }
+                origen = "tienda";
+                destino = "bodega";
+            }
             
             // Cerrar modal
-            confirmModal.style.display = 'none';
+            trasladoModal.style.display = 'none';
             
             // Ejecutar traslado
-            await realizarTraslado(
-                pending.productoId,
-                pending.tipo,
-                pending.cantidad,
-                pending.origen,
-                pending.destino
-            );
-            
-            // Limpiar pending
-            delete window.pendingTraslado;
+            await realizarTraslado(productoId, currentDirection, cantidad, origen, destino);
         }
 
         // Realizar traslado
-        async function realizarTraslado(productoId, tipo, cantidad, origen, destino) {
+        async function realizarTraslado(productoId, direccion, cantidad, origen, destino) {
             const productoIndex = productos.findIndex(p => p.id === productoId);
             if (productoIndex === -1) {
                 mostrarNotificacion('Producto no encontrado', 'error');
@@ -1583,12 +1404,12 @@
             
             const producto = productos[productoIndex];
             
-            if (tipo === 'almacenToTienda') {
-                producto.almacen -= cantidad;
+            if (direccion === "bodegaToTienda") {
+                producto.bodega -= cantidad;
                 producto.tienda += cantidad;
             } else {
                 producto.tienda -= cantidad;
-                producto.almacen += cantidad;
+                producto.bodega += cantidad;
             }
             
             // Guardar cambios localmente
@@ -1601,7 +1422,7 @@
                 producto: producto.name,
                 sku: producto.sku,
                 cantidad: cantidad,
-                tipo: tipo,
+                direccion: direccion,
                 origen: origen,
                 destino: destino,
                 sync: false // Pendiente de sincronizar
@@ -1622,20 +1443,15 @@
             // Mostrar confirmación
             Swal.fire({
                 title: '✅ Traslado exitoso',
-                html: `<strong>${cantidad} uds</strong><br>
+                html: `<strong>${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</strong><br>
                       <small>${producto.name}</small><br>
-                      <small>${origen} → ${destino}</small>`,
+                      <small>${origen === 'bodega' ? 'Bodega' : 'Tienda'} → ${destino === 'bodega' ? 'Bodega' : 'Tienda'}</small>`,
                 icon: 'success',
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {
-                // Actualizar UI
-                stockAlmacen.textContent = producto.almacen;
-                stockTienda.textContent = producto.tienda;
-                actualizarStockDisponible();
-                
-                // Limpiar y enfocar
-                limpiarEscanner();
+                // Enfocar input para siguiente escaneo
+                scannerInput.focus();
             });
         }
 
@@ -1644,11 +1460,14 @@
             try {
                 if (!db) return false;
                 
+                // Convertir nombres de campos (almacen → bodega)
+                const campoBodega = 'almacen'; // Mantener compatibilidad
+                
                 // Actualizar producto en Firebase
                 await db.collection('products').doc(producto.id.toString()).update({
-                    almacen: producto.almacen,
+                    [campoBodega]: producto.bodega,
                     tienda: producto.tienda,
-                    ultimoEnvio: origen === 'almacen' ? new Date().toISOString().split('T')[0] : producto.ultimoEnvio
+                    ultimoEnvio: origen === 'bodega' ? new Date().toISOString().split('T')[0] : producto.ultimoEnvio
                 });
                 
                 // Registrar en historial de Firebase
@@ -1673,14 +1492,6 @@
             }
         }
 
-        // Limpiar escáner
-        function limpiarEscanner() {
-            scannerInput.value = '';
-            productInfoSection.classList.remove('active');
-            currentProduct = null;
-            scannerInput.focus();
-        }
-
         // Actualizar información en configuración
         function actualizarInfoConfiguracion() {
             firebaseStatus.textContent = db && isOnline ? 'Conectado' : 'Desconectado';
@@ -1699,11 +1510,6 @@
         function setupHandheldScanner() {
             console.log('Handheld scanner configurado');
             
-            // Los scanners físicos suelen enviar:
-            // 1. El código escaneado
-            // 2. Una tecla Enter al final
-            // 3. Ya está configurado con el evento keypress para Enter
-            
             // Auto-enfocar si se pierde el foco
             document.addEventListener('click', function(e) {
                 if (e.target !== scannerInput && !scannerInput.contains(e.target)) {
@@ -1720,6 +1526,13 @@
                         scannerInput.value = '';
                     }
                 }, 30000);
+            });
+            
+            // Enfocar automáticamente después de cerrar modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && window.getComputedStyle(trasladoModal).display === 'flex') {
+                    scannerInput.focus();
+                }
             });
         }
 

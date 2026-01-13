@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Escaneo Handheld - Transferencias</title>
+    <title>Escaneo Handheld - Traslados</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
@@ -222,7 +222,7 @@
         .content-area {
             flex: 1;
             overflow-y: auto;
-            padding: 0 10px;
+            padding: 0 10px 10px 10px;
             -webkit-overflow-scrolling: touch;
         }
         
@@ -399,86 +399,6 @@
             cursor: not-allowed;
         }
         
-        .recent-transfers {
-            padding: 15px;
-            background: white;
-            margin: 0 0 10px 0;
-            border-radius: 12px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-        }
-        
-        .recent-title {
-            font-size: 1.1rem;
-            color: var(--primary);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .transfers-list {
-            max-height: 200px;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .transfer-item {
-            padding: 12px;
-            background: var(--light);
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border-left: 4px solid var(--success);
-        }
-        
-        .transfer-item.in {
-            border-left-color: var(--info);
-        }
-        
-        .transfer-item.out {
-            border-left-color: var(--warning);
-        }
-        
-        .transfer-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-        
-        .transfer-product {
-            font-weight: 600;
-            color: var(--primary);
-            font-size: 0.95rem;
-        }
-        
-        .transfer-quantity {
-            font-weight: 700;
-            color: var(--success);
-            font-size: 0.95rem;
-        }
-        
-        .transfer-details {
-            font-size: 0.8rem;
-            color: #666;
-        }
-        
-        .transfer-time {
-            font-size: 0.75rem;
-            color: #999;
-            margin-top: 4px;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 30px 15px;
-            color: #999;
-        }
-        
-        .empty-icon {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-            color: #ddd;
-        }
-        
         /* Modal para configuración */
         .modal {
             display: none;
@@ -585,25 +505,6 @@
             font-size: 16px; /* Previene zoom en iOS */
         }
         
-        /* Scrollbar styling */
-        .transfers-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .transfers-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 2px;
-        }
-        
-        .transfers-list::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 2px;
-        }
-        
-        .transfers-list::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
         /* Loading overlay */
         .loading-overlay {
             position: fixed;
@@ -645,7 +546,7 @@
                 margin: 8px;
             }
             
-            .product-info-section, .recent-transfers {
+            .product-info-section {
                 padding: 12px;
             }
             
@@ -692,6 +593,115 @@
         .notification.info {
             background: var(--info);
         }
+        
+        /* Modal de confirmación de traslado */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        
+        .confirm-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .confirm-actions button {
+            flex: 1;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .confirm-icon {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .confirm-icon i {
+            font-size: 3rem;
+            color: var(--info);
+        }
+        
+        .confirm-details {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .confirm-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .confirm-product {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .confirm-sku {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .confirm-direction {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 10px;
+        }
+        
+        .confirm-origin, .confirm-destination {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .confirm-direction-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .confirm-direction-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .confirm-direction-stock {
+            font-size: 0.9rem;
+            color: #999;
+        }
+        
+        .confirm-arrow {
+            font-size: 1.5rem;
+            color: var(--secondary);
+        }
+        
+        .confirm-note {
+            background: var(--light);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -702,7 +712,7 @@
                     <div class="header-title">
                         <i class="fas fa-barcode"></i> Handheld Scanner
                     </div>
-                    <div class="header-subtitle">Transferencias rápidas</div>
+                    <div class="header-subtitle">Traslados rápidos</div>
                     <div id="connectionStatus" class="connection-status">
                         <i class="fas fa-sync fa-spin"></i> Conectando...
                     </div>
@@ -713,9 +723,6 @@
                     </button>
                     <button class="header-btn" id="btnSettings" title="Configuración">
                         <i class="fas fa-cog"></i>
-                    </button>
-                    <button class="header-btn" id="btnHistory" title="Historial completo">
-                        <i class="fas fa-history"></i>
                     </button>
                 </div>
             </div>
@@ -777,7 +784,7 @@
                     <input type="hidden" id="productId">
                     
                     <div class="form-group">
-                        <label class="form-label">Tipo de transferencia</label>
+                        <label class="form-label">Tipo de traslado</label>
                         <select class="form-select" id="transferType" required>
                             <option value="almacenToTienda">Almacén → Tienda</option>
                             <option value="tiendaToAlmacen">Tienda → Almacén</option>
@@ -785,7 +792,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Cantidad a transferir</label>
+                        <label class="form-label">Cantidad a trasladar</label>
                         <div class="quantity-control">
                             <button type="button" class="quantity-btn" id="btnDecrease">
                                 <i class="fas fa-minus"></i>
@@ -807,19 +814,9 @@
                     </div>
                     
                     <button type="submit" class="transfer-btn" id="btnTransfer">
-                        <i class="fas fa-exchange-alt"></i> Transferir
+                        <i class="fas fa-exchange-alt"></i> Trasladar
                     </button>
                 </form>
-            </section>
-            
-            <!-- Transferencias recientes -->
-            <section class="recent-transfers">
-                <h3 class="recent-title">
-                    <i class="fas fa-clock"></i> Transferencias Hoy
-                </h3>
-                <div class="transfers-list" id="transfersList">
-                    <!-- Las transferencias se cargarán aquí dinámicamente -->
-                </div>
             </section>
         </div>
     </div>
@@ -860,15 +857,6 @@
                 </div>
                 
                 <div class="config-item">
-                    <label class="config-label">Auto-transferir</label>
-                    <select class="config-input" id="autoSubmit">
-                        <option value="off">Desactivado</option>
-                        <option value="on">Activado</option>
-                    </select>
-                    <small style="color: #666; font-size: 0.85rem;">Transferir automáticamente después de escanear</small>
-                </div>
-                
-                <div class="config-item">
                     <label class="config-label">Cantidad predeterminada</label>
                     <select class="config-input" id="defaultQuantity">
                         <option value="1">1 unidad</option>
@@ -893,8 +881,7 @@
                     <h4 style="margin-bottom: 10px; color: var(--primary);">Información de conexión</h4>
                     <div style="font-size: 0.85rem; color: #666;">
                         <div><strong>Estado:</strong> <span id="firebaseStatus">Desconectado</span></div>
-                        <div><strong>Productos:</strong> <span id="productCount">0</span></div>
-                        <div><strong>Transferencias hoy:</strong> <span id="transfersToday">0</span></div>
+                        <div><strong>Productos cargados:</strong> <span id="productCount">0</span></div>
                         <div><strong>Última sincronización:</strong> <span id="lastSync">Nunca</span></div>
                     </div>
                 </div>
@@ -902,18 +889,54 @@
         </div>
     </div>
     
-    <!-- Modal de historial -->
-    <div class="modal" id="historyModal">
+    <!-- Modal de confirmación de traslado -->
+    <div class="modal confirm-modal" id="confirmModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">
-                    <i class="fas fa-history"></i> Historial de Transferencias
+                    <i class="fas fa-exchange-alt"></i> Confirmar Traslado
                 </h3>
-                <button class="modal-close" id="closeHistory">&times;</button>
+                <button class="modal-close" id="closeConfirm">&times;</button>
             </div>
             <div class="modal-body">
-                <div id="historyList">
-                    <!-- El historial se cargará aquí -->
+                <div class="confirm-icon">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                
+                <div class="confirm-details">
+                    <div class="confirm-amount" id="confirmAmount">0 unidades</div>
+                    <div class="confirm-product" id="confirmProduct">Nombre del producto</div>
+                    <div class="confirm-sku" id="confirmSku">SKU: 000000</div>
+                    
+                    <div class="confirm-direction">
+                        <div class="confirm-origin">
+                            <div class="confirm-direction-label">Origen</div>
+                            <div class="confirm-direction-value" id="confirmOrigin">Almacén</div>
+                            <div class="confirm-direction-stock" id="confirmOriginStock">Stock: 0</div>
+                        </div>
+                        <div class="confirm-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="confirm-destination">
+                            <div class="confirm-direction-label">Destino</div>
+                            <div class="confirm-direction-value" id="confirmDestination">Tienda</div>
+                            <div class="confirm-direction-stock" id="confirmDestinationStock">Stock: 0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="confirm-note">
+                        <i class="fas fa-info-circle" style="color: var(--info);"></i>
+                        Después de confirmar, el stock se actualizará automáticamente
+                    </div>
+                </div>
+                
+                <div class="confirm-actions">
+                    <button class="scanner-btn scanner-btn-danger" id="btnCancelTransfer">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="scanner-btn scanner-btn-success" id="btnConfirmTransfer">
+                        <i class="fas fa-check"></i> Confirmar
+                    </button>
                 </div>
             </div>
         </div>
@@ -943,11 +966,10 @@
 
         // Variables globales
         let productos = [];
-        let transferencias = [];
+        let traslados = []; // Cambiado de transferencias a traslados
         let config = {
             vibrationMode: "on",
             soundMode: "on",
-            autoSubmit: "off",
             defaultQuantity: "1"
         };
         let isOnline = navigator.onLine;
@@ -972,30 +994,34 @@
         const availableStock = document.getElementById('availableStock');
         const btnTransfer = document.getElementById('btnTransfer');
         const transferForm = document.getElementById('transferForm');
-        const transfersList = document.getElementById('transfersList');
         const btnSync = document.getElementById('btnSync');
         const btnSettings = document.getElementById('btnSettings');
-        const btnHistory = document.getElementById('btnHistory');
         const settingsModal = document.getElementById('settingsModal');
-        const historyModal = document.getElementById('historyModal');
         const closeSettings = document.getElementById('closeSettings');
-        const closeHistory = document.getElementById('closeHistory');
         const vibrationMode = document.getElementById('vibrationMode');
         const soundMode = document.getElementById('soundMode');
-        const autoSubmit = document.getElementById('autoSubmit');
         const defaultQuantity = document.getElementById('defaultQuantity');
         const btnSaveSettings = document.getElementById('btnSaveSettings');
         const btnSyncNow = document.getElementById('btnSyncNow');
         const btnClearLocal = document.getElementById('btnClearLocal');
-        const historyList = document.getElementById('historyList');
         const connectionStatus = document.getElementById('connectionStatus');
         const loadingOverlay = document.getElementById('loadingOverlay');
         const loadingText = document.getElementById('loadingText');
         const notification = document.getElementById('notification');
         const firebaseStatus = document.getElementById('firebaseStatus');
         const productCount = document.getElementById('productCount');
-        const transfersToday = document.getElementById('transfersToday');
         const lastSync = document.getElementById('lastSync');
+        const confirmModal = document.getElementById('confirmModal');
+        const closeConfirm = document.getElementById('closeConfirm');
+        const btnCancelTransfer = document.getElementById('btnCancelTransfer');
+        const btnConfirmTransfer = document.getElementById('btnConfirmTransfer');
+        const confirmAmount = document.getElementById('confirmAmount');
+        const confirmProduct = document.getElementById('confirmProduct');
+        const confirmSku = document.getElementById('confirmSku');
+        const confirmOrigin = document.getElementById('confirmOrigin');
+        const confirmOriginStock = document.getElementById('confirmOriginStock');
+        const confirmDestination = document.getElementById('confirmDestination');
+        const confirmDestinationStock = document.getElementById('confirmDestinationStock');
 
         // Inicializar la aplicación
         document.addEventListener('DOMContentLoaded', async function() {
@@ -1017,7 +1043,6 @@
                 config = JSON.parse(savedConfig);
                 vibrationMode.value = config.vibrationMode;
                 soundMode.value = config.soundMode;
-                autoSubmit.value = config.autoSubmit;
                 defaultQuantity.value = config.defaultQuantity || "1";
             }
             
@@ -1025,11 +1050,6 @@
             const savedProductos = localStorage.getItem('handheldProductos');
             if (savedProductos) {
                 productos = JSON.parse(savedProductos);
-            }
-            
-            const savedTransferencias = localStorage.getItem('handheldTransferencias');
-            if (savedTransferencias) {
-                transferencias = JSON.parse(savedTransferencias);
             }
             
             // Configurar cantidad predeterminada
@@ -1040,7 +1060,6 @@
         function guardarConfiguracion() {
             config.vibrationMode = vibrationMode.value;
             config.soundMode = soundMode.value;
-            config.autoSubmit = autoSubmit.value;
             config.defaultQuantity = defaultQuantity.value;
             
             localStorage.setItem('handheldConfig', JSON.stringify(config));
@@ -1092,13 +1111,13 @@
                 }
             });
             
-            // Cambiar tipo de transferencia
+            // Cambiar tipo de traslado
             transferType.addEventListener('change', actualizarStockDisponible);
             
-            // Enviar transferencia
+            // Enviar traslado (abrir modal de confirmación)
             transferForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                realizarTransferencia();
+                abrirModalConfirmacion();
             });
             
             // Sincronizar
@@ -1106,23 +1125,14 @@
                 await sincronizarConFirebase();
             });
             
-            // Modales
+            // Modal de configuración
             btnSettings.addEventListener('click', function() {
                 actualizarInfoConfiguracion();
                 settingsModal.style.display = 'flex';
             });
             
-            btnHistory.addEventListener('click', function() {
-                mostrarHistorialCompleto();
-                historyModal.style.display = 'flex';
-            });
-            
             closeSettings.addEventListener('click', function() {
                 settingsModal.style.display = 'none';
-            });
-            
-            closeHistory.addEventListener('click', function() {
-                historyModal.style.display = 'none';
             });
             
             // Guardar configuración
@@ -1151,11 +1161,10 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         productos = [];
-                        transferencias = [];
+                        traslados = [];
                         localStorage.removeItem('handheldProductos');
-                        localStorage.removeItem('handheldTransferencias');
+                        localStorage.removeItem('handheldTraslados');
                         
-                        actualizarTransferenciasRecientes();
                         mostrarNotificacion('Datos locales limpiados', 'success');
                         
                         // Recargar desde Firebase
@@ -1166,13 +1175,29 @@
                 });
             });
             
+            // Modal de confirmación de traslado
+            btnCancelTransfer.addEventListener('click', function() {
+                confirmModal.style.display = 'none';
+                delete window.pendingTraslado;
+            });
+            
+            closeConfirm.addEventListener('click', function() {
+                confirmModal.style.display = 'none';
+                delete window.pendingTraslado;
+            });
+            
+            btnConfirmTransfer.addEventListener('click', async function() {
+                await ejecutarTrasladoConfirmado();
+            });
+            
             // Cerrar modales al hacer clic fuera
             window.addEventListener('click', function(e) {
                 if (e.target === settingsModal) {
                     settingsModal.style.display = 'none';
                 }
-                if (e.target === historyModal) {
-                    historyModal.style.display = 'none';
+                if (e.target === confirmModal) {
+                    confirmModal.style.display = 'none';
+                    delete window.pendingTraslado;
                 }
             });
             
@@ -1227,14 +1252,9 @@
                 if (db) {
                     // Cargar productos desde Firebase
                     await cargarProductosFirebase();
-                    
-                    // Cargar transferencias de hoy desde Firebase
-                    await cargarTransferenciasHoy();
-                    
                     mostrarNotificacion('Datos cargados correctamente', 'success');
                 } else {
                     // Usar datos locales si no hay Firebase
-                    actualizarTransferenciasRecientes();
                     mostrarNotificacion('Modo offline - Usando datos locales', 'warning');
                 }
             } catch (error) {
@@ -1288,53 +1308,6 @@
             }
         }
 
-        // Cargar transferencias de hoy
-        async function cargarTransferenciasHoy() {
-            try {
-                if (!db) {
-                    // Usar datos locales si no hay Firebase
-                    actualizarTransferenciasRecientes();
-                    return;
-                }
-                
-                const hoy = new Date();
-                hoy.setHours(0, 0, 0, 0);
-                
-                const snapshot = await db.collection('historial')
-                    .where('tipo', '==', 'transferencia')
-                    .where('fecha', '>=', hoy.toISOString())
-                    .orderBy('fecha', 'desc')
-                    .limit(50)
-                    .get();
-                
-                transferencias = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    transferencias.push({
-                        id: data.id || doc.id,
-                        fecha: data.fecha,
-                        producto: data.producto,
-                        sku: data.sku,
-                        cantidad: data.cantidad,
-                        tipo: data.origen === 'almacen' ? 'almacenToTienda' : 'tiendaToAlmacen',
-                        origen: data.origen,
-                        destino: data.destino
-                    });
-                });
-                
-                // Guardar localmente
-                localStorage.setItem('handheldTransferencias', JSON.stringify(transferencias));
-                
-                actualizarTransferenciasRecientes();
-                actualizarContadorTransferencias();
-                
-                return true;
-            } catch (error) {
-                console.error('Error cargando transferencias:', error);
-                return false;
-            }
-        }
-
         // Sincronizar con Firebase
         async function sincronizarConFirebase() {
             if (syncInProgress) return;
@@ -1347,9 +1320,6 @@
                 
                 // Sincronizar productos
                 await cargarProductosFirebase();
-                
-                // Sincronizar transferencias
-                await cargarTransferenciasHoy();
                 
                 // Actualizar última sincronización
                 const ahora = new Date();
@@ -1420,13 +1390,6 @@
                 mostrarProducto(producto);
                 vibrar('success');
                 reproducirSonido('success');
-                
-                // Auto-transferir si está activado
-                if (config.autoSubmit === 'on') {
-                    setTimeout(() => {
-                        realizarTransferencia();
-                    }, 500);
-                }
             } else {
                 mostrarNotificacion(`Producto no encontrado: ${codigo}`, 'error');
                 vibrar('error');
@@ -1531,8 +1494,8 @@
             }
         }
 
-        // Realizar transferencia
-        async function realizarTransferencia() {
+        // Abrir modal de confirmación de traslado
+        function abrirModalConfirmacion() {
             if (!currentProduct) {
                 mostrarNotificacion('Primero escanee un producto', 'warning');
                 return;
@@ -1541,15 +1504,9 @@
             const productoId = currentProduct.id;
             const tipo = transferType.value;
             const cantidad = parseInt(transferQuantity.value);
+            const producto = currentProduct;
             
-            const productoIndex = productos.findIndex(p => p.id === productoId);
-            if (productoIndex === -1) {
-                mostrarNotificacion('Producto no encontrado', 'error');
-                return;
-            }
-            
-            const producto = productos[productoIndex];
-            let origen, destino;
+            let origen, destino, origenNombre, destinoNombre;
             
             if (tipo === 'almacenToTienda') {
                 if (cantidad > producto.almacen) {
@@ -1557,29 +1514,88 @@
                     vibrar('error');
                     return;
                 }
-                
-                producto.almacen -= cantidad;
-                producto.tienda += cantidad;
                 origen = 'almacen';
                 destino = 'tienda';
+                origenNombre = 'Almacén';
+                destinoNombre = 'Tienda';
             } else {
                 if (cantidad > producto.tienda) {
                     mostrarNotificacion(`Solo hay ${producto.tienda} unidades en tienda`, 'error');
                     vibrar('error');
                     return;
                 }
-                
-                producto.tienda -= cantidad;
-                producto.almacen += cantidad;
                 origen = 'tienda';
                 destino = 'almacen';
+                origenNombre = 'Tienda';
+                destinoNombre = 'Almacén';
+            }
+            
+            // Mostrar detalles en el modal
+            confirmAmount.textContent = `${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}`;
+            confirmProduct.textContent = producto.name;
+            confirmSku.textContent = `SKU: ${producto.sku}`;
+            confirmOrigin.textContent = origenNombre;
+            confirmDestination.textContent = destinoNombre;
+            confirmOriginStock.textContent = `Stock: ${origen === 'almacen' ? producto.almacen : producto.tienda}`;
+            confirmDestinationStock.textContent = `Stock: ${destino === 'almacen' ? producto.almacen : producto.tienda}`;
+            
+            // Guardar datos para el traslado
+            window.pendingTraslado = {
+                productoId,
+                tipo,
+                cantidad,
+                origen,
+                destino
+            };
+            
+            // Mostrar modal
+            confirmModal.style.display = 'flex';
+        }
+
+        // Ejecutar traslado confirmado
+        async function ejecutarTrasladoConfirmado() {
+            const pending = window.pendingTraslado;
+            if (!pending) return;
+            
+            // Cerrar modal
+            confirmModal.style.display = 'none';
+            
+            // Ejecutar traslado
+            await realizarTraslado(
+                pending.productoId,
+                pending.tipo,
+                pending.cantidad,
+                pending.origen,
+                pending.destino
+            );
+            
+            // Limpiar pending
+            delete window.pendingTraslado;
+        }
+
+        // Realizar traslado
+        async function realizarTraslado(productoId, tipo, cantidad, origen, destino) {
+            const productoIndex = productos.findIndex(p => p.id === productoId);
+            if (productoIndex === -1) {
+                mostrarNotificacion('Producto no encontrado', 'error');
+                return;
+            }
+            
+            const producto = productos[productoIndex];
+            
+            if (tipo === 'almacenToTienda') {
+                producto.almacen -= cantidad;
+                producto.tienda += cantidad;
+            } else {
+                producto.tienda -= cantidad;
+                producto.almacen += cantidad;
             }
             
             // Guardar cambios localmente
             localStorage.setItem('handheldProductos', JSON.stringify(productos));
             
-            // Registrar transferencia local
-            const nuevaTransferencia = {
+            // Registrar traslado local
+            const nuevoTraslado = {
                 id: 'local_' + Date.now(),
                 fecha: new Date().toISOString(),
                 producto: producto.name,
@@ -1591,12 +1607,12 @@
                 sync: false // Pendiente de sincronizar
             };
             
-            transferencias.unshift(nuevaTransferencia);
-            localStorage.setItem('handheldTransferencias', JSON.stringify(transferencias));
+            traslados.unshift(nuevoTraslado);
+            localStorage.setItem('handheldTraslados', JSON.stringify(traslados));
             
             // Sincronizar con Firebase si hay conexión
             if (db && isOnline) {
-                await sincronizarTransferenciaFirebase(producto, cantidad, origen, destino);
+                await sincronizarTrasladoFirebase(producto, cantidad, origen, destino);
             }
             
             // Efectos
@@ -1605,7 +1621,7 @@
             
             // Mostrar confirmación
             Swal.fire({
-                title: '✅ Transferencia exitosa',
+                title: '✅ Traslado exitoso',
                 html: `<strong>${cantidad} uds</strong><br>
                       <small>${producto.name}</small><br>
                       <small>${origen} → ${destino}</small>`,
@@ -1617,16 +1633,14 @@
                 stockAlmacen.textContent = producto.almacen;
                 stockTienda.textContent = producto.tienda;
                 actualizarStockDisponible();
-                actualizarTransferenciasRecientes();
-                actualizarContadorTransferencias();
                 
                 // Limpiar y enfocar
                 limpiarEscanner();
             });
         }
 
-        // Sincronizar transferencia con Firebase
-        async function sincronizarTransferenciaFirebase(producto, cantidad, origen, destino) {
+        // Sincronizar traslado con Firebase
+        async function sincronizarTrasladoFirebase(producto, cantidad, origen, destino) {
             try {
                 if (!db) return false;
                 
@@ -1651,10 +1665,10 @@
                     usuario: 'handheld'
                 });
                 
-                console.log('Transferencia sincronizada con Firebase');
+                console.log('Traslado sincronizado con Firebase');
                 return true;
             } catch (error) {
-                console.error('Error sincronizando transferencia:', error);
+                console.error('Error sincronizando traslado:', error);
                 return false;
             }
         }
@@ -1667,174 +1681,12 @@
             scannerInput.focus();
         }
 
-        // Actualizar lista de transferencias recientes
-        function actualizarTransferenciasRecientes() {
-            transfersList.innerHTML = '';
-            
-            if (transferencias.length === 0) {
-                transfersList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <i class="fas fa-exchange-alt"></i>
-                        </div>
-                        <p>No hay transferencias hoy</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Mostrar solo las 5 más recientes
-            const recientes = transferencias.slice(0, 5);
-            
-            recientes.forEach(transf => {
-                const fecha = new Date(transf.fecha);
-                const ahora = new Date();
-                const diffMs = ahora - fecha;
-                const diffMins = Math.floor(diffMs / 60000);
-                
-                let tiempo = '';
-                if (diffMins < 1) {
-                    tiempo = 'Ahora';
-                } else if (diffMins < 60) {
-                    tiempo = `${diffMins} min`;
-                } else if (diffMins < 1440) {
-                    const horas = Math.floor(diffMins / 60);
-                    tiempo = `${horas} h`;
-                } else {
-                    tiempo = fecha.toLocaleTimeString('es-ES', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    });
-                }
-                
-                const tipoClase = transf.tipo === 'almacenToTienda' ? 'out' : 'in';
-                const icono = transf.tipo === 'almacenToTienda' ? 'fa-arrow-right' : 'fa-arrow-left';
-                
-                const syncIcon = transf.sync === false ? '<i class="fas fa-clock sync-pending" style="color: var(--warning); margin-left: 5px;"></i>' : '';
-                
-                const item = document.createElement('div');
-                item.className = `transfer-item ${tipoClase}`;
-                item.innerHTML = `
-                    <div class="transfer-header">
-                        <div class="transfer-product">${transf.producto}</div>
-                        <div class="transfer-quantity">${transf.cantidad} uds ${syncIcon}</div>
-                    </div>
-                    <div class="transfer-details">
-                        <i class="fas ${icono}"></i> ${transf.origen} → ${transf.destino}
-                    </div>
-                    <div class="transfer-time">
-                        <i class="far fa-clock"></i> ${tiempo}
-                    </div>
-                `;
-                
-                transfersList.appendChild(item);
-            });
-        }
-
-        // Actualizar contador de transferencias
-        function actualizarContadorTransferencias() {
-            const hoy = new Date();
-            hoy.setHours(0, 0, 0, 0);
-            
-            const transferenciasHoy = transferencias.filter(t => {
-                const fechaTransf = new Date(t.fecha);
-                return fechaTransf >= hoy;
-            });
-            
-            transfersToday.textContent = transferenciasHoy.length;
-        }
-
-        // Mostrar historial completo
-        function mostrarHistorialCompleto() {
-            historyList.innerHTML = '';
-            
-            if (transferencias.length === 0) {
-                historyList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <i class="fas fa-history"></i>
-                        </div>
-                        <p>No hay historial</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Agrupar por fecha
-            const transferenciasPorFecha = {};
-            transferencias.forEach(transf => {
-                const fecha = new Date(transf.fecha);
-                const fechaKey = fecha.toLocaleDateString('es-ES', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                
-                if (!transferenciasPorFecha[fechaKey]) {
-                    transferenciasPorFecha[fechaKey] = [];
-                }
-                transferenciasPorFecha[fechaKey].push(transf);
-            });
-            
-            // Mostrar por fecha
-            Object.keys(transferenciasPorFecha).forEach(fecha => {
-                const fechaHeader = document.createElement('div');
-                fechaHeader.style.cssText = `
-                    padding: 10px;
-                    background: var(--light);
-                    border-radius: 8px;
-                    margin-bottom: 10px;
-                    font-weight: 600;
-                    color: var(--primary);
-                `;
-                fechaHeader.textContent = fecha;
-                historyList.appendChild(fechaHeader);
-                
-                transferenciasPorFecha[fecha].forEach(transf => {
-                    const fechaTransf = new Date(transf.fecha);
-                    const horaStr = fechaTransf.toLocaleTimeString('es-ES', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    
-                    const tipoClase = transf.tipo === 'almacenToTienda' ? 'out' : 'in';
-                    const icono = transf.tipo === 'almacenToTienda' ? 'fa-arrow-right' : 'fa-arrow-left';
-                    
-                    const syncIcon = transf.sync === false ? 
-                        '<i class="fas fa-clock" title="Pendiente de sincronizar" style="color: var(--warning); margin-left: 5px;"></i>' : 
-                        '<i class="fas fa-check" title="Sincronizado" style="color: var(--success); margin-left: 5px;"></i>';
-                    
-                    const item = document.createElement('div');
-                    item.className = `transfer-item ${tipoClase}`;
-                    item.innerHTML = `
-                        <div class="transfer-header">
-                            <div class="transfer-product">${transf.producto}</div>
-                            <div class="transfer-quantity">${transf.cantidad} uds ${syncIcon}</div>
-                        </div>
-                        <div class="transfer-details">
-                            <i class="fas ${icono}"></i> ${transf.origen} → ${transf.destino}
-                        </div>
-                        <div class="transfer-details" style="margin-top: 4px;">
-                            <i class="fas fa-barcode"></i> SKU: ${transf.sku}
-                        </div>
-                        <div class="transfer-time">
-                            <i class="far fa-clock"></i> ${horaStr}
-                        </div>
-                    `;
-                    
-                    historyList.appendChild(item);
-                });
-            });
-        }
-
         // Actualizar información en configuración
         function actualizarInfoConfiguracion() {
             firebaseStatus.textContent = db && isOnline ? 'Conectado' : 'Desconectado';
             firebaseStatus.style.color = db && isOnline ? 'var(--success)' : 'var(--danger)';
             
             productCount.textContent = productos.length;
-            actualizarContadorTransferencias();
             
             const savedLastSync = localStorage.getItem('lastSync');
             if (savedLastSync) {
@@ -1851,11 +1703,6 @@
             // 1. El código escaneado
             // 2. Una tecla Enter al final
             // 3. Ya está configurado con el evento keypress para Enter
-            
-            // Sugerencias adicionales:
-            // - Mantener el input siempre enfocado
-            // - Limpiar automáticamente después de cierto tiempo
-            // - Configurar sonidos/vibraciones específicas
             
             // Auto-enfocar si se pierde el foco
             document.addEventListener('click', function(e) {

@@ -404,7 +404,7 @@
             background: var(--info);
         }
         
-        /* Modal de traslado - COMPACTO (10cm de alto) */
+        /* Modal de traslado - AJUSTADO AL TAMAÑO DE PANTALLA */
         .traslado-modal {
             display: none;
             position: fixed;
@@ -424,21 +424,22 @@
             border-radius: 12px;
             width: 100%;
             max-width: 400px;
-            max-height: 10cm; /* 10cm de alto */
-            height: 10cm;
             animation: modalFadeIn 0.3s;
             display: flex;
             flex-direction: column;
+            max-height: calc(100vh - 30px); /* Ajustado al tamaño de pantalla */
+            overflow: hidden; /* Sin scroll */
         }
         
         .traslado-header {
-            padding: 12px 15px;
+            padding: 15px;
             border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: var(--light);
             border-radius: 12px 12px 0 0;
+            flex-shrink: 0;
         }
         
         .traslado-title {
@@ -450,14 +451,17 @@
         }
         
         .traslado-body {
-            padding: 15px;
+            padding: 20px;
             flex: 1;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Sin scroll */
         }
         
         .product-info {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
         }
         
         .product-name {
@@ -476,15 +480,16 @@
         
         .direction-selector {
             background: var(--light);
-            padding: 12px;
+            padding: 15px;
             border-radius: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
         }
         
         .direction-label {
             font-size: 0.9rem;
             color: #666;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             text-align: center;
         }
         
@@ -495,7 +500,7 @@
         
         .direction-option {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             background: white;
@@ -532,7 +537,7 @@
         .stock-info {
             display: flex;
             justify-content: space-between;
-            margin-top: 8px;
+            margin-top: 10px;
             font-size: 0.8rem;
             color: #666;
         }
@@ -542,34 +547,36 @@
             font-weight: 600;
         }
         
-        /* Selector de cantidad con entrada manual */
+        /* Selector de cantidad simple */
         .quantity-section {
             margin: 15px 0;
+            flex-shrink: 0;
         }
         
         .quantity-label {
             font-size: 0.9rem;
             color: #666;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             text-align: center;
         }
         
-        .quantity-input-container {
+        .quantity-input-group {
             display: flex;
+            align-items: center;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         
-        .manual-input-container {
-            position: relative;
+        .quantity-input-container {
             flex: 1;
+            position: relative;
         }
         
-        .manual-quantity-input {
+        .quantity-input {
             width: 100%;
-            padding: 12px 12px 12px 40px;
+            padding: 14px 14px 14px 45px;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1.2rem;
             font-weight: 600;
             text-align: center;
@@ -578,48 +585,18 @@
             transition: border-color 0.3s;
         }
         
-        .manual-quantity-input:focus {
+        .quantity-input:focus {
             outline: none;
             border-color: var(--secondary);
         }
         
-        .manual-input-icon {
+        .quantity-input-icon {
             position: absolute;
-            left: 12px;
+            left: 15px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--secondary);
             font-size: 1.1rem;
-        }
-        
-        .quick-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 10px;
-        }
-        
-        .quick-btn {
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--primary);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .quick-btn:hover {
-            border-color: var(--secondary);
-            background: rgba(52, 152, 219, 0.1);
-        }
-        
-        .quick-btn.active {
-            border-color: var(--success);
-            background: rgba(39, 174, 96, 0.1);
-            color: var(--success);
         }
         
         .available-text {
@@ -633,15 +610,34 @@
             display: flex;
             gap: 10px;
             margin-top: auto;
-            padding-top: 15px;
+            padding-top: 20px;
             border-top: 1px solid #eee;
+            flex-shrink: 0;
         }
         
         .traslado-actions button {
             flex: 1;
-            padding: 12px;
-            font-size: 0.95rem;
+            padding: 14px;
+            font-size: 1rem;
             font-weight: 600;
+            position: relative;
+        }
+        
+        .traslado-actions button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        /* Spinner en botón de confirmar */
+        .btn-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
         }
         
         /* Bloquear teclado cuando modal está abierto */
@@ -649,54 +645,34 @@
             overflow: hidden;
         }
         
-        /* Scrollbar styling */
-        .traslado-body::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .traslado-body::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 2px;
-        }
-        
-        .traslado-body::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 2px;
-        }
-        
-        .traslado-body::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        /* Botones de cantidad rápida */
-        .quantity-buttons {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        
-        .qty-btn {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--primary);
+        /* Input readonly hasta que se toque */
+        .quantity-input.readonly {
+            background-color: #f8f9fa;
             cursor: pointer;
-            transition: all 0.3s;
         }
         
-        .qty-btn:hover {
-            border-color: var(--secondary);
-            background: rgba(52, 152, 219, 0.1);
-        }
-        
-        .qty-btn.active {
-            border-color: var(--success);
-            background: rgba(39, 174, 96, 0.1);
-            color: var(--success);
+        /* Para pantallas muy pequeñas */
+        @media (max-height: 500px) {
+            .traslado-body {
+                padding: 15px;
+            }
+            
+            .product-info {
+                margin-bottom: 15px;
+            }
+            
+            .direction-selector {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+            
+            .quantity-section {
+                margin: 10px 0;
+            }
+            
+            .traslado-actions {
+                padding-top: 15px;
+            }
         }
     </style>
 </head>
@@ -815,7 +791,7 @@
         </div>
     </div>
     
-    <!-- Modal compacto de traslado (10cm de alto) -->
+    <!-- Modal de traslado (ajustado al tamaño de pantalla) -->
     <div class="traslado-modal" id="trasladoModal">
         <div class="traslado-content">
             <div class="traslado-header">
@@ -862,29 +838,18 @@
                 <div class="quantity-section">
                     <div class="quantity-label">Cantidad a trasladar</div>
                     
-                    <div class="quantity-input-container">
-                        <div class="manual-input-container">
-                            <i class="fas fa-hashtag manual-input-icon"></i>
+                    <div class="quantity-input-group">
+                        <div class="quantity-input-container">
+                            <i class="fas fa-hashtag quantity-input-icon"></i>
                             <input type="number" 
-                                   class="manual-quantity-input" 
-                                   id="manualQuantity"
+                                   class="quantity-input readonly" 
+                                   id="quantityInput"
                                    value="1" 
                                    min="1" 
                                    max="1000"
-                                   step="1">
+                                   step="1"
+                                   readonly>
                         </div>
-                    </div>
-                    
-                    <div class="quantity-buttons">
-                        <button class="qty-btn" data-quantity="1">1</button>
-                        <button class="qty-btn" data-quantity="5">5</button>
-                        <button class="qty-btn" data-quantity="10">10</button>
-                    </div>
-                    
-                    <div class="quick-buttons">
-                        <button class="quick-btn" data-quantity="25">25</button>
-                        <button class="quick-btn" data-quantity="50">50</button>
-                        <button class="quick-btn" data-quantity="100">100</button>
                     </div>
                     
                     <div class="available-text">
@@ -938,6 +903,7 @@
         let syncInProgress = false;
         let currentDirection = "bodegaToTienda";
         let modalOpen = false;
+        let isProcessing = false; // Para prevenir doble click
 
         // Elementos del DOM
         const scannerInput = document.getElementById('scannerInput');
@@ -967,7 +933,7 @@
         const btnConfirmTraslado = document.getElementById('btnConfirmTraslado');
         const modalProductName = document.getElementById('modalProductName');
         const modalProductSku = document.getElementById('modalProductSku');
-        const manualQuantity = document.getElementById('manualQuantity');
+        const quantityInput = document.getElementById('quantityInput');
         const modalAvailableStock = document.getElementById('modalAvailableStock');
         const optionBodegaToTienda = document.getElementById('optionBodegaToTienda');
         const optionTiendaToBodega = document.getElementById('optionTiendaToBodega');
@@ -1098,6 +1064,7 @@
             
             // Modal de traslado - Cambiar dirección
             optionBodegaToTienda.addEventListener('click', function() {
+                if (isProcessing) return;
                 optionBodegaToTienda.classList.add('active');
                 optionTiendaToBodega.classList.remove('active');
                 currentDirection = "bodegaToTienda";
@@ -1105,76 +1072,73 @@
             });
             
             optionTiendaToBodega.addEventListener('click', function() {
+                if (isProcessing) return;
                 optionTiendaToBodega.classList.add('active');
                 optionBodegaToTienda.classList.remove('active');
                 currentDirection = "tiendaToBodega";
                 actualizarDisponibleEnModal();
             });
             
-            // Entrada manual de cantidad
-            manualQuantity.addEventListener('input', function() {
-                validarCantidadManual();
+            // Input de cantidad - Activar solo cuando se toca
+            quantityInput.addEventListener('click', function() {
+                if (isProcessing) return;
+                if (this.classList.contains('readonly')) {
+                    this.classList.remove('readonly');
+                    this.removeAttribute('readonly');
+                    this.focus();
+                    this.select();
+                }
             });
             
-            manualQuantity.addEventListener('change', function() {
-                validarCantidadManual();
+            quantityInput.addEventListener('blur', function() {
+                if (isProcessing) return;
+                validarCantidadInput();
             });
             
-            // Botones de cantidad rápida
-            document.querySelectorAll('.qty-btn, .quick-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const cantidad = parseInt(this.getAttribute('data-quantity'));
-                    manualQuantity.value = cantidad;
-                    
-                    // Remover clase active de todos los botones
-                    document.querySelectorAll('.qty-btn, .quick-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    
-                    // Agregar clase active al botón seleccionado
-                    this.classList.add('active');
-                    
-                    validarCantidadManual();
-                });
+            quantityInput.addEventListener('input', function() {
+                if (isProcessing) return;
+                // Validar mientras se escribe
+                setTimeout(validarCantidadInput, 50);
             });
             
             // Modal de traslado - Botones
             btnCancelTraslado.addEventListener('click', function() {
+                if (isProcessing) return;
                 cerrarModalTraslado();
             });
             
             closeTraslado.addEventListener('click', function() {
+                if (isProcessing) return;
                 cerrarModalTraslado();
             });
             
             btnConfirmTraslado.addEventListener('click', async function() {
+                if (isProcessing) return;
                 await ejecutarTrasladoConfirmado();
             });
             
-            // Cerrar modal con Escape (pero bloquear entrada de teclado)
+            // Cerrar modal con Escape
             document.addEventListener('keydown', function(e) {
-                if (modalOpen) {
-                    // Permitir Escape para cerrar
-                    if (e.key === 'Escape') {
-                        cerrarModalTraslado();
-                    }
-                    
-                    // Permitir entrada en el campo de cantidad
-                    if (e.target !== manualQuantity) {
-                        e.stopPropagation();
-                        if (e.target !== btnCancelTraslado && e.target !== btnConfirmTraslado) {
-                            e.preventDefault();
-                        }
+                if (modalOpen && e.key === 'Escape' && !isProcessing) {
+                    cerrarModalTraslado();
+                }
+                
+                // Permitir entrada en el campo de cantidad solo cuando no es readonly
+                if (modalOpen && e.target !== quantityInput && !quantityInput.classList.contains('readonly') && !isProcessing) {
+                    // Bloquear otras teclas
+                    e.stopPropagation();
+                    if (e.target !== btnCancelTraslado && e.target !== btnConfirmTraslado) {
+                        e.preventDefault();
                     }
                 }
             });
             
             // Cerrar modales al hacer clic fuera
             window.addEventListener('click', function(e) {
-                if (e.target === settingsModal) {
+                if (e.target === settingsModal && !isProcessing) {
                     settingsModal.style.display = 'none';
                 }
-                if (e.target === trasladoModal) {
+                if (e.target === trasladoModal && !isProcessing) {
                     cerrarModalTraslado();
                 }
             });
@@ -1192,35 +1156,42 @@
             });
         }
 
-        // Validar cantidad manual
-        function validarCantidadManual() {
-            let cantidad = parseInt(manualQuantity.value) || 0;
+        // Validar cantidad del input
+        function validarCantidadInput() {
+            let cantidad = parseInt(quantityInput.value) || 0;
             const maxDisponible = parseInt(modalAvailableStock.textContent) || 0;
             
             if (cantidad < 1) {
                 cantidad = 1;
-                manualQuantity.value = 1;
+                quantityInput.value = 1;
             }
             
             if (cantidad > maxDisponible && maxDisponible > 0) {
                 cantidad = maxDisponible;
-                manualQuantity.value = maxDisponible;
+                quantityInput.value = maxDisponible;
             }
             
             if (cantidad > 1000) {
                 cantidad = 1000;
-                manualQuantity.value = 1000;
-            }
-            
-            // Remover clase active de todos los botones si la cantidad no coincide
-            if (!document.querySelector(`.qty-btn[data-quantity="${cantidad}"]`) && 
-                !document.querySelector(`.quick-btn[data-quantity="${cantidad}"]`)) {
-                document.querySelectorAll('.qty-btn, .quick-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
+                quantityInput.value = 1000;
             }
             
             return cantidad;
+        }
+
+        // Mostrar spinner en botón de confirmar
+        function mostrarSpinnerConfirmar(mostrar) {
+            if (mostrar) {
+                btnConfirmTraslado.innerHTML = '<span class="btn-spinner"></span> Procesando...';
+                btnConfirmTraslado.disabled = true;
+                btnCancelTraslado.disabled = true;
+                isProcessing = true;
+            } else {
+                btnConfirmTraslado.innerHTML = '<i class="fas fa-check"></i> Trasladar';
+                btnConfirmTraslado.disabled = false;
+                btnCancelTraslado.disabled = false;
+                isProcessing = false;
+            }
         }
 
         // Cerrar modal de traslado
@@ -1232,10 +1203,12 @@
             modalOpen = false;
             document.body.classList.remove('modal-open');
             
-            // Limpiar selección de botones
-            document.querySelectorAll('.qty-btn, .quick-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            // Resetear input a readonly
+            quantityInput.classList.add('readonly');
+            quantityInput.setAttribute('readonly', true);
+            
+            // Asegurarse de que no haya spinner activo
+            mostrarSpinnerConfirmar(false);
         }
 
         // Actualizar estado de conexión
@@ -1348,6 +1321,8 @@
 
         // Buscar producto por SKU o código de barras
         async function buscarProducto() {
+            if (isProcessing) return;
+            
             const codigo = scannerInput.value.trim();
             
             if (!codigo) {
@@ -1460,32 +1435,24 @@
             stockTienda.textContent = producto.tienda;
             
             // Resetear valores
-            manualQuantity.value = "1";
+            quantityInput.value = "1";
+            quantityInput.classList.add('readonly');
+            quantityInput.setAttribute('readonly', true);
+            
             optionBodegaToTienda.classList.add('active');
             optionTiendaToBodega.classList.remove('active');
             currentDirection = "bodegaToTienda";
             
-            // Limpiar selección de botones
-            document.querySelectorAll('.qty-btn, .quick-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Seleccionar botón de 1 unidad
-            document.querySelector('.qty-btn[data-quantity="1"]').classList.add('active');
+            // Asegurar que los botones estén habilitados
+            mostrarSpinnerConfirmar(false);
             
             // Actualizar disponibilidad
             actualizarDisponibleEnModal();
             
-            // Mostrar modal y bloquear teclado (permitir entrada en cantidad)
+            // Mostrar modal
             trasladoModal.style.display = 'flex';
             modalOpen = true;
             document.body.classList.add('modal-open');
-            
-            // Enfocar el campo de cantidad
-            setTimeout(() => {
-                manualQuantity.focus();
-                manualQuantity.select();
-            }, 100);
             
             // Limpiar input de escaneo
             scannerInput.value = '';
@@ -1501,24 +1468,29 @@
                 disponible = currentProduct.bodega;
                 modalAvailableStock.textContent = disponible;
                 modalAvailableStock.style.color = '#3498db';
-                manualQuantity.max = disponible;
+                quantityInput.max = disponible;
             } else {
                 disponible = currentProduct.tienda;
                 modalAvailableStock.textContent = disponible;
                 modalAvailableStock.style.color = '#27ae60';
-                manualQuantity.max = disponible;
+                quantityInput.max = disponible;
             }
             
             // Validar la cantidad actual
-            validarCantidadManual();
+            validarCantidadInput();
         }
 
         // Ejecutar traslado confirmado
         async function ejecutarTrasladoConfirmado() {
-            if (!currentProduct) return;
+            if (isProcessing) return;
+            
+            if (!currentProduct) {
+                mostrarNotificacion('Producto no encontrado', 'error');
+                return;
+            }
             
             const productoId = currentProduct.id;
-            const cantidad = validarCantidadManual();
+            const cantidad = validarCantidadInput();
             
             if (cantidad < 1) {
                 mostrarNotificacion('La cantidad debe ser al menos 1', 'error');
@@ -1550,11 +1522,17 @@
                 destinoNombre = "Bodega";
             }
             
-            // Cerrar modal
-            cerrarModalTraslado();
+            // Mostrar spinner y deshabilitar botones
+            mostrarSpinnerConfirmar(true);
             
-            // Ejecutar traslado
-            await realizarTraslado(productoId, currentDirection, cantidad, origen, destino, origenNombre, destinoNombre);
+            try {
+                // Ejecutar traslado
+                await realizarTraslado(productoId, currentDirection, cantidad, origen, destino, origenNombre, destinoNombre);
+            } catch (error) {
+                console.error('Error en traslado:', error);
+                mostrarNotificacion('Error al realizar el traslado', 'error');
+                mostrarSpinnerConfirmar(false);
+            }
         }
 
         // Realizar traslado
@@ -1562,6 +1540,7 @@
             const productoIndex = productos.findIndex(p => p.id === productoId);
             if (productoIndex === -1) {
                 mostrarNotificacion('Producto no encontrado', 'error');
+                mostrarSpinnerConfirmar(false);
                 return;
             }
             
@@ -1595,13 +1574,20 @@
             localStorage.setItem('handheldTraslados', JSON.stringify(traslados));
             
             // Sincronizar con Firebase si hay conexión
+            let syncSuccess = false;
             if (db && isOnline) {
-                await sincronizarTrasladoFirebase(producto, cantidad, origen, destino);
+                syncSuccess = await sincronizarTrasladoFirebase(producto, cantidad, origen, destino);
             }
             
             // Efectos
             vibrar('transfer');
             reproducirSonido('success');
+            
+            // Ocultar spinner
+            mostrarSpinnerConfirmar(false);
+            
+            // Cerrar modal
+            cerrarModalTraslado();
             
             // Mostrar confirmación
             Swal.fire({

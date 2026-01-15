@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Escaneo Handheld - Traslados</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📱</text></svg>" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📱</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
@@ -247,6 +249,8 @@
             width: 100%;
             max-width: 400px;
             animation: modalFadeIn 0.3s;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         
         @keyframes modalFadeIn {
@@ -404,7 +408,7 @@
             background: var(--info);
         }
         
-        /* Modal de traslado - AJUSTADO AL TAMAÑO DE PANTALLA */
+        /* Modal de traslado - COMPLETAMENTE RESPONSIVE PARA PANTALLAS PEQUEÑAS */
         .traslado-modal {
             display: none;
             position: fixed;
@@ -416,97 +420,104 @@
             z-index: 2000;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 10px; /* Reducido padding en móviles */
         }
         
         .traslado-content {
             background: white;
-            border-radius: 12px;
+            border-radius: 10px;
             width: 100%;
-            max-width: 400px;
+            max-width: 95%; /* Ocupa casi todo el ancho */
             animation: modalFadeIn 0.3s;
             display: flex;
             flex-direction: column;
-            max-height: calc(100vh - 30px); /* Ajustado al tamaño de pantalla */
-            overflow: hidden; /* Sin scroll */
+            max-height: 95vh; /* Ocupa casi toda la altura */
+            overflow: hidden;
+            margin: 0 auto;
         }
         
         .traslado-header {
-            padding: 15px;
+            padding: 12px 15px; /* Padding reducido */
             border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: var(--light);
-            border-radius: 12px 12px 0 0;
+            border-radius: 10px 10px 0 0;
             flex-shrink: 0;
         }
         
         .traslado-title {
-            font-size: 1.1rem;
+            font-size: 1rem; /* Tamaño de fuente reducido */
             color: var(--primary);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         
         .traslado-body {
-            padding: 20px;
+            padding: 15px; /* Padding reducido */
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Sin scroll */
+            overflow: hidden;
         }
         
         .product-info {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px; /* Margen reducido */
             flex-shrink: 0;
         }
         
         .product-name {
-            font-size: 1.1rem;
+            font-size: 1rem; /* Tamaño reducido */
             font-weight: 600;
             color: var(--dark);
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             word-break: break-word;
+            line-height: 1.3;
         }
         
         .product-sku {
             color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
+            font-size: 0.85rem; /* Tamaño reducido */
+            margin-bottom: 8px;
         }
         
         .direction-selector {
             background: var(--light);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 12px; /* Padding reducido */
+            border-radius: 8px;
+            margin-bottom: 15px; /* Margen reducido */
             flex-shrink: 0;
         }
         
         .direction-label {
-            font-size: 0.9rem;
+            font-size: 0.85rem; /* Tamaño reducido */
             color: #666;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-align: center;
         }
         
         .direction-options {
             display: flex;
-            gap: 10px;
+            gap: 8px; /* Gap reducido */
         }
         
         .direction-option {
             flex: 1;
-            padding: 12px;
+            padding: 10px; /* Padding reducido */
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 6px;
             background: white;
             cursor: pointer;
             text-align: center;
             transition: all 0.3s;
+            min-height: 60px; /* Altura mínima reducida */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
         .direction-option:hover {
@@ -518,9 +529,29 @@
             background: rgba(39, 174, 96, 0.1);
         }
         
+        .direction-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            background: #f5f5f5;
+        }
+        
+        .direction-option.disabled .direction-icon,
+        .direction-option.disabled .direction-text {
+            color: #999;
+        }
+        
+        .lock-icon {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            color: var(--warning);
+            font-size: 0.8rem;
+        }
+        
         .direction-icon {
-            font-size: 1rem;
-            margin-bottom: 5px;
+            font-size: 0.9rem; /* Tamaño reducido */
+            margin-bottom: 4px;
             color: var(--secondary);
         }
         
@@ -531,14 +562,15 @@
         .direction-text {
             font-weight: 600;
             color: var(--primary);
-            font-size: 0.9rem;
+            font-size: 0.85rem; /* Tamaño reducido */
+            line-height: 1.2;
         }
         
         .stock-info {
             display: flex;
             justify-content: space-between;
-            margin-top: 10px;
-            font-size: 0.8rem;
+            margin-top: 8px;
+            font-size: 0.75rem; /* Tamaño reducido */
             color: #666;
         }
         
@@ -547,16 +579,16 @@
             font-weight: 600;
         }
         
-        /* Selector de cantidad simple */
+        /* Selector de cantidad con botón de borrar */
         .quantity-section {
-            margin: 15px 0;
+            margin: 12px 0; /* Margen reducido */
             flex-shrink: 0;
         }
         
         .quantity-label {
-            font-size: 0.9rem;
+            font-size: 0.85rem; /* Tamaño reducido */
             color: #666;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-align: center;
         }
         
@@ -574,10 +606,10 @@
         
         .quantity-input {
             width: 100%;
-            padding: 14px 14px 14px 45px;
+            padding: 12px 40px 12px 35px; /* Padding reducido */
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1.2rem;
+            border-radius: 8px;
+            font-size: 1.1rem; /* Tamaño reducido */
             font-weight: 600;
             text-align: center;
             color: var(--primary);
@@ -592,33 +624,54 @@
         
         .quantity-input-icon {
             position: absolute;
-            left: 15px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--secondary);
-            font-size: 1.1rem;
+            font-size: 1rem; /* Tamaño reducido */
+        }
+        
+        .clear-quantity-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1rem; /* Tamaño reducido */
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s;
+        }
+        
+        .clear-quantity-btn:hover {
+            color: var(--danger);
         }
         
         .available-text {
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 0.8rem; /* Tamaño reducido */
             color: #666;
-            margin-top: 10px;
+            margin-top: 8px;
         }
         
         .traslado-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px; /* Gap reducido */
             margin-top: auto;
-            padding-top: 20px;
+            padding-top: 15px; /* Padding reducido */
             border-top: 1px solid #eee;
             flex-shrink: 0;
         }
         
         .traslado-actions button {
             flex: 1;
-            padding: 14px;
-            font-size: 1rem;
+            padding: 12px; /* Padding reducido */
+            font-size: 0.95rem; /* Tamaño reducido */
             font-weight: 600;
             position: relative;
         }
@@ -651,28 +704,191 @@
             cursor: pointer;
         }
         
-        /* Para pantallas muy pequeñas */
-        @media (max-height: 500px) {
+        /* Para pantallas muy pequeñas (menos de 400px) */
+        @media (max-width: 400px) {
+            .traslado-content {
+                max-width: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .traslado-header {
+                border-radius: 0;
+                padding: 10px 12px;
+            }
+            
             .traslado-body {
-                padding: 15px;
+                padding: 12px;
+            }
+            
+            .direction-option {
+                min-height: 55px;
+                padding: 8px;
+            }
+            
+            .quantity-input {
+                padding: 10px 35px 10px 30px;
+            }
+        }
+        
+        /* Para pantallas muy cortas (menos de 500px de altura) */
+        @media (max-height: 500px) {
+            .traslado-content {
+                max-height: 100vh;
             }
             
             .product-info {
-                margin-bottom: 15px;
+                margin-bottom: 10px;
             }
             
             .direction-selector {
-                padding: 12px;
-                margin-bottom: 15px;
+                padding: 10px;
+                margin-bottom: 10px;
             }
             
             .quantity-section {
-                margin: 10px 0;
+                margin: 8px 0;
             }
             
             .traslado-actions {
-                padding-top: 15px;
+                padding-top: 12px;
             }
+        }
+        
+        /* Historial */
+        .historial-list {
+            max-height: 60vh;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .historial-item {
+            padding: 12px;
+            background: var(--light);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid var(--success);
+            position: relative;
+        }
+        
+        .historial-item.out {
+            border-left-color: var(--warning);
+        }
+        
+        .historial-item.in {
+            border-left-color: var(--info);
+        }
+        
+        .historial-item.pending {
+            border-left-color: #ffcc00;
+            background: #fff8e1;
+        }
+        
+        .historial-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .historial-product {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.95rem;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .historial-quantity {
+            font-weight: 700;
+            color: var(--success);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .historial-details {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .historial-time {
+            font-size: 0.75rem;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .sync-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .sync-status.synced {
+            background-color: var(--success);
+        }
+        
+        .sync-status.pending {
+            background-color: var(--warning);
+        }
+        
+        .empty-historial {
+            text-align: center;
+            padding: 30px 15px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            color: #ddd;
+        }
+        
+        /* Scrollbar styling */
+        .historial-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .historial-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+        
+        .historial-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 2px;
+        }
+        
+        .historial-list::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Botón de búsqueda */
+        .btn-search {
+            position: relative;
+        }
+        
+        .admin-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--warning);
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -690,6 +906,12 @@
                     </div>
                 </div>
                 <div class="header-actions">
+                    <button class="header-btn" id="btnSearch" title="Búsqueda avanzada">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="header-btn" id="btnHistory" title="Historial">
+                        <i class="fas fa-history"></i>
+                    </button>
                     <button class="header-btn" id="btnSync" title="Sincronizar">
                         <i class="fas fa-sync-alt"></i>
                     </button>
@@ -767,6 +989,14 @@
                     </select>
                 </div>
                 
+                <div class="config-item">
+                    <label class="config-label">Tipo de usuario</label>
+                    <select class="config-input" id="userType">
+                        <option value="user">Usuario normal</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                
                 <button class="scanner-btn scanner-btn-success" style="margin-top: 15px;" id="btnSaveSettings">
                     <i class="fas fa-save"></i> Guardar configuración
                 </button>
@@ -784,8 +1014,35 @@
                     <div style="font-size: 0.85rem; color: #666;">
                         <div><strong>Estado:</strong> <span id="firebaseStatus">Desconectado</span></div>
                         <div><strong>Productos cargados:</strong> <span id="productCount">0</span></div>
+                        <div><strong>Traslados hoy:</strong> <span id="trasladosToday">0</span></div>
                         <div><strong>Última sincronización:</strong> <span id="lastSync">Nunca</span></div>
+                        <div><strong>Tipo de usuario:</strong> <span id="userTypeDisplay">Usuario normal</span></div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de historial -->
+    <div class="modal" id="historialModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-history"></i> Historial de Traslados
+                </h3>
+                <button class="modal-close" id="closeHistorial">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 0.9rem; color: #666;">
+                        <span id="historialCount">0</span> traslados registrados
+                    </div>
+                    <button class="scanner-btn" id="btnRefreshHistorial" style="padding: 8px 12px; font-size: 0.85rem;">
+                        <i class="fas fa-sync-alt"></i> Actualizar
+                    </button>
+                </div>
+                <div id="historialList" class="historial-list">
+                    <!-- El historial se cargará aquí dinámicamente -->
                 </div>
             </div>
         </div>
@@ -817,10 +1074,14 @@
                             <div class="direction-text">Bodega → Tienda</div>
                         </div>
                         <div class="direction-option" id="optionTiendaToBodega">
+                            <i class="fas fa-lock lock-icon"></i>
                             <div class="direction-icon">
                                 <i class="fas fa-arrow-left"></i>
                             </div>
                             <div class="direction-text">Tienda → Bodega</div>
+                            <div style="font-size: 0.7rem; color: var(--warning); margin-top: 3px;">
+                                <i class="fas fa-lock"></i> Solo admin
+                            </div>
                         </div>
                     </div>
                     <div class="stock-info">
@@ -849,6 +1110,9 @@
                                    max="1000"
                                    step="1"
                                    readonly>
+                            <button class="clear-quantity-btn" id="clearQuantityBtn" title="Borrar cantidad">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
                     </div>
                     
@@ -896,7 +1160,8 @@
         let traslados = [];
         let config = {
             vibrationMode: "on",
-            soundMode: "on"
+            soundMode: "on",
+            userType: "user" // Valor por defecto
         };
         let isOnline = navigator.onLine;
         let currentProduct = null;
@@ -904,17 +1169,23 @@
         let currentDirection = "bodegaToTienda";
         let modalOpen = false;
         let isProcessing = false; // Para prevenir doble click
+        let isAdmin = false; // Variable para controlar si es admin
 
         // Elementos del DOM
         const scannerInput = document.getElementById('scannerInput');
         const btnScan = document.getElementById('btnScan');
         const btnClear = document.getElementById('btnClear');
         const btnSync = document.getElementById('btnSync');
+        const btnHistory = document.getElementById('btnHistory');
         const btnSettings = document.getElementById('btnSettings');
+        const btnSearch = document.getElementById('btnSearch');
         const settingsModal = document.getElementById('settingsModal');
+        const historialModal = document.getElementById('historialModal');
         const closeSettings = document.getElementById('closeSettings');
+        const closeHistorial = document.getElementById('closeHistorial');
         const vibrationMode = document.getElementById('vibrationMode');
         const soundMode = document.getElementById('soundMode');
+        const userTypeSelect = document.getElementById('userType');
         const btnSaveSettings = document.getElementById('btnSaveSettings');
         const btnSyncNow = document.getElementById('btnSyncNow');
         const btnClearLocal = document.getElementById('btnClearLocal');
@@ -924,7 +1195,12 @@
         const notification = document.getElementById('notification');
         const firebaseStatus = document.getElementById('firebaseStatus');
         const productCount = document.getElementById('productCount');
+        const trasladosToday = document.getElementById('trasladosToday');
         const lastSync = document.getElementById('lastSync');
+        const userTypeDisplay = document.getElementById('userTypeDisplay');
+        const historialList = document.getElementById('historialList');
+        const historialCount = document.getElementById('historialCount');
+        const btnRefreshHistorial = document.getElementById('btnRefreshHistorial');
         
         // Modal de traslado
         const trasladoModal = document.getElementById('trasladoModal');
@@ -934,6 +1210,7 @@
         const modalProductName = document.getElementById('modalProductName');
         const modalProductSku = document.getElementById('modalProductSku');
         const quantityInput = document.getElementById('quantityInput');
+        const clearQuantityBtn = document.getElementById('clearQuantityBtn');
         const modalAvailableStock = document.getElementById('modalAvailableStock');
         const optionBodegaToTienda = document.getElementById('optionBodegaToTienda');
         const optionTiendaToBodega = document.getElementById('optionTiendaToBodega');
@@ -945,6 +1222,9 @@
             cargarConfiguracion();
             configurarEventos();
             await inicializarDatos();
+            
+            // Verificar si es admin
+            verificarAdminStatus();
             
             // Enfocar el input de escaneo
             scannerInput.focus();
@@ -960,6 +1240,10 @@
                 config = JSON.parse(savedConfig);
                 vibrationMode.value = config.vibrationMode;
                 soundMode.value = config.soundMode;
+                userTypeSelect.value = config.userType || "user";
+                
+                // Verificar si es admin
+                isAdmin = config.userType === "admin";
             }
             
             // Cargar datos locales
@@ -967,16 +1251,51 @@
             if (savedProductos) {
                 productos = JSON.parse(savedProductos);
             }
+            
+            const savedTraslados = localStorage.getItem('handheldTraslados');
+            if (savedTraslados) {
+                traslados = JSON.parse(savedTraslados);
+            }
+            
+            // Actualizar contador de traslados de hoy
+            actualizarContadorTraslados();
         }
 
         // Guardar configuración
         function guardarConfiguracion() {
             config.vibrationMode = vibrationMode.value;
             config.soundMode = soundMode.value;
+            config.userType = userTypeSelect.value;
             
             localStorage.setItem('handheldConfig', JSON.stringify(config));
             
+            // Verificar si es admin
+            isAdmin = config.userType === "admin";
+            
             mostrarNotificacion('Configuración guardada', 'success');
+            actualizarInfoConfiguracion();
+            
+            // Actualizar estado del botón de Tienda → Bodega
+            actualizarBotonTiendaABodega();
+        }
+
+        // Verificar si es admin
+        function verificarAdminStatus() {
+            isAdmin = config.userType === "admin";
+            actualizarBotonTiendaABodega();
+        }
+
+        // Actualizar botón de Tienda → Bodega según permisos
+        function actualizarBotonTiendaABodega() {
+            if (optionTiendaToBodega) {
+                if (isAdmin) {
+                    optionTiendaToBodega.classList.remove('disabled');
+                    optionTiendaToBodega.title = "Haga clic para seleccionar";
+                } else {
+                    optionTiendaToBodega.classList.add('disabled');
+                    optionTiendaToBodega.title = "Solo disponible para administradores";
+                }
+            }
         }
 
         // Mostrar notificación
@@ -992,6 +1311,11 @@
 
         // Configurar eventos
         function configurarEventos() {
+            // Botón de búsqueda
+            btnSearch.addEventListener('click', function() {
+                window.location.href = 'busqueda.html';
+            });
+            
             // Escanear producto
             btnScan.addEventListener('click', buscarProducto);
             scannerInput.addEventListener('keypress', function(e) {
@@ -1010,6 +1334,20 @@
             // Sincronizar
             btnSync.addEventListener('click', async function() {
                 await sincronizarConFirebase();
+            });
+            
+            // Historial
+            btnHistory.addEventListener('click', function() {
+                mostrarHistorial();
+                historialModal.style.display = 'flex';
+            });
+            
+            closeHistorial.addEventListener('click', function() {
+                historialModal.style.display = 'none';
+            });
+            
+            btnRefreshHistorial.addEventListener('click', function() {
+                mostrarHistorial();
             });
             
             // Modal de configuración
@@ -1052,6 +1390,7 @@
                         localStorage.removeItem('handheldProductos');
                         localStorage.removeItem('handheldTraslados');
                         
+                        actualizarContadorTraslados();
                         mostrarNotificacion('Datos locales limpiados', 'success');
                         
                         // Recargar desde Firebase
@@ -1073,6 +1412,14 @@
             
             optionTiendaToBodega.addEventListener('click', function() {
                 if (isProcessing) return;
+                
+                // Verificar permisos de admin
+                if (!isAdmin) {
+                    mostrarNotificacion('Solo administradores pueden hacer traslados de Tienda a Bodega', 'warning');
+                    vibrar('error');
+                    return;
+                }
+                
                 optionTiendaToBodega.classList.add('active');
                 optionBodegaToTienda.classList.remove('active');
                 currentDirection = "tiendaToBodega";
@@ -1101,6 +1448,15 @@
                 setTimeout(validarCantidadInput, 50);
             });
             
+            // Botón para borrar cantidad
+            clearQuantityBtn.addEventListener('click', function() {
+                if (isProcessing) return;
+                quantityInput.value = '';
+                quantityInput.classList.remove('readonly');
+                quantityInput.removeAttribute('readonly');
+                quantityInput.focus();
+            });
+            
             // Modal de traslado - Botones
             btnCancelTraslado.addEventListener('click', function() {
                 if (isProcessing) return;
@@ -1127,7 +1483,7 @@
                 if (modalOpen && e.target !== quantityInput && !quantityInput.classList.contains('readonly') && !isProcessing) {
                     // Bloquear otras teclas
                     e.stopPropagation();
-                    if (e.target !== btnCancelTraslado && e.target !== btnConfirmTraslado) {
+                    if (e.target !== btnCancelTraslado && e.target !== btnConfirmTraslado && e.target !== clearQuantityBtn) {
                         e.preventDefault();
                     }
                 }
@@ -1137,6 +1493,9 @@
             window.addEventListener('click', function(e) {
                 if (e.target === settingsModal && !isProcessing) {
                     settingsModal.style.display = 'none';
+                }
+                if (e.target === historialModal && !isProcessing) {
+                    historialModal.style.display = 'none';
                 }
                 if (e.target === trasladoModal && !isProcessing) {
                     cerrarModalTraslado();
@@ -1160,6 +1519,11 @@
         function validarCantidadInput() {
             let cantidad = parseInt(quantityInput.value) || 0;
             const maxDisponible = parseInt(modalAvailableStock.textContent) || 0;
+            
+            // Si el campo está vacío, no hacer nada (permite borrar completamente)
+            if (quantityInput.value === '') {
+                return 0;
+            }
             
             if (cantidad < 1) {
                 cantidad = 1;
@@ -1206,6 +1570,7 @@
             // Resetear input a readonly
             quantityInput.classList.add('readonly');
             quantityInput.setAttribute('readonly', true);
+            quantityInput.value = "1";
             
             // Asegurarse de que no haya spinner activo
             mostrarSpinnerConfirmar(false);
@@ -1224,6 +1589,19 @@
             }
         }
 
+        // Actualizar contador de traslados de hoy
+        function actualizarContadorTraslados() {
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            
+            const trasladosHoy = traslados.filter(t => {
+                const fechaTraslado = new Date(t.fecha);
+                return fechaTraslado >= hoy;
+            });
+            
+            trasladosToday.textContent = trasladosHoy.length;
+        }
+
         // Inicializar datos
         async function inicializarDatos() {
             mostrarLoading(true, "Cargando datos...");
@@ -1233,6 +1611,10 @@
                 if (db) {
                     // Cargar productos desde Firebase
                     await cargarProductosFirebase();
+                    
+                    // Cargar historial de Firebase
+                    await cargarTrasladosFirebase();
+                    
                     mostrarNotificacion('Datos cargados correctamente', 'success');
                 } else {
                     // Usar datos locales si no hay Firebase
@@ -1244,6 +1626,7 @@
             } finally {
                 mostrarLoading(false);
                 actualizarEstadoConexion();
+                actualizarContadorTraslados();
             }
         }
 
@@ -1289,6 +1672,55 @@
             }
         }
 
+        // Cargar traslados desde Firebase
+        async function cargarTrasladosFirebase() {
+            try {
+                if (!db) return;
+                
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                
+                const snapshot = await db.collection('historial')
+                    .where('tipo', '==', 'transferencia')
+                    .where('fecha', '>=', hoy.toISOString())
+                    .orderBy('fecha', 'desc')
+                    .limit(100)
+                    .get();
+                
+                const nuevosTraslados = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    nuevosTraslados.push({
+                        id: data.id || doc.id,
+                        fecha: data.fecha,
+                        producto: data.producto,
+                        sku: data.sku,
+                        cantidad: data.cantidad,
+                        direccion: data.origen === 'bodega' ? 'bodegaToTienda' : 'tiendaToBodega',
+                        origen: data.origen,
+                        destino: data.destino,
+                        sync: true
+                    });
+                });
+                
+                // Agregar solo si no existen ya
+                nuevosTraslados.forEach(nuevo => {
+                    if (!traslados.some(t => t.id === nuevo.id)) {
+                        traslados.unshift(nuevo);
+                    }
+                });
+                
+                // Guardar localmente
+                localStorage.setItem('handheldTraslados', JSON.stringify(traslados));
+                
+                console.log(`Cargados ${nuevosTraslados.length} traslados de Firebase`);
+                return true;
+            } catch (error) {
+                console.error('Error cargando traslados:', error);
+                return false;
+            }
+        }
+
         // Sincronizar con Firebase
         async function sincronizarConFirebase() {
             if (syncInProgress) return;
@@ -1302,11 +1734,15 @@
                 // Sincronizar productos
                 await cargarProductosFirebase();
                 
+                // Sincronizar traslados
+                await cargarTrasladosFirebase();
+                
                 // Actualizar última sincronización
                 const ahora = new Date();
                 lastSync.textContent = ahora.toLocaleTimeString('es-ES');
                 localStorage.setItem('lastSync', ahora.toISOString());
                 
+                actualizarContadorTraslados();
                 mostrarNotificacion('Sincronización completa', 'success');
                 actualizarInfoConfiguracion();
                 
@@ -1439,9 +1875,13 @@
             quantityInput.classList.add('readonly');
             quantityInput.setAttribute('readonly', true);
             
+            // Siempre comenzar con Bodega → Tienda seleccionado
             optionBodegaToTienda.classList.add('active');
             optionTiendaToBodega.classList.remove('active');
             currentDirection = "bodegaToTienda";
+            
+            // Actualizar estado del botón de Tienda → Bodega
+            actualizarBotonTiendaABodega();
             
             // Asegurar que los botones estén habilitados
             mostrarSpinnerConfirmar(false);
@@ -1480,6 +1920,81 @@
             validarCantidadInput();
         }
 
+        // Mostrar historial
+        function mostrarHistorial() {
+            historialList.innerHTML = '';
+            
+            if (traslados.length === 0) {
+                historialList.innerHTML = `
+                    <div class="empty-historial">
+                        <div class="empty-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <p>No hay traslados registrados</p>
+                    </div>
+                `;
+                historialCount.textContent = "0";
+                return;
+            }
+            
+            // Actualizar contador
+            historialCount.textContent = traslados.length;
+            
+            // Mostrar todos los traslados
+            traslados.forEach(traslado => {
+                const fecha = new Date(traslado.fecha);
+                const ahora = new Date();
+                const diffMs = ahora - fecha;
+                const diffMins = Math.floor(diffMs / 60000);
+                
+                let tiempo = '';
+                if (diffMins < 1) {
+                    tiempo = 'Ahora mismo';
+                } else if (diffMins < 60) {
+                    tiempo = `${diffMins} min${diffMins !== 1 ? 's' : ''} atrás`;
+                } else if (diffMins < 1440) {
+                    const horas = Math.floor(diffMins / 60);
+                    tiempo = `${horas} hora${horas !== 1 ? 's' : ''} atrás`;
+                } else {
+                    tiempo = fecha.toLocaleDateString('es-ES', { 
+                        day: '2-digit',
+                        month: 'short',
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                }
+                
+                const tipoClase = traslado.direccion === 'bodegaToTienda' ? 'out' : 'in';
+                const icono = traslado.direccion === 'bodegaToTienda' ? 'fa-arrow-right' : 'fa-arrow-left';
+                const origen = traslado.origen === 'bodega' ? 'Bodega' : 'Tienda';
+                const destino = traslado.destino === 'bodega' ? 'Bodega' : 'Tienda';
+                
+                const syncStatus = traslado.sync === false ? 
+                    '<span class="sync-status pending" title="Pendiente de sincronizar"></span>' : 
+                    '<span class="sync-status synced" title="Sincronizado"></span>';
+                
+                const item = document.createElement('div');
+                item.className = `historial-item ${tipoClase} ${traslado.sync === false ? 'pending' : ''}`;
+                item.innerHTML = `
+                    <div class="historial-header">
+                        <div class="historial-product" title="${traslado.producto}">${traslado.producto}</div>
+                        <div class="historial-quantity">${syncStatus} ${traslado.cantidad} uds</div>
+                    </div>
+                    <div class="historial-details">
+                        <i class="fas ${icono}"></i> ${origen} → ${destino}
+                    </div>
+                    <div class="historial-details">
+                        <i class="fas fa-barcode"></i> SKU: ${traslado.sku}
+                    </div>
+                    <div class="historial-time">
+                        <i class="far fa-clock"></i> ${tiempo}
+                    </div>
+                `;
+                
+                historialList.appendChild(item);
+            });
+        }
+
         // Ejecutar traslado confirmado
         async function ejecutarTrasladoConfirmado() {
             if (isProcessing) return;
@@ -1491,6 +2006,14 @@
             
             const productoId = currentProduct.id;
             const cantidad = validarCantidadInput();
+            
+            // Validar que la cantidad no sea 0 o vacía
+            if (cantidad === 0 || quantityInput.value === '') {
+                mostrarNotificacion('Ingrese una cantidad válida', 'error');
+                vibrar('error');
+                quantityInput.focus();
+                return;
+            }
             
             if (cantidad < 1) {
                 mostrarNotificacion('La cantidad debe ser al menos 1', 'error');
@@ -1511,6 +2034,13 @@
                 origenNombre = "Bodega";
                 destinoNombre = "Tienda";
             } else {
+                // Verificar permisos de admin para Tienda → Bodega
+                if (!isAdmin) {
+                    mostrarNotificacion('Solo administradores pueden hacer traslados de Tienda a Bodega', 'error');
+                    vibrar('error');
+                    return;
+                }
+                
                 if (cantidad > currentProduct.tienda) {
                     mostrarNotificacion(`Solo hay ${currentProduct.tienda} unidades en tienda`, 'error');
                     vibrar('error');
@@ -1573,10 +2103,22 @@
             traslados.unshift(nuevoTraslado);
             localStorage.setItem('handheldTraslados', JSON.stringify(traslados));
             
+            // Actualizar contador
+            actualizarContadorTraslados();
+            
             // Sincronizar con Firebase si hay conexión
             let syncSuccess = false;
             if (db && isOnline) {
                 syncSuccess = await sincronizarTrasladoFirebase(producto, cantidad, origen, destino);
+                
+                // Actualizar estado de sincronización si fue exitoso
+                if (syncSuccess) {
+                    const ultimoTrasladoIndex = traslados.findIndex(t => t.id === nuevoTraslado.id);
+                    if (ultimoTrasladoIndex !== -1) {
+                        traslados[ultimoTrasladoIndex].sync = true;
+                        localStorage.setItem('handheldTraslados', JSON.stringify(traslados));
+                    }
+                }
             }
             
             // Efectos
@@ -1630,7 +2172,7 @@
                     cantidad: cantidad,
                     origen: origen,
                     destino: destino,
-                    usuario: 'handheld'
+                    usuario: config.userType === 'admin' ? 'admin' : 'handheld'
                 });
                 
                 console.log('Traslado sincronizado con Firebase');
@@ -1647,12 +2189,16 @@
             firebaseStatus.style.color = db && isOnline ? 'var(--success)' : 'var(--danger)';
             
             productCount.textContent = productos.length;
+            actualizarContadorTraslados();
             
             const savedLastSync = localStorage.getItem('lastSync');
             if (savedLastSync) {
                 const lastSyncDate = new Date(savedLastSync);
                 lastSync.textContent = lastSyncDate.toLocaleTimeString('es-ES');
             }
+            
+            userTypeDisplay.textContent = config.userType === 'admin' ? 'Administrador' : 'Usuario normal';
+            userTypeDisplay.style.color = config.userType === 'admin' ? 'var(--warning)' : 'var(--secondary)';
         }
 
         // Configurar escáner handheld

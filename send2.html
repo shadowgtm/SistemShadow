@@ -898,9 +898,9 @@
             <div class="header-content">
                 <div>
                     <div class="header-title">
-                        <i class="fas fa-barcode"></i> Handheld Scanner
+                        <i class="fas fa-barcode"></i> Bodega
                     </div>
-                    <div class="header-subtitle">Traslados rápidos</div>
+                    <div class="header-subtitle">Traslados</div>
                     <div id="connectionStatus" class="connection-status">
                         <i class="fas fa-sync fa-spin"></i> Conectando...
                     </div>
@@ -909,8 +909,8 @@
                     <button class="header-btn" id="btnSearch" title="Búsqueda avanzada">
                         <i class="fas fa-search"></i>
                     </button>
-                    <button class="header-btn" id="btnHistory" title="Historial">
-                        <i class="fas fa-history"></i>
+                    <button class="header-btn" id="btnHistory" title="Transferencias">
+                        <i class="fas fa-exchange-alt"></i>
                     </button>
                     <button class="header-btn" id="btnSync" title="Sincronizar">
                         <i class="fas fa-sync-alt"></i>
@@ -1014,7 +1014,7 @@
                     <div style="font-size: 0.85rem; color: #666;">
                         <div><strong>Estado:</strong> <span id="firebaseStatus">Desconectado</span></div>
                         <div><strong>Productos cargados:</strong> <span id="productCount">0</span></div>
-                        <div><strong>Traslados hoy:</strong> <span id="trasladosToday">0</span></div>
+                        <div><strong>Transferencias hoy:</strong> <span id="trasladosToday">0</span></div>
                         <div><strong>Última sincronización:</strong> <span id="lastSync">Nunca</span></div>
                         <div><strong>Tipo de usuario:</strong> <span id="userTypeDisplay">Usuario normal</span></div>
                     </div>
@@ -1023,26 +1023,26 @@
         </div>
     </div>
     
-    <!-- Modal de historial -->
+    <!-- Modal de transferencias -->
     <div class="modal" id="historialModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">
-                    <i class="fas fa-history"></i> Historial de Traslados
+                    <i class="fas fa-exchange-alt"></i> Transferencias de Hoy
                 </h3>
                 <button class="modal-close" id="closeHistorial">&times;</button>
             </div>
             <div class="modal-body">
                 <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="font-size: 0.9rem; color: #666;">
-                        <span id="historialCount">0</span> traslados registrados
+                        <span id="historialCount">0</span> transferencias registradas
                     </div>
                     <button class="scanner-btn" id="btnRefreshHistorial" style="padding: 8px 12px; font-size: 0.85rem;">
                         <i class="fas fa-sync-alt"></i> Actualizar
                     </button>
                 </div>
                 <div id="historialList" class="historial-list">
-                    <!-- El historial se cargará aquí dinámicamente -->
+                    <!-- Las transferencias se cargarán aquí dinámicamente -->
                 </div>
             </div>
         </div>
@@ -1157,7 +1157,7 @@
 
         // Variables globales
         let productos = [];
-        let traslados = [];
+        let historial = []; // CAMBIADO: Ahora se llama historial como el sistema web
         let config = {
             vibrationMode: "on",
             soundMode: "on",
@@ -1217,6 +1217,43 @@
         const stockBodega = document.getElementById('stockBodega');
         const stockTienda = document.getElementById('stockTienda');
 
+        // Función para obtener el timestamp actual
+        function getCurrentTimestamp() {
+            return Date.now();
+        }
+
+        // Función para formatear tiempo relativo (time ago)
+        function formatTimeAgo(timestamp) {
+            if (!timestamp) return "Nunca";
+            
+            const now = Date.now();
+            const diff = now - timestamp;
+            
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            const weeks = Math.floor(days / 7);
+            const months = Math.floor(days / 30);
+            const years = Math.floor(days / 365);
+            
+            if (seconds < 60) {
+                return "hace un momento";
+            } else if (minutes < 60) {
+                return minutes === 1 ? "hace 1 minuto" : `hace ${minutes} minutos`;
+            } else if (hours < 24) {
+                return hours === 1 ? "hace 1 hora" : `hace ${hours} horas`;
+            } else if (days < 7) {
+                return days === 1 ? "hace 1 día" : `hace ${days} días`;
+            } else if (weeks < 4) {
+                return weeks === 1 ? "hace 1 semana" : `hace ${weeks} semanas`;
+            } else if (months < 12) {
+                return months === 1 ? "hace 1 mes" : `hace ${months} meses`;
+            } else {
+                return years === 1 ? "hace 1 año" : `hace ${years} años`;
+            }
+        }
+
         // Inicializar la aplicación
         document.addEventListener('DOMContentLoaded', async function() {
             cargarConfiguracion();
@@ -1252,9 +1289,9 @@
                 productos = JSON.parse(savedProductos);
             }
             
-            const savedTraslados = localStorage.getItem('handheldTraslados');
-            if (savedTraslados) {
-                traslados = JSON.parse(savedTraslados);
+            const savedHistorial = localStorage.getItem('handheldHistorial');
+            if (savedHistorial) {
+                historial = JSON.parse(savedHistorial);
             }
             
             // Actualizar contador de traslados de hoy
@@ -1336,7 +1373,7 @@
                 await sincronizarConFirebase();
             });
             
-            // Historial
+            // Transferencias
             btnHistory.addEventListener('click', function() {
                 mostrarHistorial();
                 historialModal.style.display = 'flex';
@@ -1386,9 +1423,9 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         productos = [];
-                        traslados = [];
+                        historial = [];
                         localStorage.removeItem('handheldProductos');
-                        localStorage.removeItem('handheldTraslados');
+                        localStorage.removeItem('handheldHistorial');
                         
                         actualizarContadorTraslados();
                         mostrarNotificacion('Datos locales limpiados', 'success');
@@ -1594,12 +1631,14 @@
             const hoy = new Date();
             hoy.setHours(0, 0, 0, 0);
             
-            const trasladosHoy = traslados.filter(t => {
-                const fechaTraslado = new Date(t.fecha);
+            // Filtrar solo transferencias del historial
+            const transferenciasHoy = historial.filter(t => {
+                if (t.tipo !== 'transferencia') return false;
+                const fechaTraslado = new Date(t.timestamp);
                 return fechaTraslado >= hoy;
             });
             
-            trasladosToday.textContent = trasladosHoy.length;
+            trasladosToday.textContent = transferenciasHoy.length;
         }
 
         // Inicializar datos
@@ -1613,7 +1652,7 @@
                     await cargarProductosFirebase();
                     
                     // Cargar historial de Firebase
-                    await cargarTrasladosFirebase();
+                    await cargarHistorialFirebase();
                     
                     mostrarNotificacion('Datos cargados correctamente', 'success');
                 } else {
@@ -1656,8 +1695,9 @@
                         name: data.name,
                         barcode: data.barcode,
                         proveedor: data.proveedor,
-                        bodega: data.almacen || data.bodega || 0,
-                        tienda: data.tienda || 0
+                        bodega: data.bodega || 0,
+                        tienda: data.tienda || 0,
+                        lastTransfer: data.lastTransfer || null // Compatibilidad con sistema web
                     });
                 });
                 
@@ -1672,51 +1712,67 @@
             }
         }
 
-        // Cargar traslados desde Firebase
-        async function cargarTrasladosFirebase() {
+        // Cargar historial desde Firebase - SOLO TRANSFERENCIAS
+        async function cargarHistorialFirebase() {
             try {
                 if (!db) return;
                 
                 const hoy = new Date();
                 hoy.setHours(0, 0, 0, 0);
                 
+                // SOLO cargar documentos con tipo 'transferencia' del día de hoy
                 const snapshot = await db.collection('historial')
-                    .where('tipo', '==', 'transferencia')
-                    .where('fecha', '>=', hoy.toISOString())
-                    .orderBy('fecha', 'desc')
+                    .where('timestamp', '>=', hoy.getTime())
+                    .where('tipo', '==', 'transferencia') // FILTRO CLAVE: solo transferencias
+                    .orderBy('timestamp', 'desc')
                     .limit(100)
                     .get();
                 
-                const nuevosTraslados = [];
+                const nuevasTransferencias = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    nuevosTraslados.push({
+                    
+                    // Verificar que sea una transferencia
+                    if (data.tipo !== 'transferencia') {
+                        return; // Saltar si no es transferencia
+                    }
+                    
+                    nuevasTransferencias.push({
                         id: data.id || doc.id,
-                        fecha: data.fecha,
+                        timestamp: data.timestamp,
+                        tipo: data.tipo,
                         producto: data.producto,
                         sku: data.sku,
                         cantidad: data.cantidad,
-                        direccion: data.origen === 'bodega' ? 'bodegaToTienda' : 'tiendaToBodega',
                         origen: data.origen,
                         destino: data.destino,
-                        sync: true
+                        usuario: data.usuario || 'handheld'
                     });
                 });
                 
-                // Agregar solo si no existen ya
-                nuevosTraslados.forEach(nuevo => {
-                    if (!traslados.some(t => t.id === nuevo.id)) {
-                        traslados.unshift(nuevo);
+                // Limpiar transferencias del día actual y agregar las nuevas
+                const hoyTimestamp = hoy.getTime();
+                historial = historial.filter(t => {
+                    if (t.tipo !== 'transferencia') return true; // Mantener otros tipos
+                    return t.timestamp < hoyTimestamp; // Mantener transferencias antiguas
+                });
+                
+                nuevasTransferencias.forEach(nuevo => {
+                    if (!historial.some(t => t.id === nuevo.id)) {
+                        historial.unshift(nuevo);
                     }
                 });
                 
-                // Guardar localmente
-                localStorage.setItem('handheldTraslados', JSON.stringify(traslados));
+                // Ordenar por timestamp (más reciente primero)
+                historial.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 
-                console.log(`Cargados ${nuevosTraslados.length} traslados de Firebase`);
+                // Guardar localmente
+                localStorage.setItem('handheldHistorial', JSON.stringify(historial));
+                
+                console.log(`Cargadas ${nuevasTransferencias.length} transferencias de Firebase`);
                 return true;
             } catch (error) {
-                console.error('Error cargando traslados:', error);
+                console.error('Error cargando historial:', error);
                 return false;
             }
         }
@@ -1734,8 +1790,8 @@
                 // Sincronizar productos
                 await cargarProductosFirebase();
                 
-                // Sincronizar traslados
-                await cargarTrasladosFirebase();
+                // Sincronizar historial
+                await cargarHistorialFirebase();
                 
                 // Actualizar última sincronización
                 const ahora = new Date();
@@ -1790,8 +1846,9 @@
                             name: data.name,
                             barcode: data.barcode,
                             proveedor: data.proveedor,
-                            bodega: data.almacen || data.bodega || 0,
-                            tienda: data.tienda || 0
+                            bodega: data.bodega || 0,
+                            tienda: data.tienda || 0,
+                            lastTransfer: data.lastTransfer || null
                         };
                         
                         // Agregar a lista local
@@ -1920,74 +1977,52 @@
             validarCantidadInput();
         }
 
-        // Mostrar historial
+        // Mostrar historial - SOLO TRANSFERENCIAS
         function mostrarHistorial() {
             historialList.innerHTML = '';
             
-            if (traslados.length === 0) {
+            // FILTRAR SOLO TRANSFERENCIAS (del historial)
+            const transferencias = historial.filter(t => t.tipo === 'transferencia');
+            
+            if (transferencias.length === 0) {
                 historialList.innerHTML = `
                     <div class="empty-historial">
                         <div class="empty-icon">
-                            <i class="fas fa-history"></i>
+                            <i class="fas fa-exchange-alt"></i>
                         </div>
-                        <p>No hay traslados registrados</p>
+                        <p>No hay transferencias registradas</p>
                     </div>
                 `;
                 historialCount.textContent = "0";
                 return;
             }
             
-            // Actualizar contador
-            historialCount.textContent = traslados.length;
+            // Actualizar contador - solo transferencias
+            historialCount.textContent = transferencias.length + " transferencias";
             
-            // Mostrar todos los traslados
-            traslados.forEach(traslado => {
-                const fecha = new Date(traslado.fecha);
-                const ahora = new Date();
-                const diffMs = ahora - fecha;
-                const diffMins = Math.floor(diffMs / 60000);
-                
-                let tiempo = '';
-                if (diffMins < 1) {
-                    tiempo = 'Ahora mismo';
-                } else if (diffMins < 60) {
-                    tiempo = `${diffMins} min${diffMins !== 1 ? 's' : ''} atrás`;
-                } else if (diffMins < 1440) {
-                    const horas = Math.floor(diffMins / 60);
-                    tiempo = `${horas} hora${horas !== 1 ? 's' : ''} atrás`;
-                } else {
-                    tiempo = fecha.toLocaleDateString('es-ES', { 
-                        day: '2-digit',
-                        month: 'short',
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    });
-                }
-                
-                const tipoClase = traslado.direccion === 'bodegaToTienda' ? 'out' : 'in';
-                const icono = traslado.direccion === 'bodegaToTienda' ? 'fa-arrow-right' : 'fa-arrow-left';
-                const origen = traslado.origen === 'bodega' ? 'Bodega' : 'Tienda';
-                const destino = traslado.destino === 'bodega' ? 'Bodega' : 'Tienda';
-                
-                const syncStatus = traslado.sync === false ? 
-                    '<span class="sync-status pending" title="Pendiente de sincronizar"></span>' : 
-                    '<span class="sync-status synced" title="Sincronizado"></span>';
+            // Mostrar solo las transferencias filtradas
+            transferencias.forEach(transferencia => {
+                const tiempoRelativo = formatTimeAgo(transferencia.timestamp);
+                const tipoClase = transferencia.origen === 'bodega' ? 'out' : 'in';
+                const icono = transferencia.origen === 'bodega' ? 'fa-arrow-right' : 'fa-arrow-left';
+                const origen = transferencia.origen === 'bodega' ? 'Bodega' : 'Tienda';
+                const destino = transferencia.destino === 'bodega' ? 'Bodega' : 'Tienda';
                 
                 const item = document.createElement('div');
-                item.className = `historial-item ${tipoClase} ${traslado.sync === false ? 'pending' : ''}`;
+                item.className = `historial-item ${tipoClase}`;
                 item.innerHTML = `
                     <div class="historial-header">
-                        <div class="historial-product" title="${traslado.producto}">${traslado.producto}</div>
-                        <div class="historial-quantity">${syncStatus} ${traslado.cantidad} uds</div>
+                        <div class="historial-product" title="${transferencia.producto}">${transferencia.producto}</div>
+                        <div class="historial-quantity">${transferencia.cantidad} uds</div>
                     </div>
                     <div class="historial-details">
                         <i class="fas ${icono}"></i> ${origen} → ${destino}
                     </div>
                     <div class="historial-details">
-                        <i class="fas fa-barcode"></i> SKU: ${traslado.sku}
+                        <i class="fas fa-barcode"></i> SKU: ${transferencia.sku}
                     </div>
                     <div class="historial-time">
-                        <i class="far fa-clock"></i> ${tiempo}
+                        <i class="far fa-clock"></i> ${tiempoRelativo}
                     </div>
                 `;
                 
@@ -2057,7 +2092,7 @@
             
             try {
                 // Ejecutar traslado
-                await realizarTraslado(productoId, currentDirection, cantidad, origen, destino, origenNombre, destinoNombre);
+                await realizarTraslado(productoId, cantidad, origen, destino, origenNombre, destinoNombre);
             } catch (error) {
                 console.error('Error en traslado:', error);
                 mostrarNotificacion('Error al realizar el traslado', 'error');
@@ -2065,8 +2100,8 @@
             }
         }
 
-        // Realizar traslado
-        async function realizarTraslado(productoId, direccion, cantidad, origen, destino, origenNombre, destinoNombre) {
+        // Realizar traslado y guardar en historial
+        async function realizarTraslado(productoId, cantidad, origen, destino, origenNombre, destinoNombre) {
             const productoIndex = productos.findIndex(p => p.id === productoId);
             if (productoIndex === -1) {
                 mostrarNotificacion('Producto no encontrado', 'error');
@@ -2076,7 +2111,8 @@
             
             const producto = productos[productoIndex];
             
-            if (direccion === "bodegaToTienda") {
+            // Actualizar stock
+            if (origen === "bodega") {
                 producto.bodega -= cantidad;
                 producto.tienda += cantidad;
             } else {
@@ -2084,24 +2120,28 @@
                 producto.bodega += cantidad;
             }
             
+            // Actualizar timestamp de última transferencia
+            producto.lastTransfer = getCurrentTimestamp();
+            
             // Guardar cambios localmente
             localStorage.setItem('handheldProductos', JSON.stringify(productos));
             
-            // Registrar traslado local
-            const nuevoTraslado = {
-                id: 'local_' + Date.now(),
-                fecha: new Date().toISOString(),
+            // Crear registro de historial
+            const nuevoRegistro = {
+                id: 'handheld_' + Date.now(),
+                timestamp: getCurrentTimestamp(),
+                tipo: 'transferencia',
                 producto: producto.name,
                 sku: producto.sku,
                 cantidad: cantidad,
-                direccion: direccion,
                 origen: origen,
                 destino: destino,
-                sync: false
+                usuario: isAdmin ? 'admin' : 'handheld'
             };
             
-            traslados.unshift(nuevoTraslado);
-            localStorage.setItem('handheldTraslados', JSON.stringify(traslados));
+            // Guardar en historial local
+            historial.unshift(nuevoRegistro);
+            localStorage.setItem('handheldHistorial', JSON.stringify(historial));
             
             // Actualizar contador
             actualizarContadorTraslados();
@@ -2109,16 +2149,7 @@
             // Sincronizar con Firebase si hay conexión
             let syncSuccess = false;
             if (db && isOnline) {
-                syncSuccess = await sincronizarTrasladoFirebase(producto, cantidad, origen, destino);
-                
-                // Actualizar estado de sincronización si fue exitoso
-                if (syncSuccess) {
-                    const ultimoTrasladoIndex = traslados.findIndex(t => t.id === nuevoTraslado.id);
-                    if (ultimoTrasladoIndex !== -1) {
-                        traslados[ultimoTrasladoIndex].sync = true;
-                        localStorage.setItem('handheldTraslados', JSON.stringify(traslados));
-                    }
-                }
+                syncSuccess = await sincronizarTrasladoFirebase(producto, nuevoRegistro);
             }
             
             // Efectos
@@ -2146,30 +2177,21 @@
             });
         }
 
-        // CORREGIDO: Sincronizar traslado con Firebase
-        async function sincronizarTrasladoFirebase(producto, cantidad, origen, destino) {
+        // Sincronizar traslado con Firebase
+        async function sincronizarTrasladoFirebase(producto, historialItem) {
             try {
                 if (!db) return false;
                 
-                // CORRECCIÓN: Actualizar producto en Firebase con los campos correctos
+                // Actualizar producto en Firebase
                 await db.collection('products').doc(producto.id.toString()).update({
                     bodega: producto.bodega,
                     tienda: producto.tienda,
-                    ultimoEnvio: origen === 'bodega' ? new Date().toISOString().split('T')[0] : producto.ultimoEnvio || null
+                    lastTransfer: producto.lastTransfer
                 });
                 
-                // Registrar en historial de Firebase
-                const historialId = 'hist_' + Date.now();
-                await db.collection('historial').doc(historialId).set({
-                    id: historialId,
-                    fecha: new Date().toISOString().replace('T', ' ').substring(0, 19),
-                    tipo: 'transferencia',
-                    producto: producto.name,
-                    sku: producto.sku,
-                    cantidad: cantidad,
-                    origen: origen,
-                    destino: destino,
-                    usuario: config.userType === 'admin' ? 'admin' : 'handheld'
+                // Guardar en historial de Firebase con el MISMO FORMATO que el sistema web
+                await db.collection('historial').doc(historialItem.id.toString()).set({
+                    ...historialItem
                 });
                 
                 console.log('Traslado sincronizado con Firebase:', {
@@ -2177,8 +2199,9 @@
                     sku: producto.sku,
                     bodega: producto.bodega,
                     tienda: producto.tienda,
-                    cantidad: cantidad,
-                    direccion: `${origen} → ${destino}`
+                    cantidad: historialItem.cantidad,
+                    direccion: `${historialItem.origen} → ${historialItem.destino}`,
+                    timestamp: historialItem.timestamp
                 });
                 return true;
             } catch (error) {

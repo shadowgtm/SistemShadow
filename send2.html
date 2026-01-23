@@ -509,7 +509,7 @@
         
         .product-info {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             flex-shrink: 0;
         }
         
@@ -528,28 +528,31 @@
             margin-bottom: 8px;
         }
         
-        /* SIMPLIFICADO: Solo stock de bodega visible */
+        /* MODIFICADO: Stock de bodega más pequeño */
         .stock-section {
             background: #f0f7ff;
-            padding: 15px;
+            padding: 10px 15px;
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-align: center;
             border: 2px solid #1a56db;
             flex-shrink: 0;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .stock-label {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #666;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         
         .stock-value {
-            font-size: 2.5rem;
-            font-weight: 800;
+            font-size: 1.8rem;
+            font-weight: 700;
             color: #1a56db;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .stock-low {
@@ -562,9 +565,9 @@
         
         .direction-info {
             background: #e8f5e9;
-            padding: 10px;
+            padding: 8px 12px;
             border-radius: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-align: center;
             border: 2px solid var(--success);
             flex-shrink: 0;
@@ -573,14 +576,14 @@
         .direction-text {
             font-weight: 600;
             color: var(--success);
-            font-size: 1.1rem;
+            font-size: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
         }
         
-        /* Selector de cantidad */
+        /* Selector de cantidad - MODIFICADO para permitir teclado */
         .quantity-section {
             margin: 12px 0;
             flex-shrink: 0;
@@ -705,14 +708,6 @@
             overflow: hidden;
         }
         
-        /* Input readonly hasta que se toque */
-        .quantity-input.readonly {
-            background-color: #f8f9fa;
-            cursor: pointer;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        
         /* Para pantallas muy pequeñas */
         @media (max-width: 400px) {
             .traslado-content {
@@ -738,7 +733,12 @@
             }
             
             .stock-value {
-                font-size: 2rem;
+                font-size: 1.5rem;
+            }
+            
+            .stock-section {
+                padding: 8px 12px;
+                min-height: 60px;
             }
         }
         
@@ -749,12 +749,18 @@
             }
             
             .product-info {
-                margin-bottom: 10px;
+                margin-bottom: 8px;
             }
             
             .stock-section {
-                padding: 10px;
-                margin-bottom: 10px;
+                padding: 6px 10px;
+                margin-bottom: 8px;
+                min-height: 55px;
+            }
+            
+            .direction-info {
+                padding: 6px 10px;
+                margin-bottom: 8px;
             }
             
             .quantity-section {
@@ -1036,7 +1042,7 @@
                     <div class="product-sku" id="modalProductSku">SKU: 000000</div>
                 </div>
                 
-                <!-- SOLO STOCK DE BODEGA -->
+                <!-- SOLO STOCK DE BODEGA (más pequeño) -->
                 <div class="stock-section">
                     <div class="stock-label">Existencia en Bodega</div>
                     <div class="stock-value" id="stockBodegaDisplay">0</div>
@@ -1056,15 +1062,13 @@
                         <div class="quantity-input-container">
                             <i class="fas fa-hashtag quantity-input-icon"></i>
                             <input type="number" 
-                                   class="quantity-input readonly" 
+                                   class="quantity-input" 
                                    id="quantityInput"
                                    value="1" 
                                    min="1" 
                                    max="1000"
                                    step="1"
-                                   readonly
-                                   inputmode="numeric"
-                                   onfocus="blur()">
+                                   inputmode="numeric">
                             <button class="clear-quantity-btn" id="clearQuantityBtn" title="Borrar cantidad">
                                 <i class="fas fa-times"></i>
                             </button>
@@ -1376,15 +1380,17 @@
                 });
             });
             
-            // Input de cantidad - Activar solo cuando se toque
+            // Input de cantidad - CORREGIDO: Ahora permite teclado
             quantityInput.addEventListener('click', function() {
                 if (isProcessing) return;
-                if (this.classList.contains('readonly')) {
-                    this.classList.remove('readonly');
-                    this.removeAttribute('readonly');
-                    this.focus();
-                    this.select();
-                }
+                this.focus();
+                this.select();
+            });
+            
+            quantityInput.addEventListener('focus', function() {
+                if (isProcessing) return;
+                // Mostrar teclado numérico
+                this.setAttribute('inputmode', 'numeric');
             });
             
             quantityInput.addEventListener('blur', function() {
@@ -1401,8 +1407,6 @@
             clearQuantityBtn.addEventListener('click', function() {
                 if (isProcessing) return;
                 quantityInput.value = '';
-                quantityInput.classList.remove('readonly');
-                quantityInput.removeAttribute('readonly');
                 quantityInput.focus();
             });
             
@@ -1506,8 +1510,6 @@
             document.body.classList.remove('modal-open');
             
             // Resetear input
-            quantityInput.classList.add('readonly');
-            quantityInput.setAttribute('readonly', true);
             quantityInput.value = "1";
             
             // Asegurarse de que no haya spinner activo
@@ -1635,7 +1637,7 @@
             }
         }
 
-        // Cargar historial desde Firebase SIMPLE (sin filtros complejos que requieran índice)
+        // Cargar historial desde Firebase SIMPLE
         async function cargarHistorialFirebaseSimple() {
             try {
                 if (!db) return;
@@ -1657,7 +1659,7 @@
                     contador++;
                     const data = doc.data();
                     
-                    // Filtrar SOLO transferencias en el cliente (no en la consulta)
+                    // Filtrar SOLO transferencias en el cliente
                     if (data.tipo === 'transferencia') {
                         nuevasTransferencias.push({
                             id: data.id || doc.id,
@@ -1691,7 +1693,6 @@
                 return true;
             } catch (error) {
                 console.error('Error cargando historial:', error);
-                // Si hay error, usar datos locales o vacío
                 historial = historial || [];
                 return false;
             }
@@ -1710,7 +1711,7 @@
                 // Sincronizar productos
                 await cargarProductosFirebaseConProgreso();
                 
-                // Sincronizar historial (versión simple)
+                // Sincronizar historial
                 await cargarHistorialFirebaseSimple();
                 
                 // Actualizar última sincronización
@@ -1843,7 +1844,7 @@
             modalProductName.textContent = producto.name;
             modalProductSku.textContent = `SKU: ${producto.sku}`;
             
-            // MOSTRAR SOLO STOCK DE BODEGA
+            // MOSTRAR SOLO STOCK DE BODEGA (tamaño reducido)
             const stockBodega = producto.bodega || 0;
             stockBodegaDisplay.textContent = stockBodega;
             
@@ -1864,8 +1865,6 @@
             
             // Resetear input
             quantityInput.value = "1";
-            quantityInput.classList.add('readonly');
-            quantityInput.setAttribute('readonly', true);
             
             // Asegurar que los botones estén habilitados
             mostrarSpinnerConfirmar(false);
@@ -1873,10 +1872,16 @@
             // Validar cantidad
             validarCantidadInput();
             
-            // Mostrar modal
+            // Mostrar modal y enfocar input automáticamente
             trasladoModal.style.display = 'flex';
             modalOpen = true;
             document.body.classList.add('modal-open');
+            
+            // Enfocar el input de cantidad después de un breve delay
+            setTimeout(() => {
+                quantityInput.focus();
+                quantityInput.select();
+            }, 300);
             
             // Limpiar input de escaneo
             scannerInput.value = '';
@@ -1931,7 +1936,7 @@
             });
         }
 
-        // Ejecutar traslado confirmado (SIEMPRE de Bodega → Tienda)
+        // Ejecutar traslado confirmado
         async function ejecutarTrasladoConfirmado() {
             if (isProcessing) return;
             
@@ -1980,7 +1985,7 @@
             }
         }
 
-        // Realizar traslado (SIEMPRE de Bodega → Tienda)
+        // Realizar traslado
         async function realizarTraslado(productoId, cantidad, origen, destino, origenNombre, destinoNombre) {
             const productoIndex = productos.findIndex(p => p.id === productoId);
             if (productoIndex === -1) {
@@ -1991,7 +1996,7 @@
             
             const producto = productos[productoIndex];
             
-            // Actualizar stock (SIEMPRE de Bodega → Tienda)
+            // Actualizar stock
             producto.bodega -= cantidad;
             producto.tienda += cantidad;
             

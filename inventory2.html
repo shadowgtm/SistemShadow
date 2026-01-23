@@ -655,16 +655,12 @@
         
         /* Estilos adicionales para diferentes niveles de stock */
         .stock-cell::before {
-            content: '';
-            position: absolute;
-            left: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: var(--success);
-        }
+    display: none;
+}
+
+.stock-cell.critico::before {
+    display: block;
+}
         
         .stock-cell.critico {
             color: var(--danger) !important;

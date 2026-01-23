@@ -1986,8 +1986,8 @@
 
         // Función para obtener clase CSS según nivel de stock
         function getStockLevelClass(stock) {
-            if (stock <= 5) return 'critico';
-            if (stock <= 15) return 'bajo';
+            if (stock <= 0) return 'critico';
+            if (stock <= 0) return 'bajo';
             return '';
         }
 

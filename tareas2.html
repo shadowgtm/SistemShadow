@@ -297,7 +297,7 @@
         
         .progress-bar {
             width: 100%;
-            height: 12px; /* Barra más delgada */
+            height: 12px;
             background: #f0f0f0;
             border-radius: 6px;
             overflow: hidden;
@@ -490,8 +490,8 @@
             background: rgba(39, 174, 96, 0.3);
         }
         
-        /* Modal para escanear producto */
-        .scan-modal {
+        /* Modal para TAP en producto (Inventario + Problemas) */
+        .tap-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -505,7 +505,7 @@
             padding: 15px;
         }
         
-        .scan-modal-content {
+        .tap-modal-content {
             background: white;
             border-radius: 12px;
             width: 100%;
@@ -520,9 +520,58 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        .scan-modal-header {
+        .tap-modal-header {
             padding: 20px;
             background: linear-gradient(135deg, var(--primary), #1a252f);
+            color: white;
+            text-align: center;
+        }
+        
+        .tap-modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .tap-modal-sku {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .tap-modal-body {
+            padding: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        /* Modal para ESCANEO (Solo cantidad) */
+        .scan-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2001;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        
+        .scan-modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 350px;
+            animation: modalFadeIn 0.3s;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .scan-modal-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--secondary), #2980b9);
             color: white;
             text-align: center;
         }
@@ -539,21 +588,11 @@
         }
         
         .scan-modal-body {
-            padding: 20px;
-            max-height: 70vh;
-            overflow-y: auto;
+            padding: 25px;
         }
         
         .modal-section {
             margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .modal-section:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
         }
         
         .modal-section-title {
@@ -605,8 +644,48 @@
             color: #666;
         }
         
-        .problem-options {
+        .inventory-info {
             margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .inventory-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .inventory-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .inventory-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .inventory-value {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .inventory-value.low {
+            color: var(--warning);
+        }
+        
+        .inventory-value.critical {
+            color: var(--danger);
+        }
+        
+        .problem-options {
+            margin-top: 20px;
         }
         
         .problem-buttons {
@@ -651,47 +730,7 @@
             font-size: 1.1rem;
         }
         
-        .inventory-info {
-            margin-top: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-        }
-        
-        .inventory-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .inventory-item:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-        
-        .inventory-label {
-            font-weight: 600;
-            color: #495057;
-        }
-        
-        .inventory-value {
-            font-weight: 700;
-            color: var(--primary);
-        }
-        
-        .inventory-value.low {
-            color: var(--warning);
-        }
-        
-        .inventory-value.critical {
-            color: var(--danger);
-        }
-        
-        .scan-modal-actions {
+        .modal-actions {
             display: flex;
             gap: 10px;
             margin-top: 20px;
@@ -788,6 +827,7 @@
                 flex-direction: column;
             }
             
+            .tap-modal-content,
             .scan-modal-content {
                 max-width: 95%;
             }
@@ -803,7 +843,7 @@
                 flex: 1 0 calc(50% - 10px);
             }
             
-            .scan-modal-actions {
+            .modal-actions {
                 flex-direction: column;
             }
         }
@@ -881,15 +921,15 @@
         </div>
     </div>
     
-    <!-- Modal para producto (al hacer tap) -->
-    <div class="scan-modal" id="productModal">
-        <div class="scan-modal-content">
-            <div class="scan-modal-header">
-                <div class="scan-modal-title" id="modalProductName">Nombre del Producto</div>
-                <div class="scan-modal-sku" id="modalProductSku">SKU: 000000</div>
+    <!-- Modal para TAP en producto (Inventario + Problemas) -->
+    <div class="tap-modal" id="tapModal">
+        <div class="tap-modal-content">
+            <div class="tap-modal-header">
+                <div class="tap-modal-title" id="tapProductName">Nombre del Producto</div>
+                <div class="tap-modal-sku" id="tapProductSku">SKU: 000000</div>
             </div>
             
-            <div class="scan-modal-body">
+            <div class="tap-modal-body">
                 <!-- Sección 1: Existencia de Inventario -->
                 <div class="modal-section">
                     <div class="modal-section-title">
@@ -898,44 +938,23 @@
                     <div class="inventory-info">
                         <div class="inventory-item">
                             <span class="inventory-label">Requerido:</span>
-                            <span class="inventory-value" id="modalRequired">0</span>
+                            <span class="inventory-value" id="tapRequired">0</span>
                         </div>
                         <div class="inventory-item">
                             <span class="inventory-label">Escaneado:</span>
-                            <span class="inventory-value" id="modalScanned">0</span>
+                            <span class="inventory-value" id="tapScanned">0</span>
                         </div>
                         <div class="inventory-item">
                             <span class="inventory-label">Restante:</span>
-                            <span class="inventory-value" id="modalRemaining">0</span>
+                            <span class="inventory-value" id="tapRemaining">0</span>
                         </div>
                         <div class="inventory-item">
                             <span class="inventory-label">Stock Bodega:</span>
-                            <span class="inventory-value" id="modalStock">0</span>
+                            <span class="inventory-value" id="tapStock">0</span>
                         </div>
                         <div class="inventory-item">
                             <span class="inventory-label">Disponible:</span>
-                            <span class="inventory-value" id="modalAvailable">0</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Sección 2: Cantidad a Escanear -->
-                <div class="modal-section">
-                    <div class="modal-section-title">
-                        <i class="fas fa-hashtag"></i> Cantidad a Escanear
-                    </div>
-                    <div class="quantity-input-section">
-                        <div class="quantity-input-group">
-                            <input type="number" 
-                                   class="quantity-input" 
-                                   id="modalQuantityInput"
-                                   min="0"
-                                   max="1000"
-                                   value="0"
-                                   autofocus>
-                        </div>
-                        <div class="quantity-info">
-                            Máximo: <strong id="modalMax">0</strong> unidades
+                            <span class="inventory-value" id="tapAvailable">0</span>
                         </div>
                     </div>
                 </div>
@@ -947,11 +966,11 @@
                     </div>
                     <div class="problem-options">
                         <div class="problem-buttons">
-                            <button class="problem-btn" id="btnInsufficient" data-problem="insufficient">
+                            <button class="problem-btn" id="tapBtnInsufficient" data-problem="insufficient">
                                 <i class="fas fa-exclamation-triangle"></i>
                                 Existencia Insuficiente
                             </button>
-                            <button class="problem-btn" id="btnBroken" data-problem="broken">
+                            <button class="problem-btn" id="tapBtnBroken" data-problem="broken">
                                 <i class="fas fa-times-circle"></i>
                                 Quebrado
                             </button>
@@ -959,11 +978,54 @@
                     </div>
                 </div>
                 
-                <div class="scan-modal-actions">
-                    <button class="modal-btn modal-btn-cancel" id="btnModalCancel">
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn-cancel" id="tapBtnCancel">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                    <button class="modal-btn modal-btn-confirm" id="tapBtnConfirm">
+                        <i class="fas fa-check"></i> Guardar Problema
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para ESCANEO (Solo cantidad) -->
+    <div class="scan-modal" id="scanModal">
+        <div class="scan-modal-content">
+            <div class="scan-modal-header">
+                <div class="scan-modal-title" id="scanModalProductName">Nombre del Producto</div>
+                <div class="scan-modal-sku" id="scanModalProductSku">SKU: 000000</div>
+            </div>
+            
+            <div class="scan-modal-body">
+                <!-- Solo Sección 2: Cantidad a Escanear -->
+                <div class="modal-section">
+                    <div class="modal-section-title">
+                        <i class="fas fa-hashtag"></i> Cantidad Escaneada
+                    </div>
+                    <div class="quantity-input-section">
+                        <div class="quantity-input-group">
+                            <input type="number" 
+                                   class="quantity-input" 
+                                   id="scanModalQuantityInput"
+                                   min="0"
+                                   max="1000"
+                                   value="0"
+                                   autofocus>
+                        </div>
+                        <div class="quantity-info">
+                            Máximo: <strong id="scanModalMax">0</strong> unidades | 
+                            Restante: <strong id="scanModalRemaining">0</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn-cancel" id="scanBtnCancel">
                         <i class="fas fa-times"></i> Cancelar
                     </button>
-                    <button class="modal-btn modal-btn-confirm" id="btnModalConfirm">
+                    <button class="modal-btn modal-btn-confirm" id="scanBtnConfirm">
                         <i class="fas fa-check"></i> Guardar
                     </button>
                 </div>
@@ -1068,78 +1130,6 @@
                         available: 6
                     }
                 ]
-            },
-            {
-                id: "SAL-2023-003",
-                title: "Pedido Especial Corporativo",
-                date: "2023-10-14",
-                status: "Finalizado",
-                client: "Empresa ABC",
-                priority: "Alta",
-                finalized: true,
-                products: [
-                    { 
-                        id: "P008", 
-                        sku: "SKU12352", 
-                        name: "Tablet Samsung Galaxy Tab S8", 
-                        required: 10, 
-                        scanned: 10, 
-                        issues: [],
-                        stock: 15,
-                        available: 5
-                    },
-                    { 
-                        id: "P009", 
-                        sku: "SKU12353", 
-                        name: "Cargador USB-C 65W", 
-                        required: 15, 
-                        scanned: 15, 
-                        issues: [],
-                        stock: 20,
-                        available: 5
-                    }
-                ]
-            },
-            {
-                id: "SAL-2023-004",
-                title: "Envío Tienda Online",
-                date: "2023-10-15",
-                status: "En Proceso",
-                client: "E-commerce Store",
-                priority: "Alta",
-                finalized: false,
-                products: [
-                    { 
-                        id: "P010", 
-                        sku: "SKU12354", 
-                        name: "Smartwatch Apple Watch", 
-                        required: 2, 
-                        scanned: 1, 
-                        issues: ["Existencia Insuficiente"],
-                        stock: 1,
-                        available: 0
-                    },
-                    { 
-                        id: "P011", 
-                        sku: "SKU12355", 
-                        name: "Auriculares Bluetooth Sony", 
-                        required: 4, 
-                        scanned: 2, 
-                        issues: [],
-                        stock: 5,
-                        available: 2
-                    },
-                    { 
-                        id: "P012", 
-                        sku: "SKU12356", 
-                        name: "Altavoz Inteligente Google", 
-                        required: 3, 
-                        scanned: 1, 
-                        issues: ["Quebrado"],
-                        stock: 4,
-                        available: 1
-                    }
-                ]
             }
         ];
 
@@ -1152,7 +1142,8 @@
         // Elementos del DOM
         const mainInterface = document.getElementById('mainInterface');
         const scanInterface = document.getElementById('scanInterface');
-        const productModal = document.getElementById('productModal');
+        const tapModal = document.getElementById('tapModal');
+        const scanModal = document.getElementById('scanModal');
         const cardsContainer = document.getElementById('cardsContainer');
         const scannerInput = document.getElementById('scannerInput');
         const requirementProgress = document.getElementById('requirementProgress');
@@ -1167,20 +1158,27 @@
         const btnBack = document.getElementById('btnBack');
         const btnFinalizeHeader = document.getElementById('btnFinalizeHeader');
         
-        // Elementos del modal
-        const modalProductName = document.getElementById('modalProductName');
-        const modalProductSku = document.getElementById('modalProductSku');
-        const modalRequired = document.getElementById('modalRequired');
-        const modalScanned = document.getElementById('modalScanned');
-        const modalRemaining = document.getElementById('modalRemaining');
-        const modalStock = document.getElementById('modalStock');
-        const modalAvailable = document.getElementById('modalAvailable');
-        const modalQuantityInput = document.getElementById('modalQuantityInput');
-        const modalMax = document.getElementById('modalMax');
-        const btnInsufficient = document.getElementById('btnInsufficient');
-        const btnBroken = document.getElementById('btnBroken');
-        const btnModalCancel = document.getElementById('btnModalCancel');
-        const btnModalConfirm = document.getElementById('btnModalConfirm');
+        // Elementos del modal TAP
+        const tapProductName = document.getElementById('tapProductName');
+        const tapProductSku = document.getElementById('tapProductSku');
+        const tapRequired = document.getElementById('tapRequired');
+        const tapScanned = document.getElementById('tapScanned');
+        const tapRemaining = document.getElementById('tapRemaining');
+        const tapStock = document.getElementById('tapStock');
+        const tapAvailable = document.getElementById('tapAvailable');
+        const tapBtnInsufficient = document.getElementById('tapBtnInsufficient');
+        const tapBtnBroken = document.getElementById('tapBtnBroken');
+        const tapBtnCancel = document.getElementById('tapBtnCancel');
+        const tapBtnConfirm = document.getElementById('tapBtnConfirm');
+        
+        // Elementos del modal SCAN
+        const scanModalProductName = document.getElementById('scanModalProductName');
+        const scanModalProductSku = document.getElementById('scanModalProductSku');
+        const scanModalQuantityInput = document.getElementById('scanModalQuantityInput');
+        const scanModalMax = document.getElementById('scanModalMax');
+        const scanModalRemaining = document.getElementById('scanModalRemaining');
+        const scanBtnCancel = document.getElementById('scanBtnCancel');
+        const scanBtnConfirm = document.getElementById('scanBtnConfirm');
 
         // Inicializar aplicación
         document.addEventListener('DOMContentLoaded', function() {
@@ -1246,29 +1244,43 @@
                 }
             });
             
-            // Modal - Botones de problemas
-            btnInsufficient.addEventListener('click', function() {
+            // Modal TAP - Botones de problemas
+            tapBtnInsufficient.addEventListener('click', function() {
                 toggleProblem('insufficient');
             });
             
-            btnBroken.addEventListener('click', function() {
+            tapBtnBroken.addEventListener('click', function() {
                 toggleProblem('broken');
             });
             
-            // Modal - Cancelar
-            btnModalCancel.addEventListener('click', function() {
-                closeModal();
+            // Modal TAP - Cancelar
+            tapBtnCancel.addEventListener('click', function() {
+                closeTapModal();
             });
             
-            // Modal - Confirmar
-            btnModalConfirm.addEventListener('click', function() {
-                saveProductUpdate();
+            // Modal TAP - Confirmar problema
+            tapBtnConfirm.addEventListener('click', function() {
+                saveProblem();
             });
             
-            // Cerrar modal con Escape
+            // Modal SCAN - Cancelar
+            scanBtnCancel.addEventListener('click', function() {
+                closeScanModal();
+            });
+            
+            // Modal SCAN - Confirmar cantidad
+            scanBtnConfirm.addEventListener('click', function() {
+                saveScanQuantity();
+            });
+            
+            // Cerrar modales con Escape
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && productModal.style.display === 'flex') {
-                    closeModal();
+                if (e.key === 'Escape') {
+                    if (tapModal.style.display === 'flex') {
+                        closeTapModal();
+                    } else if (scanModal.style.display === 'flex') {
+                        closeScanModal();
+                    }
                 }
             });
             
@@ -1527,9 +1539,9 @@
                     ` : ''}
                 `;
                 
-                // Agregar event listener para abrir modal al hacer tap
+                // Agregar event listener para abrir modal TAP
                 productElement.addEventListener('click', function() {
-                    openProductModal(product.id);
+                    openTapModal(product.id);
                 });
                 
                 productsList.appendChild(productElement);
@@ -1644,7 +1656,7 @@
             // Buscar producto por SKU
             const product = currentRequirement.products.find(p => p.sku === code);
             if (product) {
-                openProductModal(product.id);
+                openScanModal(product.id);
                 scannerInput.value = '';
             } else {
                 showNotification(`Producto no encontrado: ${code}`, 'error');
@@ -1653,8 +1665,8 @@
             }
         }
 
-        // Abrir modal para producto al hacer tap
-        function openProductModal(productId) {
+        // Abrir modal TAP (Inventario + Problemas)
+        function openTapModal(productId) {
             if (!currentRequirement) return;
             
             currentProduct = currentRequirement.products.find(p => p.id === productId);
@@ -1662,48 +1674,45 @@
             
             // Resetear selección de problemas
             selectedProblem = null;
-            btnInsufficient.classList.remove('active');
-            btnBroken.classList.remove('active');
+            tapBtnInsufficient.classList.remove('active');
+            tapBtnBroken.classList.remove('active');
             
             // Actualizar información del modal
-            modalProductName.textContent = currentProduct.name;
-            modalProductSku.textContent = `SKU: ${currentProduct.sku}`;
-            modalRequired.textContent = currentProduct.required;
-            modalScanned.textContent = currentProduct.scanned;
+            tapProductName.textContent = currentProduct.name;
+            tapProductSku.textContent = `SKU: ${currentProduct.sku}`;
+            tapRequired.textContent = currentProduct.required;
+            tapScanned.textContent = currentProduct.scanned;
             
             const remaining = Math.max(0, currentProduct.required - currentProduct.scanned);
-            modalRemaining.textContent = remaining;
-            modalStock.textContent = currentProduct.stock || 0;
+            tapRemaining.textContent = remaining;
+            tapStock.textContent = currentProduct.stock || 0;
             
             // Calcular disponible (stock - ya escaneado)
             const available = Math.max(0, (currentProduct.stock || 0) - currentProduct.scanned);
-            modalAvailable.textContent = available;
+            tapAvailable.textContent = available;
             
             // Actualizar clases de color para disponibilidad
-            updateInventoryColors(available, currentProduct.required);
+            updateTapInventoryColors(available, currentProduct.required);
             
-            // Establecer valor inicial del input
-            modalQuantityInput.value = remaining > 0 ? remaining : 0;
-            
-            // Calcular máximo (lo que falta o lo disponible, lo que sea menor)
-            const maxPossible = Math.min(remaining, available);
-            modalQuantityInput.max = maxPossible;
-            modalMax.textContent = maxPossible;
+            // Si el producto ya tiene issues, marcar el botón correspondiente
+            if (currentProduct.issues && currentProduct.issues.length > 0) {
+                if (currentProduct.issues.includes('Existencia Insuficiente')) {
+                    selectedProblem = 'insufficient';
+                    tapBtnInsufficient.classList.add('active');
+                } else if (currentProduct.issues.includes('Quebrado')) {
+                    selectedProblem = 'broken';
+                    tapBtnBroken.classList.add('active');
+                }
+            }
             
             // Mostrar modal
-            productModal.style.display = 'flex';
-            
-            // Enfocar input
-            setTimeout(() => {
-                modalQuantityInput.focus();
-                modalQuantityInput.select();
-            }, 100);
+            tapModal.style.display = 'flex';
         }
 
-        // Actualizar colores de inventario según disponibilidad
-        function updateInventoryColors(available, required) {
-            const stockValue = modalStock;
-            const availableValue = modalAvailable;
+        // Actualizar colores de inventario en modal TAP
+        function updateTapInventoryColors(available, required) {
+            const stockValue = tapStock;
+            const availableValue = tapAvailable;
             
             // Resetear clases
             stockValue.className = 'inventory-value';
@@ -1724,9 +1733,9 @@
             }
         }
 
-        // Cerrar modal
-        function closeModal() {
-            productModal.style.display = 'none';
+        // Cerrar modal TAP
+        function closeTapModal() {
+            tapModal.style.display = 'none';
             currentProduct = null;
             selectedProblem = null;
             
@@ -1736,55 +1745,79 @@
             }, 100);
         }
 
-        // Alternar selección de problema
+        // Abrir modal SCAN (Solo cantidad)
+        function openScanModal(productId) {
+            if (!currentRequirement) return;
+            
+            currentProduct = currentRequirement.products.find(p => p.id === productId);
+            if (!currentProduct) return;
+            
+            // Actualizar información del modal SCAN
+            scanModalProductName.textContent = currentProduct.name;
+            scanModalProductSku.textContent = `SKU: ${currentProduct.sku}`;
+            
+            const remaining = Math.max(0, currentProduct.required - currentProduct.scanned);
+            scanModalRemaining.textContent = remaining;
+            
+            // Calcular disponible (stock - ya escaneado)
+            const available = Math.max(0, (currentProduct.stock || 0) - currentProduct.scanned);
+            
+            // Calcular máximo (lo que falta o lo disponible, lo que sea menor)
+            const maxPossible = Math.min(remaining, available);
+            scanModalQuantityInput.max = maxPossible;
+            scanModalMax.textContent = maxPossible;
+            
+            // Establecer valor inicial del input (sugerir lo que falta)
+            scanModalQuantityInput.value = maxPossible > 0 ? maxPossible : 0;
+            
+            // Mostrar modal
+            scanModal.style.display = 'flex';
+            
+            // Enfocar input
+            setTimeout(() => {
+                scanModalQuantityInput.focus();
+                scanModalQuantityInput.select();
+            }, 100);
+        }
+
+        // Cerrar modal SCAN
+        function closeScanModal() {
+            scanModal.style.display = 'none';
+            currentProduct = null;
+            
+            // Re-enfocar input de escaneo
+            setTimeout(() => {
+                scannerInput.focus();
+            }, 100);
+        }
+
+        // Alternar selección de problema en modal TAP
         function toggleProblem(problemType) {
             if (selectedProblem === problemType) {
                 // Deseleccionar
                 selectedProblem = null;
                 if (problemType === 'insufficient') {
-                    btnInsufficient.classList.remove('active');
+                    tapBtnInsufficient.classList.remove('active');
                 } else {
-                    btnBroken.classList.remove('active');
+                    tapBtnBroken.classList.remove('active');
                 }
             } else {
                 // Seleccionar nuevo problema
                 selectedProblem = problemType;
                 
                 if (problemType === 'insufficient') {
-                    btnInsufficient.classList.add('active');
-                    btnBroken.classList.remove('active');
+                    tapBtnInsufficient.classList.add('active');
+                    tapBtnBroken.classList.remove('active');
                 } else {
-                    btnBroken.classList.add('active');
-                    btnInsufficient.classList.remove('active');
+                    tapBtnBroken.classList.add('active');
+                    tapBtnInsufficient.classList.remove('active');
                 }
-                
-                // Si se selecciona un problema, establecer cantidad a 0
-                modalQuantityInput.value = 0;
             }
         }
 
-        // Guardar actualización de producto
-        function saveProductUpdate() {
+        // Guardar problema desde modal TAP
+        function saveProblem() {
             if (!currentProduct) return;
-            
-            const quantity = parseInt(modalQuantityInput.value) || 0;
-            const maxAllowed = parseInt(modalQuantityInput.max) || 0;
-            
-            // Validar cantidad
-            if (quantity < 0) {
-                showNotification('La cantidad no puede ser negativa', 'error');
-                modalQuantityInput.focus();
-                return;
-            }
-            
-            if (quantity > maxAllowed) {
-                showNotification(`No puede exceder la cantidad disponible: ${maxAllowed}`, 'error');
-                modalQuantityInput.focus();
-                return;
-            }
-            
-            // Actualizar cantidad escaneada
-            currentProduct.scanned = quantity;
             
             // Manejar problemas
             if (selectedProblem) {
@@ -1798,8 +1831,53 @@
                 
                 // Si hay problema, forzar cantidad a 0
                 currentProduct.scanned = 0;
+                
+                // Mostrar notificación
+                showNotification(`Producto marcado como: ${problemText}`, 'warning');
             } else {
                 // Si no hay problema seleccionado, limpiar issues
+                currentProduct.issues = [];
+                showNotification('Problema eliminado del producto', 'info');
+            }
+            
+            // Actualizar interfaz
+            renderProducts();
+            updateRequirementProgress();
+            updateRequirementStatus();
+            updateFinalizeButton();
+            
+            // Cerrar modal
+            closeTapModal();
+            
+            // Guardar cambios
+            saveToLocalStorage();
+        }
+
+        // Guardar cantidad desde modal SCAN
+        function saveScanQuantity() {
+            if (!currentProduct) return;
+            
+            const quantity = parseInt(scanModalQuantityInput.value) || 0;
+            const maxAllowed = parseInt(scanModalQuantityInput.max) || 0;
+            
+            // Validar cantidad
+            if (quantity < 0) {
+                showNotification('La cantidad no puede ser negativa', 'error');
+                scanModalQuantityInput.focus();
+                return;
+            }
+            
+            if (quantity > maxAllowed) {
+                showNotification(`No puede exceder la cantidad máxima: ${maxAllowed}`, 'error');
+                scanModalQuantityInput.focus();
+                return;
+            }
+            
+            // Actualizar cantidad escaneada
+            currentProduct.scanned = quantity;
+            
+            // Si se está escaneando cantidad, limpiar problemas
+            if (quantity > 0) {
                 currentProduct.issues = [];
             }
             
@@ -1811,29 +1889,54 @@
             
             // Mostrar notificación
             let message = '';
-            if (selectedProblem) {
-                const problemText = selectedProblem === 'insufficient' ? 'Existencia Insuficiente' : 'Quebrado';
-                message = `Producto marcado como: ${problemText}`;
-                showNotification(message, 'warning');
-            } else if (quantity === 0) {
+            if (quantity === 0) {
                 message = `Cantidad actualizada: ${currentProduct.name} - 0 unidades`;
                 showNotification(message, 'info');
             } else {
-                message = `Actualizado: ${currentProduct.name} - ${quantity} unidades`;
+                message = `Escaneado: ${currentProduct.name} - ${quantity} unidades`;
                 showNotification(message, 'success');
             }
             
             // Efectos
-            if (!selectedProblem && quantity > 0) {
+            if (quantity > 0) {
                 playSound('success');
                 vibrate();
             }
             
             // Cerrar modal
-            closeModal();
+            closeScanModal();
             
             // Guardar cambios
             saveToLocalStorage();
+            
+            // Si se completó este producto, enfocar el siguiente
+            if (quantity >= currentProduct.required) {
+                autoFocusNextProduct();
+            }
+        }
+
+        // Enfocar automáticamente el siguiente producto pendiente
+        function autoFocusNextProduct() {
+            if (!currentRequirement) return;
+            
+            const pendingProducts = currentRequirement.products.filter(p => 
+                p.scanned < p.required && 
+                (!p.issues || p.issues.length === 0)
+            );
+            
+            if (pendingProducts.length > 0) {
+                // Mostrar sugerencia para el siguiente producto
+                const nextProduct = pendingProducts[0];
+                showNotification(`Siguiente: ${nextProduct.name} - ${nextProduct.required - nextProduct.scanned} restantes`, 'info');
+                
+                // Auto-enfocar el input de escaneo para el SKU
+                scannerInput.value = nextProduct.sku;
+                scannerInput.focus();
+                scannerInput.select();
+            } else {
+                // Si no hay productos pendientes, mostrar mensaje
+                showNotification('¡Todos los productos están completados!', 'success');
+            }
         }
 
         // Actualizar progreso del requerimiento

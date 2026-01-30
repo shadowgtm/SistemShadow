@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistema de Requerimientos por Salida</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #9b59b6;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), #1a252f);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .header-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            padding-bottom: 20px;
+        }
+        
+        .requirement-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 5px solid var(--secondary);
+        }
+        
+        .requirement-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            padding: 20px;
+        }
+        
+        .requirement-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .requirement-id {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .detail-item {
+            text-align: center;
+        }
+        
+        .detail-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+            color: #666;
+            display: block;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-pending {
+            background: #ffeaa7;
+            color: #d35400;
+        }
+        
+        .status-in-progress {
+            background: #a29bfe;
+            color: white;
+        }
+        
+        .status-completed {
+            background: #55efc4;
+            color: #00b894;
+        }
+        
+        /* Interfaz de escaneo */
+        .scan-interface {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            flex-direction: column;
+        }
+        
+        .scan-header {
+            background: linear-gradient(135deg, var(--primary), #1a252f);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .scan-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .scan-back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .scan-back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .scanner-section {
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .scanner-title {
+            text-align: center;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .scanner-input-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .scanner-input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: var(--light);
+            transition: border-color 0.3s;
+        }
+        
+        .scanner-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+        
+        .scanner-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary);
+            font-size: 1.1rem;
+        }
+        
+        .progress-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .progress-title {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .progress-percent {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-complete {
+            background: linear-gradient(90deg, var(--success), #2ecc71);
+        }
+        
+        .progress-incomplete {
+            background: linear-gradient(90deg, var(--warning), #e67e22);
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .products-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+        
+        .product-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .product-item.completed {
+            border-left-color: var(--success);
+        }
+        
+        .product-item.in-progress {
+            border-left-color: var(--warning);
+        }
+        
+        .product-item.problem {
+            border-left-color: var(--danger);
+        }
+        
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1rem;
+            flex: 1;
+        }
+        
+        .product-sku {
+            font-size: 0.8rem;
+            color: #666;
+            background: #eee;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        
+        .product-quantity {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        
+        .quantity-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .quantity-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .product-progress {
+            margin-top: 15px;
+        }
+        
+        .product-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .product-progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .scanned-count {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .scan-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .scan-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .scan-btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .scan-btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .problem-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .problem-insufficient {
+            background: #ffeaa7;
+            color: #d35400;
+        }
+        
+        .problem-broken {
+            background: #ff7675;
+            color: white;
+        }
+        
+        /* Modal para escanear producto */
+        .scan-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        
+        .scan-modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            animation: modalFadeIn 0.3s;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .scan-modal-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), #1a252f);
+            color: white;
+            text-align: center;
+        }
+        
+        .scan-modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .scan-modal-sku {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .scan-modal-body {
+            padding: 20px;
+        }
+        
+        .quantity-input-section {
+            margin-bottom: 20px;
+        }
+        
+        .quantity-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .quantity-input-group {
+            position: relative;
+        }
+        
+        .quantity-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--primary);
+            background: #f8f9fa;
+        }
+        
+        .quantity-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+        
+        .quantity-info {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .problem-options {
+            margin-bottom: 20px;
+        }
+        
+        .problem-title {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .problem-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .problem-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .problem-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        .problem-btn.active {
+            border-color: var(--warning);
+            background: #fff8e1;
+            color: #d35400;
+        }
+        
+        .problem-btn.broken.active {
+            border-color: var(--danger);
+            background: #ffebee;
+            color: #c0392b;
+        }
+        
+        .problem-btn i {
+            font-size: 1.1rem;
+        }
+        
+        .scan-modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .modal-btn-cancel {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .modal-btn-cancel:hover {
+            background: #e9ecef;
+        }
+        
+        .modal-btn-confirm {
+            background: var(--success);
+            color: white;
+        }
+        
+        .modal-btn-confirm:hover {
+            background: #219653;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+        
+        @keyframes slideIn {
+            from { right: -300px; opacity: 0; }
+            to { right: 20px; opacity: 1; }
+        }
+        
+        .notification.error {
+            background: var(--danger);
+        }
+        
+        .notification.warning {
+            background: var(--warning);
+        }
+        
+        .notification.info {
+            background: var(--info);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+        
+        .empty-text {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .scan-controls {
+                flex-wrap: wrap;
+            }
+            
+            .scan-btn {
+                min-width: calc(50% - 5px);
+            }
+            
+            .problem-buttons {
+                flex-direction: column;
+            }
+            
+            .scan-modal-content {
+                max-width: 95%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .card-details {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .detail-item {
+                flex: 1 0 calc(50% - 10px);
+            }
+            
+            .scan-modal-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Interfaz principal - Lista de requerimientos -->
+    <div class="app-container" id="mainInterface">
+        <header class="app-header">
+            <div class="header-content">
+                <div>
+                    <div class="header-title">
+                        <i class="fas fa-clipboard-list"></i> Requerimientos por Salida
+                    </div>
+                    <div class="header-subtitle">Seleccione un requerimiento para escanear</div>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn" id="btnRefresh" title="Actualizar">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="header-btn" id="btnSettings" title="Configuración">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="content-area">
+            <div class="cards-container" id="cardsContainer">
+                <!-- Las cards de requerimientos se generarán aquí -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Interfaz de escaneo - Se muestra al seleccionar un requerimiento -->
+    <div class="scan-interface" id="scanInterface">
+        <div class="scan-header">
+            <button class="scan-back-btn" id="btnBack">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="scan-title" id="scanReqTitle">Requerimiento</div>
+            <div style="width: 40px;"></div> <!-- Espaciador -->
+        </div>
+        
+        <section class="scanner-section">
+            <h2 class="scanner-title">
+                <i class="fas fa-qrcode"></i> Escanear Producto
+            </h2>
+            
+            <div class="scanner-input-container">
+                <i class="fas fa-barcode scanner-icon"></i>
+                <input type="text" 
+                       class="scanner-input" 
+                       id="scannerInput"
+                       placeholder="Escanear código de barras o SKU..."
+                       autocomplete="off"
+                       autofocus>
+            </div>
+            
+            <div class="progress-section">
+                <div class="progress-header">
+                    <div class="progress-title">Progreso del Requerimiento</div>
+                    <div class="progress-percent" id="requirementProgress">0%</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="requirementProgressFill"></div>
+                </div>
+                <div class="progress-text">
+                    <span>Escaneados: <strong id="scannedCount">0</strong></span>
+                    <span>Total: <strong id="totalCount">0</strong></span>
+                </div>
+            </div>
+        </section>
+        
+        <div class="products-list" id="productsList">
+            <!-- Lista de productos se generará aquí -->
+        </div>
+    </div>
+    
+    <!-- Modal para escanear producto -->
+    <div class="scan-modal" id="scanModal">
+        <div class="scan-modal-content">
+            <div class="scan-modal-header">
+                <div class="scan-modal-title" id="modalProductName">Nombre del Producto</div>
+                <div class="scan-modal-sku" id="modalProductSku">SKU: 000000</div>
+            </div>
+            
+            <div class="scan-modal-body">
+                <div class="quantity-input-section">
+                    <label class="quantity-label">Cantidad Escaneada</label>
+                    <div class="quantity-input-group">
+                        <input type="number" 
+                               class="quantity-input" 
+                               id="modalQuantityInput"
+                               min="0"
+                               max="1000"
+                               value="0"
+                               autofocus>
+                    </div>
+                    <div class="quantity-info">
+                        Requerido: <strong id="modalRequired">0</strong> unidades | 
+                        Restantes: <strong id="modalRemaining">0</strong>
+                    </div>
+                </div>
+                
+                <div class="problem-options">
+                    <label class="problem-title">Marcar Problema (Opcional)</label>
+                    <div class="problem-buttons">
+                        <button class="problem-btn" id="btnInsufficient" data-problem="insufficient">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Existencia Insuficiente
+                        </button>
+                        <button class="problem-btn" id="btnBroken" data-problem="broken">
+                            <i class="fas fa-times-circle"></i>
+                            Quebrado
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="scan-modal-actions">
+                    <button class="modal-btn modal-btn-cancel" id="btnModalCancel">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="modal-btn modal-btn-confirm" id="btnModalConfirm">
+                        <i class="fas fa-check"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Datos de ejemplo para requerimientos
+        const requirementsData = [
+            {
+                id: "SAL-2023-001",
+                title: "Pedido Cliente Premium",
+                date: "2023-10-15",
+                status: "En Proceso",
+                client: "Corporación XYZ",
+                priority: "Alta",
+                products: [
+                    { id: "P001", sku: "SKU12345", name: "Laptop Dell XPS 15", required: 3, scanned: 2, issues: [] },
+                    { id: "P002", sku: "SKU12346", name: "Mouse Inalámbrico Logitech", required: 5, scanned: 5, issues: [] },
+                    { id: "P003", sku: "SKU12347", name: "Teclado Mecánico RGB", required: 2, scanned: 0, issues: [] }
+                ]
+            },
+            {
+                id: "SAL-2023-002",
+                title: "Reabastecimiento Tienda Centro",
+                date: "2023-10-15",
+                status: "Pendiente",
+                client: "Tienda Centro",
+                priority: "Media",
+                products: [
+                    { id: "P004", sku: "SKU12348", name: "Monitor 24\" Full HD", required: 4, scanned: 0, issues: [] },
+                    { id: "P005", sku: "SKU12349", name: "Impresora Multifuncional", required: 2, scanned: 0, issues: [] },
+                    { id: "P006", sku: "SKU12350", name: "Router WiFi 6", required: 3, scanned: 0, issues: [] },
+                    { id: "P007", sku: "SKU12351", name: "Disco Duro Externo 1TB", required: 6, scanned: 0, issues: [] }
+                ]
+            },
+            {
+                id: "SAL-2023-003",
+                title: "Pedido Especial Corporativo",
+                date: "2023-10-14",
+                status: "Completado",
+                client: "Empresa ABC",
+                priority: "Alta",
+                products: [
+                    { id: "P008", sku: "SKU12352", name: "Tablet Samsung Galaxy Tab S8", required: 10, scanned: 10, issues: [] },
+                    { id: "P009", sku: "SKU12353", name: "Cargador USB-C 65W", required: 15, scanned: 15, issues: [] }
+                ]
+            },
+            {
+                id: "SAL-2023-004",
+                title: "Envío Tienda Online",
+                date: "2023-10-15",
+                status: "En Proceso",
+                client: "E-commerce Store",
+                priority: "Alta",
+                products: [
+                    { id: "P010", sku: "SKU12354", name: "Smartwatch Apple Watch", required: 2, scanned: 1, issues: ["Existencia Insuficiente"] },
+                    { id: "P011", sku: "SKU12355", name: "Auriculares Bluetooth Sony", required: 4, scanned: 2, issues: [] },
+                    { id: "P012", sku: "SKU12356", name: "Altavoz Inteligente Google", required: 3, scanned: 1, issues: ["Quebrado"] }
+                ]
+            }
+        ];
+
+        // Variables globales
+        let requirements = JSON.parse(JSON.stringify(requirementsData));
+        let currentRequirement = null;
+        let currentProduct = null;
+        let selectedProblem = null;
+
+        // Elementos del DOM
+        const mainInterface = document.getElementById('mainInterface');
+        const scanInterface = document.getElementById('scanInterface');
+        const scanModal = document.getElementById('scanModal');
+        const cardsContainer = document.getElementById('cardsContainer');
+        const scannerInput = document.getElementById('scannerInput');
+        const requirementProgress = document.getElementById('requirementProgress');
+        const requirementProgressFill = document.getElementById('requirementProgressFill');
+        const scannedCount = document.getElementById('scannedCount');
+        const totalCount = document.getElementById('totalCount');
+        const productsList = document.getElementById('productsList');
+        const scanReqTitle = document.getElementById('scanReqTitle');
+        const notification = document.getElementById('notification');
+        const btnRefresh = document.getElementById('btnRefresh');
+        const btnSettings = document.getElementById('btnSettings');
+        const btnBack = document.getElementById('btnBack');
+        
+        // Elementos del modal
+        const modalProductName = document.getElementById('modalProductName');
+        const modalProductSku = document.getElementById('modalProductSku');
+        const modalQuantityInput = document.getElementById('modalQuantityInput');
+        const modalRequired = document.getElementById('modalRequired');
+        const modalRemaining = document.getElementById('modalRemaining');
+        const btnInsufficient = document.getElementById('btnInsufficient');
+        const btnBroken = document.getElementById('btnBroken');
+        const btnModalCancel = document.getElementById('btnModalCancel');
+        const btnModalConfirm = document.getElementById('btnModalConfirm');
+
+        // Inicializar aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            renderRequirements();
+            setupEventListeners();
+            loadFromLocalStorage();
+        });
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Botón de actualizar
+            btnRefresh.addEventListener('click', function() {
+                Swal.fire({
+                    title: '¿Reiniciar datos?',
+                    text: 'Se perderán todos los escaneos actuales',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, reiniciar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        requirements = JSON.parse(JSON.stringify(requirementsData));
+                        renderRequirements();
+                        saveToLocalStorage();
+                        showNotification('Datos reinicializados', 'success');
+                    }
+                });
+            });
+            
+            // Botón de configuración
+            btnSettings.addEventListener('click', function() {
+                Swal.fire({
+                    title: 'Configuración',
+                    html: `
+                        <div style="text-align: left;">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Sonido de confirmación:</label>
+                                <select id="soundSetting" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+                                    <option value="on">Activado</option>
+                                    <option value="off">Desactivado</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Vibrar al escanear:</label>
+                                <select id="vibrationSetting" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+                                    <option value="on">Activado</option>
+                                    <option value="off">Desactivado</option>
+                                </select>
+                            </div>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Guardar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        showNotification('Configuración guardada', 'success');
+                    }
+                });
+            });
+            
+            // Botón para volver a la lista
+            btnBack.addEventListener('click', function() {
+                showMainInterface();
+            });
+            
+            // Escáner - Enter key
+            scannerInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    processScan();
+                }
+            });
+            
+            // Modal - Botones de problemas
+            btnInsufficient.addEventListener('click', function() {
+                toggleProblem('insufficient');
+            });
+            
+            btnBroken.addEventListener('click', function() {
+                toggleProblem('broken');
+            });
+            
+            // Modal - Cancelar
+            btnModalCancel.addEventListener('click', function() {
+                closeModal();
+            });
+            
+            // Modal - Confirmar
+            btnModalConfirm.addEventListener('click', function() {
+                saveScan();
+            });
+            
+            // Cerrar modal con Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && scanModal.style.display === 'flex') {
+                    closeModal();
+                }
+            });
+            
+            // Auto-ocultar notificación después de 3 segundos
+            setInterval(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Renderizar requirements como cards
+        function renderRequirements() {
+            cardsContainer.innerHTML = '';
+            
+            if (requirements.length === 0) {
+                cardsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-clipboard"></i>
+                        </div>
+                        <div class="empty-text">No hay requerimientos disponibles</div>
+                        <button class="scan-btn scan-btn-primary" onclick="loadSampleData()" style="margin-top: 15px;">
+                            <i class="fas fa-download"></i> Cargar datos de ejemplo
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            requirements.forEach(req => {
+                // Calcular estadísticas del requerimiento
+                const totalProducts = req.products.length;
+                const totalRequired = req.products.reduce((sum, p) => sum + p.required, 0);
+                const totalScanned = req.products.reduce((sum, p) => sum + p.scanned, 0);
+                const progressPercent = totalRequired > 0 ? Math.round((totalScanned / totalRequired) * 100) : 0;
+                const completedProducts = req.products.filter(p => p.scanned >= p.required).length;
+                const hasProblems = req.products.some(p => p.issues && p.issues.length > 0);
+                
+                // Determinar color de borde según progreso
+                let borderColor = '#3498db'; // Azul por defecto
+                if (progressPercent === 100) {
+                    borderColor = '#27ae60'; // Verde completo
+                } else if (progressPercent > 0) {
+                    borderColor = '#f39c12'; // Naranja en progreso
+                }
+                
+                // Determinar clase de estado
+                let statusClass = 'status-pending';
+                let statusText = 'Pendiente';
+                
+                if (progressPercent === 100) {
+                    statusClass = 'status-completed';
+                    statusText = 'Completado';
+                } else if (progressPercent > 0) {
+                    statusClass = 'status-in-progress';
+                    statusText = 'En Proceso';
+                }
+                
+                const card = document.createElement('div');
+                card.className = 'requirement-card';
+                card.style.borderLeftColor = borderColor;
+                card.dataset.id = req.id;
+                
+                card.innerHTML = `
+                    <div class="card-header" onclick="openScanInterface('${req.id}')">
+                        <div class="requirement-title">${req.title}</div>
+                        <div class="requirement-id">${req.id} • ${req.date}</div>
+                        
+                        <div class="card-details">
+                            <div class="detail-item">
+                                <span class="detail-value">${totalProducts}</span>
+                                <span class="detail-label">Productos</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-value">${totalRequired}</span>
+                                <span class="detail-label">Unidades</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-value" style="color: ${progressPercent === 100 ? '#27ae60' : progressPercent > 0 ? '#f39c12' : '#3498db'}">
+                                    ${progressPercent}%
+                                </span>
+                                <span class="detail-label">Completado</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                            ${hasProblems ? '<span style="font-size: 0.8rem; color: #e74c3c;"><i class="fas fa-exclamation-triangle"></i> Con problemas</span>' : ''}
+                        </div>
+                        
+                        <div style="margin-top: 15px; color: #666; font-size: 0.9rem;">
+                            <i class="fas fa-building"></i> ${req.client} • 
+                            <i class="fas fa-flag"></i> Prioridad: ${req.priority}
+                        </div>
+                    </div>
+                `;
+                
+                cardsContainer.appendChild(card);
+            });
+        }
+
+        // Abrir interfaz de escaneo para un requerimiento
+        function openScanInterface(reqId) {
+            currentRequirement = requirements.find(r => r.id === reqId);
+            if (!currentRequirement) return;
+            
+            // Cambiar a interfaz de escaneo
+            mainInterface.style.display = 'none';
+            scanInterface.style.display = 'flex';
+            
+            // Actualizar título
+            scanReqTitle.textContent = currentRequirement.title;
+            
+            // Renderizar productos
+            renderProducts();
+            
+            // Actualizar progreso
+            updateRequirementProgress();
+            
+            // Enfocar input de escaneo
+            setTimeout(() => {
+                scannerInput.focus();
+            }, 100);
+        }
+
+        // Mostrar interfaz principal
+        function showMainInterface() {
+            mainInterface.style.display = 'flex';
+            scanInterface.style.display = 'none';
+            currentRequirement = null;
+            scannerInput.value = '';
+            renderRequirements();
+        }
+
+        // Renderizar productos en la interfaz de escaneo
+        function renderProducts() {
+            if (!currentRequirement) return;
+            
+            productsList.innerHTML = '';
+            
+            currentRequirement.products.forEach(product => {
+                const isCompleted = product.scanned >= product.required;
+                const hasIssues = product.issues && product.issues.length > 0;
+                const remaining = Math.max(0, product.required - product.scanned);
+                
+                // Determinar clase del item
+                let itemClass = 'product-item';
+                if (isCompleted) {
+                    itemClass += ' completed';
+                } else if (product.scanned > 0) {
+                    itemClass += ' in-progress';
+                }
+                if (hasIssues) {
+                    itemClass += ' problem';
+                }
+                
+                // Calcular porcentaje de completado
+                const scanPercent = product.required > 0 ? (product.scanned / product.required) * 100 : 0;
+                
+                // Determinar color de la barra de progreso
+                let progressColor = '#3498db'; // Azul por defecto
+                if (isCompleted) {
+                    progressColor = '#27ae60'; // Verde completo
+                } else if (product.scanned > 0) {
+                    progressColor = '#f39c12'; // Naranja en progreso
+                }
+                
+                const productElement = document.createElement('div');
+                productElement.className = itemClass;
+                productElement.dataset.productId = product.id;
+                
+                productElement.innerHTML = `
+                    <div class="product-header">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-sku">${product.sku}</div>
+                    </div>
+                    
+                    <div class="product-quantity">
+                        <div class="quantity-label">Requerido:</div>
+                        <div class="quantity-value">${product.required}</div>
+                    </div>
+                    
+                    <div class="product-quantity">
+                        <div class="quantity-label">Escaneado:</div>
+                        <div class="quantity-value" style="color: ${isCompleted ? '#27ae60' : product.scanned > 0 ? '#f39c12' : '#e74c3c'}">
+                            ${product.scanned}
+                        </div>
+                    </div>
+                    
+                    <div class="product-progress">
+                        <div class="product-progress-bar">
+                            <div class="product-progress-fill" style="width: ${scanPercent}%; background: ${progressColor}"></div>
+                        </div>
+                        <div class="scanned-count">
+                            <span>${product.scanned} / ${product.required} unidades</span>
+                            <span>${remaining} faltantes</span>
+                        </div>
+                    </div>
+                    
+                    ${hasIssues ? `
+                    <div>
+                        ${product.issues.map(issue => `
+                            <div class="problem-badge ${issue === 'Existencia Insuficiente' ? 'problem-insufficient' : 'problem-broken'}">
+                                <i class="fas fa-exclamation-circle"></i> ${issue}
+                            </div>
+                        `).join('')}
+                    </div>
+                    ` : ''}
+                    
+                    <div class="scan-controls">
+                        <button class="scan-btn scan-btn-primary" onclick="openScanModal('${product.id}')">
+                            <i class="fas fa-barcode"></i> Escanear Producto
+                        </button>
+                    </div>
+                `;
+                
+                productsList.appendChild(productElement);
+            });
+        }
+
+        // Procesar escaneo automático
+        function processScan() {
+            const code = scannerInput.value.trim();
+            if (!code) {
+                showNotification('Ingrese un código para escanear', 'warning');
+                return;
+            }
+            
+            if (!currentRequirement) return;
+            
+            // Buscar producto por SKU
+            const product = currentRequirement.products.find(p => p.sku === code);
+            if (product) {
+                openScanModal(product.id);
+                scannerInput.value = '';
+            } else {
+                showNotification(`Producto no encontrado: ${code}`, 'error');
+                scannerInput.value = '';
+                scannerInput.focus();
+            }
+        }
+
+        // Abrir modal para escanear producto
+        function openScanModal(productId) {
+            if (!currentRequirement) return;
+            
+            currentProduct = currentRequirement.products.find(p => p.id === productId);
+            if (!currentProduct) return;
+            
+            // Resetear selección de problemas
+            selectedProblem = null;
+            btnInsufficient.classList.remove('active');
+            btnBroken.classList.remove('active');
+            
+            // Actualizar información del modal
+            modalProductName.textContent = currentProduct.name;
+            modalProductSku.textContent = `SKU: ${currentProduct.sku}`;
+            modalRequired.textContent = currentProduct.required;
+            
+            const remaining = Math.max(0, currentProduct.required - currentProduct.scanned);
+            modalRemaining.textContent = remaining;
+            
+            // Establecer valor inicial del input
+            modalQuantityInput.value = remaining > 0 ? remaining : 0;
+            modalQuantityInput.max = currentProduct.required;
+            
+            // Mostrar modal
+            scanModal.style.display = 'flex';
+            
+            // Enfocar input
+            setTimeout(() => {
+                modalQuantityInput.focus();
+                modalQuantityInput.select();
+            }, 100);
+        }
+
+        // Cerrar modal
+        function closeModal() {
+            scanModal.style.display = 'none';
+            currentProduct = null;
+            selectedProblem = null;
+            
+            // Re-enfocar input de escaneo
+            setTimeout(() => {
+                scannerInput.focus();
+            }, 100);
+        }
+
+        // Alternar selección de problema
+        function toggleProblem(problemType) {
+            if (selectedProblem === problemType) {
+                // Deseleccionar
+                selectedProblem = null;
+                if (problemType === 'insufficient') {
+                    btnInsufficient.classList.remove('active');
+                } else {
+                    btnBroken.classList.remove('active');
+                }
+            } else {
+                // Seleccionar nuevo problema
+                selectedProblem = problemType;
+                
+                if (problemType === 'insufficient') {
+                    btnInsufficient.classList.add('active');
+                    btnBroken.classList.remove('active');
+                } else {
+                    btnBroken.classList.add('active');
+                    btnInsufficient.classList.remove('active');
+                }
+                
+                // Si se selecciona un problema, establecer cantidad a 0
+                modalQuantityInput.value = 0;
+            }
+        }
+
+        // Guardar escaneo
+        function saveScan() {
+            if (!currentProduct) return;
+            
+            const quantity = parseInt(modalQuantityInput.value) || 0;
+            
+            // Validar cantidad
+            if (quantity < 0) {
+                showNotification('La cantidad no puede ser negativa', 'error');
+                modalQuantityInput.focus();
+                return;
+            }
+            
+            if (quantity > currentProduct.required) {
+                showNotification(`No puede exceder la cantidad requerida: ${currentProduct.required}`, 'error');
+                modalQuantityInput.focus();
+                return;
+            }
+            
+            // Actualizar cantidad escaneada
+            currentProduct.scanned = quantity;
+            
+            // Manejar problemas
+            if (selectedProblem) {
+                // Si hay problema seleccionado, establecer issues
+                if (!currentProduct.issues) currentProduct.issues = [];
+                
+                const problemText = selectedProblem === 'insufficient' ? 'Existencia Insuficiente' : 'Quebrado';
+                
+                // Limpiar issues anteriores y agregar el nuevo
+                currentProduct.issues = [problemText];
+                
+                // Si hay problema, forzar cantidad a 0
+                currentProduct.scanned = 0;
+            } else {
+                // Si no hay problema seleccionado, limpiar issues
+                currentProduct.issues = [];
+            }
+            
+            // Actualizar interfaz
+            renderProducts();
+            updateRequirementProgress();
+            updateRequirementStatus();
+            
+            // Mostrar notificación
+            let message = '';
+            if (selectedProblem) {
+                const problemText = selectedProblem === 'insufficient' ? 'Existencia Insuficiente' : 'Quebrado';
+                message = `Producto marcado como: ${problemText}`;
+                showNotification(message, 'warning');
+            } else if (quantity === 0) {
+                message = `Cantidad actualizada: ${currentProduct.name} - 0 unidades`;
+                showNotification(message, 'info');
+            } else {
+                message = `Escaneado: ${currentProduct.name} - ${quantity} unidades`;
+                showNotification(message, 'success');
+            }
+            
+            // Efectos
+            if (!selectedProblem && quantity > 0) {
+                playSound('success');
+                vibrate();
+            }
+            
+            // Cerrar modal
+            closeModal();
+            
+            // Guardar cambios
+            saveToLocalStorage();
+            
+            // Si se completó este producto, enfocar el siguiente
+            if (quantity >= currentProduct.required && !selectedProblem) {
+                autoFocusNextProduct();
+            }
+        }
+
+        // Enfocar automáticamente el siguiente producto pendiente
+        function autoFocusNextProduct() {
+            if (!currentRequirement) return;
+            
+            const pendingProducts = currentRequirement.products.filter(p => 
+                p.scanned < p.required && 
+                (!p.issues || p.issues.length === 0)
+            );
+            
+            if (pendingProducts.length > 0) {
+                // Mostrar sugerencia para el siguiente producto
+                const nextProduct = pendingProducts[0];
+                showNotification(`Siguiente: ${nextProduct.name} - ${nextProduct.required - nextProduct.scanned} restantes`, 'info');
+                
+                // Auto-enfocar el input de escaneo para el SKU
+                scannerInput.value = nextProduct.sku;
+                scannerInput.focus();
+                scannerInput.select();
+            }
+        }
+
+        // Actualizar progreso del requerimiento
+        function updateRequirementProgress() {
+            if (!currentRequirement) return;
+            
+            const totalRequired = currentRequirement.products.reduce((sum, p) => sum + p.required, 0);
+            const totalScanned = currentRequirement.products.reduce((sum, p) => sum + p.scanned, 0);
+            const progressPercent = totalRequired > 0 ? Math.round((totalScanned / totalRequired) * 100) : 0;
+            
+            // Actualizar elementos
+            requirementProgress.textContent = `${progressPercent}%`;
+            requirementProgressFill.style.width = `${progressPercent}%`;
+            scannedCount.textContent = totalScanned;
+            totalCount.textContent = totalRequired;
+            
+            // Actualizar color de la barra
+            if (progressPercent === 100) {
+                requirementProgressFill.className = 'progress-fill progress-complete';
+                requirementProgress.style.color = '#27ae60';
+            } else {
+                requirementProgressFill.className = 'progress-fill progress-incomplete';
+                requirementProgress.style.color = '#f39c12';
+            }
+        }
+
+        // Actualizar estado del requerimiento
+        function updateRequirementStatus() {
+            if (!currentRequirement) return;
+            
+            const totalRequired = currentRequirement.products.reduce((sum, p) => sum + p.required, 0);
+            const totalScanned = currentRequirement.products.reduce((sum, p) => sum + p.scanned, 0);
+            const allComplete = currentRequirement.products.every(p => p.scanned >= p.required);
+            
+            if (allComplete) {
+                currentRequirement.status = 'Completado';
+            } else if (totalScanned > 0) {
+                currentRequirement.status = 'En Proceso';
+            } else {
+                currentRequirement.status = 'Pendiente';
+            }
+        }
+
+        // Mostrar notificación
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+        }
+
+        // Reproducir sonido
+        function playSound(type) {
+            try {
+                if (type === 'success') {
+                    // Beep corto
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                }
+            } catch (e) {
+                console.log('Audio no soportado');
+            }
+        }
+
+        // Vibrar dispositivo
+        function vibrate() {
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+        }
+
+        // Guardar datos en localStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('requerimientosData', JSON.stringify(requirements));
+        }
+
+        // Cargar datos desde localStorage
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('requerimientosData');
+            if (savedData) {
+                try {
+                    requirements = JSON.parse(savedData);
+                    renderRequirements();
+                } catch (e) {
+                    console.error('Error cargando datos:', e);
+                }
+            }
+        }
+
+        // Cargar datos de ejemplo
+        function loadSampleData() {
+            requirements = JSON.parse(JSON.stringify(requirementsData));
+            renderRequirements();
+            saveToLocalStorage();
+            showNotification('Datos de ejemplo cargados', 'success');
+        }
+
+        // Auto-guardar cada 30 segundos
+        setInterval(saveToLocalStorage, 30000);
+    </script>
+</body>
+</html>

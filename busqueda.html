@@ -487,103 +487,6 @@
             background: #e0e0e0;
         }
         
-        /* Modal de confirmación */
-        .confirm-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-        }
-        
-        .confirm-content {
-            background: white;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 350px;
-            animation: modalFadeIn 0.3s;
-        }
-        
-        .confirm-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            background: var(--light);
-            border-radius: 12px 12px 0 0;
-            text-align: center;
-        }
-        
-        .confirm-title {
-            font-size: 1.3rem;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .confirm-body {
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .confirm-text {
-            margin-bottom: 20px;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
-        
-        .confirm-barcode {
-            font-family: monospace;
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--danger);
-            background: #f8f9fa;
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin: 10px 0;
-            display: inline-block;
-        }
-        
-        .confirm-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .confirm-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .confirm-btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-        
-        .confirm-btn-danger:hover {
-            background: #c0392b;
-        }
-        
-        .confirm-btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-        
-        .confirm-btn-secondary:hover {
-            background: #e0e0e0;
-        }
-        
         /* Modal agregar código de barras */
         .barcode-modal {
             display: none;
@@ -799,6 +702,7 @@
             justify-content: center;
             border-radius: 6px;
             transition: background 0.2s;
+            position: relative;
         }
         
         .barcode-remove:hover {
@@ -807,6 +711,24 @@
         
         .barcode-remove i {
             font-size: 1rem;
+        }
+        
+        .barcode-remove .spinner-small {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--danger);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .barcode-remove.processing i {
+            display: none;
+        }
+        
+        .barcode-remove.processing .spinner-small {
+            display: block;
         }
         
         .no-barcodes {
@@ -856,6 +778,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
         }
         
         .barcode-btn-primary {
@@ -874,6 +797,41 @@
         
         .barcode-btn-secondary:hover {
             background: #e0e0e0;
+        }
+        
+        .barcode-btn.processing {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .barcode-btn .spinner-small {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .barcode-btn-primary .spinner-small {
+            border-top-color: white;
+        }
+        
+        .barcode-btn-secondary .spinner-small {
+            border-top-color: #333;
+        }
+        
+        .barcode-btn.processing span {
+            visibility: hidden;
+        }
+        
+        .barcode-btn.processing .spinner-small {
+            display: block;
         }
         
         .message {
@@ -899,6 +857,18 @@
             background: #d1ecf1;
             color: #0c5460;
             border: 1px solid #bee5eb;
+        }
+        
+        /* Spinner de carga en modal */
+        .barcode-loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            display: none;
+        }
+        
+        .barcode-loading .spinner {
+            margin-bottom: 15px;
         }
         
         /* Scrollbar */
@@ -941,8 +911,7 @@
             
             .modal-content,
             .auth-content,
-            .barcode-content,
-            .confirm-content {
+            .barcode-content {
                 max-width: 95%;
             }
         }
@@ -1059,32 +1028,6 @@
         </div>
     </div>
 
-    <!-- Modal de confirmación para eliminar código -->
-    <div class="confirm-modal" id="confirmModal">
-        <div class="confirm-content">
-            <div class="confirm-header">
-                <h3 class="confirm-title">
-                    <i class="fas fa-trash-alt"></i> Confirmar Eliminación
-                </h3>
-            </div>
-            
-            <div class="confirm-body">
-                <div class="confirm-text">
-                    ¿Estás seguro que deseas eliminar este código de barras?
-                </div>
-                <div class="confirm-barcode" id="confirmBarcodeValue">1234567890123</div>
-                <div class="confirm-text">
-                    Esta acción no se puede deshacer.
-                </div>
-                
-                <div class="confirm-buttons">
-                    <button class="confirm-btn confirm-btn-secondary" id="cancelDelete">Cancelar</button>
-                    <button class="confirm-btn confirm-btn-danger" id="confirmDelete">Eliminar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal agregar código de barras -->
     <div class="barcode-modal" id="barcodeModal">
         <div class="barcode-content">
@@ -1095,6 +1038,12 @@
             </div>
             
             <div class="barcode-body">
+                <!-- Spinner de carga general -->
+                <div class="barcode-loading" id="barcodeLoading">
+                    <div class="spinner"></div>
+                    <div>Cargando códigos de barras...</div>
+                </div>
+                
                 <div class="message" id="barcodeMessage"></div>
                 
                 <!-- Búsqueda de productos -->
@@ -1145,8 +1094,14 @@
                         </div>
                         
                         <div class="barcode-buttons">
-                            <button class="barcode-btn barcode-btn-secondary" id="cancelBarcode">Cancelar</button>
-                            <button class="barcode-btn barcode-btn-primary" id="saveBarcode">Agregar Código</button>
+                            <button class="barcode-btn barcode-btn-secondary" id="cancelBarcode">
+                                <span>Cancelar</span>
+                                <div class="spinner-small"></div>
+                            </button>
+                            <button class="barcode-btn barcode-btn-primary" id="saveBarcode">
+                                <span>Agregar Código</span>
+                                <div class="spinner-small"></div>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1184,8 +1139,6 @@
         let authenticated = false;
         let selectedProductForBarcode = null;
         let currentBarcodes = [];
-        let barcodeToDelete = null;
-        let barcodeToDeleteIndex = -1;
 
         // Elementos del DOM
         const searchInput = document.getElementById('searchInput');
@@ -1198,23 +1151,17 @@
         // Modales
         const productModal = document.getElementById('productModal');
         const authModal = document.getElementById('authModal');
-        const confirmModal = document.getElementById('confirmModal');
         const barcodeModal = document.getElementById('barcodeModal');
         
         // Botones de cierre
         const closeModal = document.getElementById('closeModal');
         const cancelAuth = document.getElementById('cancelAuth');
         const cancelBarcode = document.getElementById('cancelBarcode');
-        const cancelDelete = document.getElementById('cancelDelete');
         
         // Autenticación
         const authPin = document.getElementById('authPin');
         const submitAuth = document.getElementById('submitAuth');
         const authError = document.getElementById('authError');
-        
-        // Confirmación de eliminación
-        const confirmBarcodeValue = document.getElementById('confirmBarcodeValue');
-        const confirmDelete = document.getElementById('confirmDelete');
         
         // Modal de barras - Búsqueda
         const barcodeSearchInput = document.getElementById('barcodeSearchInput');
@@ -1223,6 +1170,7 @@
         const barcodeProductName = document.getElementById('barcodeProductName');
         const barcodeProductSku = document.getElementById('barcodeProductSku');
         const clearProductSelection = document.getElementById('clearProductSelection');
+        const barcodeLoading = document.getElementById('barcodeLoading');
         
         // Modal de barras - Gestión
         const barcodeInput = document.getElementById('barcodeInput');
@@ -1279,12 +1227,6 @@
                 resetBarcodeModal();
                 barcodeModal.style.display = 'none';
             });
-            
-            cancelDelete.addEventListener('click', function() {
-                confirmModal.style.display = 'none';
-                barcodeToDelete = null;
-                barcodeToDeleteIndex = -1;
-            });
 
             // Autenticación
             submitAuth.addEventListener('click', function() {
@@ -1300,16 +1242,6 @@
             // Solo permitir números en el campo PIN
             authPin.addEventListener('input', function() {
                 this.value = this.value.replace(/\D/g, '');
-            });
-
-            // Confirmación de eliminación
-            confirmDelete.addEventListener('click', function() {
-                if (barcodeToDelete !== null && barcodeToDeleteIndex !== -1) {
-                    eliminarCodigoBarrasConfirmado(barcodeToDeleteIndex);
-                }
-                confirmModal.style.display = 'none';
-                barcodeToDelete = null;
-                barcodeToDeleteIndex = -1;
             });
 
             // Búsqueda en modal de barras
@@ -1354,11 +1286,6 @@
                     authPin.value = '';
                     authError.style.display = 'none';
                 }
-                if (e.target === confirmModal) {
-                    confirmModal.style.display = 'none';
-                    barcodeToDelete = null;
-                    barcodeToDeleteIndex = -1;
-                }
                 if (e.target === barcodeModal) {
                     resetBarcodeModal();
                     barcodeModal.style.display = 'none';
@@ -1375,11 +1302,6 @@
                         authModal.style.display = 'none';
                         authPin.value = '';
                         authError.style.display = 'none';
-                    }
-                    if (confirmModal.style.display === 'flex') {
-                        confirmModal.style.display = 'none';
-                        barcodeToDelete = null;
-                        barcodeToDeleteIndex = -1;
                     }
                     if (barcodeModal.style.display === 'flex') {
                         resetBarcodeModal();
@@ -1436,7 +1358,12 @@
             barcodeResults.style.display = 'none';
             barcodeResults.innerHTML = '';
             barcodeMessage.style.display = 'none';
+            barcodeLoading.style.display = 'none';
             mostrarBarcodes([]);
+            
+            // Restablecer botones
+            saveBarcode.classList.remove('processing');
+            cancelBarcode.classList.remove('processing');
         }
 
         // Buscar productos en el modal de barras
@@ -1503,16 +1430,19 @@
                 barcodeResults.style.display = 'none';
                 barcodeSearchInput.value = '';
                 
-                // Mostrar información del producto
+                // Mostrar información del producto y spinner de carga
                 barcodeProductInfo.style.display = 'block';
+                barcodeLoading.style.display = 'flex';
                 
                 // Cargar códigos de barras existentes
                 await cargarBarcodesProducto(producto);
                 
-                // Enfocar el input para agregar nuevo código
+                // Ocultar spinner y enfocar el input
+                barcodeLoading.style.display = 'none';
                 barcodeInput.focus();
             } catch (error) {
                 console.error('Error seleccionando producto:', error);
+                barcodeLoading.style.display = 'none';
                 mostrarMensajeBarcode('Error al seleccionar producto', 'error');
             }
         }
@@ -1577,32 +1507,80 @@
                     <span class="barcode-value">${barcode}</span>
                     <button class="barcode-remove" data-index="${index}" title="Eliminar código">
                         <i class="fas fa-trash-alt"></i>
+                        <div class="spinner-small"></div>
                     </button>
                 `;
                 
-                // Agregar evento para eliminar código (con confirmación)
+                // Agregar evento para eliminar código (SIN CONFIRMACIÓN)
                 const removeBtn = barcodeItem.querySelector('.barcode-remove');
                 removeBtn.addEventListener('click', function() {
-                    mostrarConfirmacionEliminar(barcode, index);
+                    eliminarCodigoBarras(index, this);
                 });
                 
                 barcodesContainer.appendChild(barcodeItem);
             });
         }
 
-        // Mostrar confirmación para eliminar código de barras
-        function mostrarConfirmacionEliminar(barcode, index) {
-            barcodeToDelete = barcode;
-            barcodeToDeleteIndex = index;
-            confirmBarcodeValue.textContent = barcode;
-            confirmModal.style.display = 'flex';
+        // Verificar si un código de barras ya existe en otro producto
+        async function verificarCodigoBarrasDuplicado(codigo) {
+            try {
+                // Buscar en todos los productos si el código ya está asignado
+                const querySnapshot = await db.collection('products')
+                    .where('barcodes', 'array-contains', codigo)
+                    .get();
+                
+                if (!querySnapshot.empty) {
+                    // Encontró productos con este código
+                    const productosConCodigo = [];
+                    querySnapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.sku !== selectedProductForBarcode.sku) {
+                            productosConCodigo.push({
+                                sku: data.sku,
+                                name: data.name
+                            });
+                        }
+                    });
+                    
+                    return productosConCodigo;
+                }
+                
+                // También verificar el campo barcode (para compatibilidad)
+                const querySnapshot2 = await db.collection('products')
+                    .where('barcode', '==', codigo)
+                    .get();
+                
+                if (!querySnapshot2.empty) {
+                    const productosConCodigo = [];
+                    querySnapshot2.forEach(doc => {
+                        const data = doc.data();
+                        if (data.sku !== selectedProductForBarcode.sku) {
+                            productosConCodigo.push({
+                                sku: data.sku,
+                                name: data.name
+                            });
+                        }
+                    });
+                    
+                    return productosConCodigo;
+                }
+                
+                return []; // No hay duplicados
+            } catch (error) {
+                console.error('Error verificando código duplicado:', error);
+                return [];
+            }
         }
 
-        // Eliminar código de barras (después de confirmación)
-        async function eliminarCodigoBarrasConfirmado(index) {
+        // Eliminar código de barras (SIN CONFIRMACIÓN, CON SPINNER)
+        async function eliminarCodigoBarras(index, botonEliminar) {
             if (!selectedProductForBarcode) return;
             
             try {
+                // Mostrar spinner en el botón de eliminar
+                botonEliminar.classList.add('processing');
+                botonEliminar.disabled = true;
+                
                 // Eliminar de la lista local
                 const codigoEliminado = currentBarcodes.splice(index, 1)[0];
                 
@@ -1633,7 +1611,7 @@
                     // Actualizar visualización
                     mostrarBarcodes(currentBarcodes);
                     
-                    mostrarMensajeBarcode('Código de barras eliminado exitosamente', 'success');
+                    mostrarMensajeBarcode('Código de barras eliminado', 'success');
                 } else {
                     throw new Error('Producto no encontrado en la base de datos');
                 }
@@ -1641,10 +1619,18 @@
             } catch (error) {
                 console.error('Error eliminando código de barras:', error);
                 mostrarMensajeBarcode('Error al eliminar código de barras: ' + error.message, 'error');
+                // Re-cargar códigos actuales
+                mostrarBarcodes(currentBarcodes);
+            } finally {
+                // Quitar spinner del botón
+                if (botonEliminar) {
+                    botonEliminar.classList.remove('processing');
+                    botonEliminar.disabled = false;
+                }
             }
         }
 
-        // Agregar nuevo código de barras
+        // Agregar nuevo código de barras (CON SPINNER)
         async function agregarCodigoBarras() {
             const nuevoCodigo = barcodeInput.value.trim();
             
@@ -1658,13 +1644,34 @@
                 return;
             }
             
-            // Verificar si el código ya existe
+            // Verificar si el código ya existe en el mismo producto
             if (currentBarcodes.includes(nuevoCodigo)) {
-                mostrarMensajeBarcode('Este código de barras ya está asignado', 'error');
+                mostrarMensajeBarcode('Este código de barras ya está asignado a este producto', 'error');
                 return;
             }
             
             try {
+                // Mostrar spinner en el botón de guardar
+                saveBarcode.classList.add('processing');
+                saveBarcode.disabled = true;
+                
+                // Verificar si el código ya existe en OTRO producto
+                const productosDuplicados = await verificarCodigoBarrasDuplicado(nuevoCodigo);
+                
+                if (productosDuplicados.length > 0) {
+                    // Mostrar mensaje con los productos que ya tienen este código
+                    const productosLista = productosDuplicados.map(p => 
+                        `${p.name} (SKU: ${p.sku})`
+                    ).join(', ');
+                    
+                    mostrarMensajeBarcode(
+                        `Este código de barras ya está asignado a otros productos: ${productosLista}`,
+                        'error'
+                    );
+                    return;
+                }
+                
+                // Si pasa todas las validaciones, agregar el código
                 // Agregar a la lista local
                 currentBarcodes.push(nuevoCodigo);
                 
@@ -1703,6 +1710,10 @@
                 // Revertir cambio local
                 currentBarcodes.pop();
                 mostrarMensajeBarcode('Error al agregar código de barras: ' + error.message, 'error');
+            } finally {
+                // Quitar spinner del botón de guardar
+                saveBarcode.classList.remove('processing');
+                saveBarcode.disabled = false;
             }
         }
 
@@ -1799,7 +1810,7 @@
             mostrarResultados(resultados);
         }
 
-        // Mostrar resultados de búsqueda en página principal
+        // Mostrar resultados de búsqueda en página principal (SIN CONTADOR)
         function mostrarResultados(resultados) {
             contentArea.innerHTML = '';
 
@@ -1824,22 +1835,14 @@
             const resultsContainer = document.createElement('div');
             resultsContainer.className = 'results-container';
 
-            // Crear tarjetas para cada resultado
+            // Crear tarjetas para cada resultado (SIN MOSTRAR CONTADOR DE CÓDIGOS)
             resultados.forEach(producto => {
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 card.dataset.id = producto.id;
 
-                // Mostrar indicador si tiene códigos de barras
-                const barcodeCount = producto.barcodes ? producto.barcodes.length : 
-                                   (producto.barcode ? 1 : 0);
-                const barcodeInfo = barcodeCount > 0 ? 
-                    `<span style="font-size:0.8rem; color:#666; margin-left:5px;">
-                        (${barcodeCount} código${barcodeCount !== 1 ? 's' : ''})
-                    </span>` : '';
-
                 card.innerHTML = `
-                    <div class="product-name">${producto.name}${barcodeInfo}</div>
+                    <div class="product-name">${producto.name}</div>
                     <div class="product-details">
                         <div class="product-sku">SKU: ${producto.sku}</div>
                         <div class="product-stock">${producto.bodega} unidades</div>

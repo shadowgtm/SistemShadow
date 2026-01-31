@@ -434,7 +434,10 @@
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 3px;
             transition: border-color 0.3s;
         }
         
@@ -481,6 +484,103 @@
         }
         
         .auth-btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Modal de confirmación */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        
+        .confirm-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 350px;
+            animation: modalFadeIn 0.3s;
+        }
+        
+        .confirm-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            background: var(--light);
+            border-radius: 12px 12px 0 0;
+            text-align: center;
+        }
+        
+        .confirm-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .confirm-body {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .confirm-text {
+            margin-bottom: 20px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .confirm-barcode {
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--danger);
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        
+        .confirm-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .confirm-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .confirm-btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .confirm-btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .confirm-btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .confirm-btn-secondary:hover {
             background: #e0e0e0;
         }
         
@@ -692,17 +792,21 @@
             border: none;
             color: var(--danger);
             cursor: pointer;
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: background 0.2s;
         }
         
         .barcode-remove:hover {
-            background: rgba(231, 76, 60, 0.1);
+            background: rgba(231, 76, 60, 0.15);
+        }
+        
+        .barcode-remove i {
+            font-size: 1rem;
         }
         
         .no-barcodes {
@@ -837,7 +941,8 @@
             
             .modal-content,
             .auth-content,
-            .barcode-content {
+            .barcode-content,
+            .confirm-content {
                 max-width: 95%;
             }
         }
@@ -929,19 +1034,21 @@
         <div class="auth-content">
             <div class="auth-header">
                 <h3 class="auth-title">
-                    <i class="fas fa-lock"></i> Autenticación
+                    <i class="fas fa-lock"></i> Ingresar PIN
                 </h3>
             </div>
             
             <div class="auth-body">
-                <div class="auth-error" id="authError">Contraseña incorrecta. Intenta nuevamente.</div>
+                <div class="auth-error" id="authError">PIN incorrecto. Intenta nuevamente.</div>
                 
                 <div class="auth-input-container">
                     <input type="password" 
                            class="auth-input" 
-                           id="authPassword"
-                           placeholder="Ingresa la contraseña"
-                           autocomplete="off">
+                           id="authPin"
+                           placeholder="Ingresa el PIN de 4 dígitos"
+                           autocomplete="off"
+                           maxlength="4"
+                           inputmode="numeric">
                 </div>
                 
                 <div class="auth-buttons">
@@ -952,12 +1059,38 @@
         </div>
     </div>
 
+    <!-- Modal de confirmación para eliminar código -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-content">
+            <div class="confirm-header">
+                <h3 class="confirm-title">
+                    <i class="fas fa-trash-alt"></i> Confirmar Eliminación
+                </h3>
+            </div>
+            
+            <div class="confirm-body">
+                <div class="confirm-text">
+                    ¿Estás seguro que deseas eliminar este código de barras?
+                </div>
+                <div class="confirm-barcode" id="confirmBarcodeValue">1234567890123</div>
+                <div class="confirm-text">
+                    Esta acción no se puede deshacer.
+                </div>
+                
+                <div class="confirm-buttons">
+                    <button class="confirm-btn confirm-btn-secondary" id="cancelDelete">Cancelar</button>
+                    <button class="confirm-btn confirm-btn-danger" id="confirmDelete">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal agregar código de barras -->
     <div class="barcode-modal" id="barcodeModal">
         <div class="barcode-content">
             <div class="barcode-header">
                 <h3 class="barcode-title">
-                    <i class="fas fa-barcode"></i> Gestión de Códigos de Barras
+                    <i class="fas fa-barcode"></i> Cod. Barras
                 </h3>
             </div>
             
@@ -1032,8 +1165,8 @@
             appId: "1:605168322064:web:e0d9a16c5e5bc230d9ac95"
         };
 
-        // Contraseña de administrador
-        const ADMIN_PASSWORD = "admin21";
+        // PIN de administrador
+        const ADMIN_PIN = "1234";
 
         // Inicializar Firebase
         let app, db;
@@ -1051,6 +1184,8 @@
         let authenticated = false;
         let selectedProductForBarcode = null;
         let currentBarcodes = [];
+        let barcodeToDelete = null;
+        let barcodeToDeleteIndex = -1;
 
         // Elementos del DOM
         const searchInput = document.getElementById('searchInput');
@@ -1063,17 +1198,23 @@
         // Modales
         const productModal = document.getElementById('productModal');
         const authModal = document.getElementById('authModal');
+        const confirmModal = document.getElementById('confirmModal');
         const barcodeModal = document.getElementById('barcodeModal');
         
         // Botones de cierre
         const closeModal = document.getElementById('closeModal');
         const cancelAuth = document.getElementById('cancelAuth');
         const cancelBarcode = document.getElementById('cancelBarcode');
+        const cancelDelete = document.getElementById('cancelDelete');
         
         // Autenticación
-        const authPassword = document.getElementById('authPassword');
+        const authPin = document.getElementById('authPin');
         const submitAuth = document.getElementById('submitAuth');
         const authError = document.getElementById('authError');
+        
+        // Confirmación de eliminación
+        const confirmBarcodeValue = document.getElementById('confirmBarcodeValue');
+        const confirmDelete = document.getElementById('confirmDelete');
         
         // Modal de barras - Búsqueda
         const barcodeSearchInput = document.getElementById('barcodeSearchInput');
@@ -1130,7 +1271,7 @@
             
             cancelAuth.addEventListener('click', function() {
                 authModal.style.display = 'none';
-                authPassword.value = '';
+                authPin.value = '';
                 authError.style.display = 'none';
             });
             
@@ -1138,30 +1279,37 @@
                 resetBarcodeModal();
                 barcodeModal.style.display = 'none';
             });
+            
+            cancelDelete.addEventListener('click', function() {
+                confirmModal.style.display = 'none';
+                barcodeToDelete = null;
+                barcodeToDeleteIndex = -1;
+            });
 
             // Autenticación
             submitAuth.addEventListener('click', function() {
-                const password = authPassword.value.trim();
-                if (password === ADMIN_PASSWORD) {
-                    authenticated = true;
-                    authModal.style.display = 'none';
-                    authPassword.value = '';
-                    authError.style.display = 'none';
-                    // Mostrar modal para gestionar barras
-                    showBarcodeModal();
-                } else {
-                    authError.style.display = 'block';
-                    authPassword.value = '';
-                    setTimeout(() => {
-                        authError.style.display = 'none';
-                    }, 3000);
+                verificarPin();
+            });
+            
+            authPin.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    verificarPin();
                 }
             });
             
-            authPassword.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    submitAuth.click();
+            // Solo permitir números en el campo PIN
+            authPin.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '');
+            });
+
+            // Confirmación de eliminación
+            confirmDelete.addEventListener('click', function() {
+                if (barcodeToDelete !== null && barcodeToDeleteIndex !== -1) {
+                    eliminarCodigoBarrasConfirmado(barcodeToDeleteIndex);
                 }
+                confirmModal.style.display = 'none';
+                barcodeToDelete = null;
+                barcodeToDeleteIndex = -1;
             });
 
             // Búsqueda en modal de barras
@@ -1203,8 +1351,13 @@
                 }
                 if (e.target === authModal) {
                     authModal.style.display = 'none';
-                    authPassword.value = '';
+                    authPin.value = '';
                     authError.style.display = 'none';
+                }
+                if (e.target === confirmModal) {
+                    confirmModal.style.display = 'none';
+                    barcodeToDelete = null;
+                    barcodeToDeleteIndex = -1;
                 }
                 if (e.target === barcodeModal) {
                     resetBarcodeModal();
@@ -1220,8 +1373,13 @@
                     }
                     if (authModal.style.display === 'flex') {
                         authModal.style.display = 'none';
-                        authPassword.value = '';
+                        authPin.value = '';
                         authError.style.display = 'none';
+                    }
+                    if (confirmModal.style.display === 'flex') {
+                        confirmModal.style.display = 'none';
+                        barcodeToDelete = null;
+                        barcodeToDeleteIndex = -1;
                     }
                     if (barcodeModal.style.display === 'flex') {
                         resetBarcodeModal();
@@ -1231,10 +1389,29 @@
             });
         }
 
+        // Verificar PIN
+        function verificarPin() {
+            const pin = authPin.value.trim();
+            if (pin === ADMIN_PIN) {
+                authenticated = true;
+                authModal.style.display = 'none';
+                authPin.value = '';
+                authError.style.display = 'none';
+                // Mostrar modal para gestionar barras
+                showBarcodeModal();
+            } else {
+                authError.style.display = 'block';
+                authPin.value = '';
+                setTimeout(() => {
+                    authError.style.display = 'none';
+                }, 3000);
+            }
+        }
+
         // Mostrar modal de autenticación
         function showAuthModal() {
             authModal.style.display = 'flex';
-            authPassword.focus();
+            authPin.focus();
         }
 
         // Mostrar modal para gestionar códigos de barras
@@ -1340,10 +1517,10 @@
             }
         }
 
-        // Cargar códigos de barras del producto - VERSIÓN CORREGIDA
+        // Cargar códigos de barras del producto
         async function cargarBarcodesProducto(producto) {
             try {
-                // Primero, intentamos buscar por SKU ya que es más confiable
+                // Buscamos por SKU ya que es más confiable
                 const querySnapshot = await db.collection('products')
                     .where('sku', '==', producto.sku)
                     .get();
@@ -1398,22 +1575,76 @@
                 
                 barcodeItem.innerHTML = `
                     <span class="barcode-value">${barcode}</span>
-                    <button class="barcode-remove" data-index="${index}">
-                        <i class="fas fa-times"></i>
+                    <button class="barcode-remove" data-index="${index}" title="Eliminar código">
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                 `;
                 
-                // Agregar evento para eliminar código
+                // Agregar evento para eliminar código (con confirmación)
                 const removeBtn = barcodeItem.querySelector('.barcode-remove');
                 removeBtn.addEventListener('click', function() {
-                    eliminarCodigoBarras(index);
+                    mostrarConfirmacionEliminar(barcode, index);
                 });
                 
                 barcodesContainer.appendChild(barcodeItem);
             });
         }
 
-        // Agregar nuevo código de barras - VERSIÓN CORREGIDA
+        // Mostrar confirmación para eliminar código de barras
+        function mostrarConfirmacionEliminar(barcode, index) {
+            barcodeToDelete = barcode;
+            barcodeToDeleteIndex = index;
+            confirmBarcodeValue.textContent = barcode;
+            confirmModal.style.display = 'flex';
+        }
+
+        // Eliminar código de barras (después de confirmación)
+        async function eliminarCodigoBarrasConfirmado(index) {
+            if (!selectedProductForBarcode) return;
+            
+            try {
+                // Eliminar de la lista local
+                const codigoEliminado = currentBarcodes.splice(index, 1)[0];
+                
+                // Si no quedan códigos, mantener array vacío
+                const nuevoBarcode = currentBarcodes.length > 0 ? currentBarcodes[0] : '';
+                
+                // Buscar el documento por SKU
+                const querySnapshot = await db.collection('products')
+                    .where('sku', '==', selectedProductForBarcode.sku)
+                    .get();
+                
+                if (!querySnapshot.empty) {
+                    const doc = querySnapshot.docs[0];
+                    
+                    // Actualizar en Firebase
+                    await db.collection('products').doc(doc.id).update({
+                        barcodes: currentBarcodes,
+                        barcode: nuevoBarcode
+                    });
+                    
+                    // Actualizar producto en array local
+                    const prodIndex = productos.findIndex(p => p.sku === selectedProductForBarcode.sku);
+                    if (prodIndex !== -1) {
+                        productos[prodIndex].barcodes = currentBarcodes;
+                        productos[prodIndex].barcode = nuevoBarcode;
+                    }
+                    
+                    // Actualizar visualización
+                    mostrarBarcodes(currentBarcodes);
+                    
+                    mostrarMensajeBarcode('Código de barras eliminado exitosamente', 'success');
+                } else {
+                    throw new Error('Producto no encontrado en la base de datos');
+                }
+                
+            } catch (error) {
+                console.error('Error eliminando código de barras:', error);
+                mostrarMensajeBarcode('Error al eliminar código de barras: ' + error.message, 'error');
+            }
+        }
+
+        // Agregar nuevo código de barras
         async function agregarCodigoBarras() {
             const nuevoCodigo = barcodeInput.value.trim();
             
@@ -1472,52 +1703,6 @@
                 // Revertir cambio local
                 currentBarcodes.pop();
                 mostrarMensajeBarcode('Error al agregar código de barras: ' + error.message, 'error');
-            }
-        }
-
-        // Eliminar código de barras - VERSIÓN CORREGIDA
-        async function eliminarCodigoBarras(index) {
-            if (!selectedProductForBarcode) return;
-            
-            try {
-                // Eliminar de la lista local
-                const codigoEliminado = currentBarcodes.splice(index, 1)[0];
-                
-                // Si no quedan códigos, mantener array vacío
-                const nuevoBarcode = currentBarcodes.length > 0 ? currentBarcodes[0] : '';
-                
-                // Buscar el documento por SKU
-                const querySnapshot = await db.collection('products')
-                    .where('sku', '==', selectedProductForBarcode.sku)
-                    .get();
-                
-                if (!querySnapshot.empty) {
-                    const doc = querySnapshot.docs[0];
-                    
-                    // Actualizar en Firebase
-                    await db.collection('products').doc(doc.id).update({
-                        barcodes: currentBarcodes,
-                        barcode: nuevoBarcode
-                    });
-                    
-                    // Actualizar producto en array local
-                    const prodIndex = productos.findIndex(p => p.sku === selectedProductForBarcode.sku);
-                    if (prodIndex !== -1) {
-                        productos[prodIndex].barcodes = currentBarcodes;
-                        productos[prodIndex].barcode = nuevoBarcode;
-                    }
-                    
-                    // Actualizar visualización
-                    mostrarBarcodes(currentBarcodes);
-                    
-                    mostrarMensajeBarcode('Código de barras eliminado', 'success');
-                } else {
-                    throw new Error('Producto no encontrado en la base de datos');
-                }
-                
-            } catch (error) {
-                console.error('Error eliminando código de barras:', error);
-                mostrarMensajeBarcode('Error al eliminar código de barras: ' + error.message, 'error');
             }
         }
 

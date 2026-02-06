@@ -323,102 +323,79 @@
             margin-bottom: 8px;
         }
         
-        .direction-selector {
-            background: var(--light);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #dee2e6;
+        /* Sección de existencia en BODEGA */
+        .existence-section {
+            margin-bottom: 20px;
         }
         
-        .direction-label {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 8px;
+        .existence-section .card {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #2c3e50;
+        }
+        
+        .existence-section .card-header {
+            border-radius: 10px 10px 0 0 !important;
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
+        }
+        
+        .existence-content {
+            padding: 20px;
             text-align: center;
         }
         
-        .direction-options {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .direction-option {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-            min-height: 60px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        
-        .direction-option:hover {
-            border-color: var(--secondary);
-            transform: translateY(-1px);
-        }
-        
-        .direction-option.active {
-            border-color: var(--success);
-            background: rgba(39, 174, 96, 0.1);
-            box-shadow: 0 2px 4px rgba(39, 174, 96, 0.2);
-        }
-        
-        .direction-option.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-            background: #f5f5f5;
-        }
-        
-        .direction-option.disabled .direction-icon,
-        .direction-option.disabled .direction-text {
-            color: #999;
-        }
-        
-        .lock-icon {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            color: var(--warning);
-            font-size: 0.8rem;
-        }
-        
-        .direction-icon {
+        .existence-label {
             font-size: 0.9rem;
-            margin-bottom: 4px;
-            color: var(--secondary);
+            color: #6c757d;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .direction-option.active .direction-icon {
-            color: var(--success);
+        .existence-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+            margin: 10px 0;
+            color: #2c3e50;
+            transition: transform 0.3s;
         }
         
-        .direction-text {
+        .existence-value:hover {
+            transform: scale(1.05);
+        }
+        
+        .existence-unit {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        /* Estado de existencia */
+        .existence-status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: var(--primary);
-            font-size: 0.85rem;
-            line-height: 1.2;
         }
         
-        .stock-info {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 8px;
-            font-size: 0.75rem;
-            color: #666;
+        .existence-status.available {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+            border: 1px solid rgba(39, 174, 96, 0.2);
         }
         
-        .available-stock {
-            color: var(--success);
-            font-weight: 600;
+        .existence-status.low {
+            background-color: rgba(243, 156, 18, 0.1);
+            color: #f39c12;
+            border: 1px solid rgba(243, 156, 18, 0.2);
+        }
+        
+        .existence-status.empty {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.2);
         }
         
         /* Selector de cantidad */
@@ -496,9 +473,15 @@
         
         .available-text {
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: #666;
             margin-top: 8px;
+            font-weight: 600;
+        }
+        
+        .available-text .stock-amount {
+            color: var(--primary);
+            font-size: 1.1rem;
         }
         
         .traslado-actions {
@@ -670,6 +653,10 @@
                 padding: 10px !important;
                 margin: 8px !important;
             }
+            
+            .existence-value {
+                font-size: 2.5rem;
+            }
         }
         
         @media (max-width: 400px) {
@@ -684,13 +671,12 @@
                 border-radius: 0;
             }
             
-            .direction-option {
-                min-height: 55px;
-                padding: 8px;
-            }
-            
             .quantity-input {
                 padding: 10px 35px 10px 30px;
+            }
+            
+            .existence-value {
+                font-size: 2.8rem;
             }
         }
         
@@ -700,9 +686,12 @@
                 padding: 10px;
             }
             
-            .direction-selector {
-                padding: 10px;
+            .existence-section {
                 margin-bottom: 10px;
+            }
+            
+            .existence-value {
+                font-size: 2.2rem;
             }
             
             .quantity-section {
@@ -919,40 +908,29 @@
                         <div class="product-sku" id="modalProductSku">SKU: 000000</div>
                     </div>
                     
-                    <div class="direction-selector">
-                        <div class="direction-label">Dirección del traslado</div>
-                        <div class="direction-options">
-                            <div class="direction-option active" id="optionBodegaToTienda">
-                                <div class="direction-icon">
-                                    <i class="bi bi-arrow-right"></i>
-                                </div>
-                                <div class="direction-text">Bodega → Tienda</div>
+                    <!-- EXISTENCIA EN BODEGA -->
+                    <div class="existence-section mb-4">
+                        <div class="card">
+                            <div class="card-header text-white py-2">
+                                <h6 class="mb-0"><i class="bi bi-box-seam me-2"></i> Existencia en Bodega</h6>
                             </div>
-                            <div class="direction-option" id="optionTiendaToBodega">
-                                <i class="bi bi-lock lock-icon"></i>
-                                <div class="direction-icon">
-                                    <i class="bi bi-arrow-left"></i>
+                            <div class="card-body">
+                                <div class="existence-content">
+                                    <div class="existence-label">Unidades Disponibles</div>
+                                    <div class="existence-value" id="stockBodega">0</div>
+                                    <div class="existence-unit">unidades</div>
+                                    
+                                    <!-- Estado de existencia -->
+                                    <div id="existenceStatus" class="existence-status available mt-3">
+                                        <i class="bi bi-check-circle me-2"></i> Producto disponible
+                                    </div>
                                 </div>
-                                <div class="direction-text">Tienda → Bodega</div>
-                                <div class="small text-warning mt-1">
-                                    <i class="bi bi-shield-lock"></i> Solo admin
-                                </div>
-                            </div>
-                        </div>
-                        <div class="stock-info mt-2">
-                            <div>
-                                <span id="stockBodegaLabel">Bodega:</span>
-                                <span class="available-stock" id="stockBodega">0</span>
-                            </div>
-                            <div>
-                                <span id="stockTiendaLabel">Tienda:</span>
-                                <span class="available-stock" id="stockTienda">0</span>
                             </div>
                         </div>
                     </div>
                     
                     <div class="quantity-section">
-                        <div class="quantity-label">Cantidad a trasladar</div>
+                        <div class="quantity-label">Cantidad a trasladar a Tienda</div>
                         
                         <div class="quantity-input-group">
                             <div class="quantity-input-container">
@@ -972,7 +950,7 @@
                         </div>
                         
                         <div class="available-text">
-                            Disponible: <span id="modalAvailableStock">0</span> unidades
+                            Disponible en bodega: <span id="modalAvailableStock" class="stock-amount">0</span> unidades
                         </div>
                     </div>
                     
@@ -981,7 +959,7 @@
                             <i class="bi bi-x-lg me-2"></i> Cancelar
                         </button>
                         <button class="btn btn-success flex-grow-1" id="btnConfirmTraslado">
-                            <i class="bi bi-check-lg me-2"></i> Trasladar
+                            <i class="bi bi-check-lg me-2"></i> Trasladar a Tienda
                         </button>
                     </div>
                 </div>
@@ -1078,10 +1056,8 @@
         const quantityInput = document.getElementById('quantityInput');
         const clearQuantityBtn = document.getElementById('clearQuantityBtn');
         const modalAvailableStock = document.getElementById('modalAvailableStock');
-        const optionBodegaToTienda = document.getElementById('optionBodegaToTienda');
-        const optionTiendaToBodega = document.getElementById('optionTiendaToBodega');
         const stockBodega = document.getElementById('stockBodega');
-        const stockTienda = document.getElementById('stockTienda');
+        const existenceStatus = document.getElementById('existenceStatus');
         
         // Bootstrap Modal instances
         let settingsModal, historialModal, trasladoModal;
@@ -1306,9 +1282,6 @@
             mostrarNotificacion('Configuración guardada', 'success');
             actualizarInfoConfiguracion();
             
-            // Actualizar estado del botón de Tienda → Bodega
-            actualizarBotonTiendaABodega();
-            
             // Cerrar modal
             settingsModal.hide();
         }
@@ -1316,20 +1289,7 @@
         // Verificar si es admin
         function verificarAdminStatus() {
             isAdmin = config.userType === "admin";
-            actualizarBotonTiendaABodega();
-        }
-
-        // Actualizar botón de Tienda → Bodega según permisos
-        function actualizarBotonTiendaABodega() {
-            if (optionTiendaToBodega) {
-                if (isAdmin) {
-                    optionTiendaToBodega.classList.remove('disabled');
-                    optionTiendaToBodega.title = "Haga clic para seleccionar";
-                } else {
-                    optionTiendaToBodega.classList.add('disabled');
-                    optionTiendaToBodega.title = "Solo disponible para administradores";
-                }
-            }
+            // Ya no hay botón de Tienda → Bodega que actualizar
         }
 
         // Mostrar notificación
@@ -1437,31 +1397,6 @@
                 });
             });
             
-            // Modal de traslado - Cambiar dirección
-            optionBodegaToTienda.addEventListener('click', function() {
-                if (isProcessing) return;
-                optionBodegaToTienda.classList.add('active');
-                optionTiendaToBodega.classList.remove('active');
-                currentDirection = "bodegaToTienda";
-                actualizarDisponibleEnModal();
-            });
-            
-            optionTiendaToBodega.addEventListener('click', function() {
-                if (isProcessing) return;
-                
-                // Verificar permisos de admin
-                if (!isAdmin) {
-                    mostrarNotificacion('Solo administradores pueden hacer traslados de Tienda a Bodega', 'warning');
-                    vibrar('error');
-                    return;
-                }
-                
-                optionTiendaToBodega.classList.add('active');
-                optionBodegaToTienda.classList.remove('active');
-                currentDirection = "tiendaToBodega";
-                actualizarDisponibleEnModal();
-            });
-            
             // Input de cantidad - Activar solo cuando se toque
             quantityInput.addEventListener('click', function() {
                 if (isProcessing) return;
@@ -1562,7 +1497,7 @@
                 btnCancelTraslado.disabled = true;
                 isProcessing = true;
             } else {
-                btnConfirmTraslado.innerHTML = '<i class="bi bi-check-lg me-2"></i> Trasladar';
+                btnConfirmTraslado.innerHTML = '<i class="bi bi-check-lg me-2"></i> Trasladar a Tienda';
                 btnConfirmTraslado.disabled = false;
                 btnCancelTraslado.disabled = false;
                 isProcessing = false;
@@ -1585,6 +1520,225 @@
             
             // Asegurarse de que no haya spinner activo
             mostrarSpinnerConfirmar(false);
+        }
+
+        // Actualizar existencia en el modal
+        function actualizarExistenciaEnModal() {
+            if (!currentProduct) return;
+            
+            const bodega = currentProduct.bodega || 0;
+            
+            // Actualizar valores
+            stockBodega.textContent = bodega;
+            modalAvailableStock.textContent = bodega;
+            modalAvailableStock.style.color = '#2c3e50';
+            quantityInput.max = bodega;
+            
+            // Actualizar estado de existencia
+            actualizarEstadoExistencia(bodega);
+            
+            // Validar la cantidad actual
+            validarCantidadInput();
+        }
+
+        // Actualizar estado de existencia
+        function actualizarEstadoExistencia(cantidad) {
+            if (!existenceStatus) return;
+            
+            // Limpiar clases anteriores
+            existenceStatus.classList.remove('available', 'low', 'empty');
+            
+            if (cantidad === 0) {
+                // SIN EXISTENCIA
+                existenceStatus.className = 'existence-status empty mt-3';
+                existenceStatus.innerHTML = '<i class="bi bi-x-circle me-2"></i> Sin existencia en bodega';
+                
+                // Deshabilitar botón de trasladar si no hay existencia
+                btnConfirmTraslado.disabled = true;
+                btnConfirmTraslado.innerHTML = '<i class="bi bi-ban me-2"></i> Sin existencia';
+                
+            } else if (cantidad <= 5) {
+                // EXISTENCIA BAJA
+                existenceStatus.className = 'existence-status low mt-3';
+                existenceStatus.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i> Existencia baja';
+                btnConfirmTraslado.disabled = false;
+                btnConfirmTraslado.innerHTML = '<i class="bi bi-check-lg me-2"></i> Trasladar a Tienda';
+                
+            } else {
+                // EXISTENCIA DISPONIBLE
+                existenceStatus.className = 'existence-status available mt-3';
+                existenceStatus.innerHTML = '<i class="bi bi-check-circle me-2"></i> Producto disponible';
+                btnConfirmTraslado.disabled = false;
+                btnConfirmTraslado.innerHTML = '<i class="bi bi-check-lg me-2"></i> Trasladar a Tienda';
+            }
+        }
+
+        // Mostrar modal de traslado
+        function mostrarModalTraslado(producto) {
+            currentProduct = producto;
+            
+            // Actualizar información del producto en el modal
+            modalProductName.textContent = producto.name;
+            modalProductSku.textContent = `SKU: ${producto.sku}`;
+            
+            // Resetear valores
+            quantityInput.value = "1";
+            quantityInput.classList.add('readonly');
+            quantityInput.setAttribute('readonly', true);
+            
+            // Siempre será traslado de bodega a tienda
+            currentDirection = "bodegaToTienda";
+            
+            // Asegurar que los botones estén habilitados
+            mostrarSpinnerConfirmar(false);
+            
+            // Actualizar existencia
+            actualizarExistenciaEnModal();
+            
+            // Mostrar modal
+            trasladoModal.show();
+            modalOpen = true;
+            document.body.classList.add('modal-open');
+            
+            // Limpiar input de escaneo
+            scannerInput.value = '';
+        }
+
+        // Ejecutar traslado confirmado (con validación de existencia)
+        async function ejecutarTrasladoConfirmado() {
+            if (isProcessing) return;
+            
+            if (!currentProduct) {
+                mostrarNotificacion('Producto no encontrado', 'error');
+                return;
+            }
+            
+            const productoId = currentProduct.id;
+            const cantidad = validarCantidadInput();
+            const bodegaActual = currentProduct.bodega || 0;
+            
+            // Validar que la cantidad no sea 0 o vacía
+            if (cantidad === 0 || quantityInput.value === '') {
+                mostrarNotificacion('Ingrese una cantidad válida', 'error');
+                vibrar('error');
+                quantityInput.focus();
+                return;
+            }
+            
+            if (cantidad < 1) {
+                mostrarNotificacion('La cantidad debe ser al menos 1', 'error');
+                vibrar('error');
+                return;
+            }
+            
+            // Validar stock en bodega - SI NO HAY EXISTENCIA, MOSTRAR SweetAlert
+            if (bodegaActual === 0) {
+                Swal.fire({
+                    title: "¡Sin existencia!",
+                    text: "No hay unidades disponibles en bodega para este producto.",
+                    icon: "error",
+                    confirmButtonText: "Entendido",
+                    confirmButtonColor: "#dc3545"
+                });
+                vibrar('error');
+                return;
+            }
+            
+            // Validar que haya suficiente stock
+            if (cantidad > bodegaActual) {
+                mostrarNotificacion(`Solo hay ${bodegaActual} unidades en bodega`, 'error');
+                vibrar('error');
+                return;
+            }
+            
+            // Mostrar spinner y deshabilitar botones
+            mostrarSpinnerConfirmar(true);
+            
+            try {
+                // Ejecutar traslado (siempre de bodega a tienda)
+                await realizarTraslado(productoId, cantidad, "bodega", "tienda", "Bodega", "Tienda");
+            } catch (error) {
+                console.error('Error en traslado:', error);
+                mostrarNotificacion('Error al realizar el traslado', 'error');
+                mostrarSpinnerConfirmar(false);
+            }
+        }
+
+        // Realizar traslado y guardar en historial
+        async function realizarTraslado(productoId, cantidad, origen, destino, origenNombre, destinoNombre) {
+            const productoIndex = productos.findIndex(p => p.id === productoId);
+            if (productoIndex === -1) {
+                mostrarNotificacion('Producto no encontrado', 'error');
+                mostrarSpinnerConfirmar(false);
+                return;
+            }
+            
+            const producto = productos[productoIndex];
+            
+            // Actualizar stock
+            if (origen === "bodega") {
+                producto.bodega -= cantidad;
+                producto.tienda += cantidad;
+            } else {
+                producto.tienda -= cantidad;
+                producto.bodega += cantidad;
+            }
+            
+            // Actualizar timestamp de última transferencia
+            producto.lastTransfer = getCurrentTimestamp();
+            
+            // Guardar cambios localmente
+            localStorage.setItem('handheldProductos', JSON.stringify(productos));
+            
+            // Crear registro de historial
+            const nuevoRegistro = {
+                id: 'handheld_' + Date.now(),
+                timestamp: getCurrentTimestamp(),
+                tipo: 'transferencia',
+                producto: producto.name,
+                sku: producto.sku,
+                cantidad: cantidad,
+                origen: origen,
+                destino: destino,
+                usuario: isAdmin ? 'admin' : 'handheld'
+            };
+            
+            // Guardar en historial local
+            historial.unshift(nuevoRegistro);
+            localStorage.setItem('handheldHistorial', JSON.stringify(historial));
+            
+            // Actualizar contador
+            actualizarContadorTraslados();
+            
+            // Sincronizar con Firebase si hay conexión
+            let syncSuccess = false;
+            if (db && isOnline) {
+                syncSuccess = await sincronizarTrasladoFirebase(producto, nuevoRegistro);
+            }
+            
+            // Efectos
+            vibrar('transfer');
+            reproducirSonido('success');
+            
+            // Ocultar spinner
+            mostrarSpinnerConfirmar(false);
+            
+            // Cerrar modal
+            cerrarModalTraslado();
+            
+            // Mostrar confirmación
+            Swal.fire({
+                title: '✅ Traslado exitoso',
+                html: `<strong>${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</strong><br>
+                      <small>${producto.name}</small><br>
+                      <small>${origenNombre} → ${destinoNombre}</small>`,
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                // Enfocar input para siguiente escaneo
+                scannerInput.focus();
+            });
         }
 
         // Actualizar estado de conexión
@@ -1916,66 +2070,6 @@
             }
         }
 
-        // Mostrar modal de traslado
-        function mostrarModalTraslado(producto) {
-            currentProduct = producto;
-            
-            // Actualizar información del producto en el modal
-            modalProductName.textContent = producto.name;
-            modalProductSku.textContent = `SKU: ${producto.sku}`;
-            stockBodega.textContent = producto.bodega;
-            stockTienda.textContent = producto.tienda;
-            
-            // Resetear valores
-            quantityInput.value = "1";
-            quantityInput.classList.add('readonly');
-            quantityInput.setAttribute('readonly', true);
-            
-            // Siempre comenzar con Bodega → Tienda seleccionado
-            optionBodegaToTienda.classList.add('active');
-            optionTiendaToBodega.classList.remove('active');
-            currentDirection = "bodegaToTienda";
-            
-            // Actualizar estado del botón de Tienda → Bodega
-            actualizarBotonTiendaABodega();
-            
-            // Asegurar que los botones estén habilitados
-            mostrarSpinnerConfirmar(false);
-            
-            // Actualizar disponibilidad
-            actualizarDisponibleEnModal();
-            
-            // Mostrar modal
-            trasladoModal.show();
-            modalOpen = true;
-            document.body.classList.add('modal-open');
-            
-            // Limpiar input de escaneo
-            scannerInput.value = '';
-        }
-
-        // Actualizar stock disponible en el modal
-        function actualizarDisponibleEnModal() {
-            if (!currentProduct) return;
-            
-            let disponible;
-            
-            if (currentDirection === "bodegaToTienda") {
-                disponible = currentProduct.bodega;
-                modalAvailableStock.textContent = disponible;
-                modalAvailableStock.style.color = '#3498db';
-                quantityInput.max = disponible;
-            } else {
-                disponible = currentProduct.tienda;
-                modalAvailableStock.textContent = disponible;
-                modalAvailableStock.style.color = '#27ae60';
-                quantityInput.max = disponible;
-            }
-            
-            // Validar la cantidad actual
-            validarCantidadInput();
-        }
-
         // Mostrar historial - SOLO TRANSFERENCIAS
         function mostrarHistorial() {
             historialList.innerHTML = '';
@@ -2026,153 +2120,6 @@
                 `;
                 
                 historialList.appendChild(item);
-            });
-        }
-
-        // Ejecutar traslado confirmado
-        async function ejecutarTrasladoConfirmado() {
-            if (isProcessing) return;
-            
-            if (!currentProduct) {
-                mostrarNotificacion('Producto no encontrado', 'error');
-                return;
-            }
-            
-            const productoId = currentProduct.id;
-            const cantidad = validarCantidadInput();
-            
-            // Validar que la cantidad no sea 0 o vacía
-            if (cantidad === 0 || quantityInput.value === '') {
-                mostrarNotificacion('Ingrese una cantidad válida', 'error');
-                vibrar('error');
-                quantityInput.focus();
-                return;
-            }
-            
-            if (cantidad < 1) {
-                mostrarNotificacion('La cantidad debe ser al menos 1', 'error');
-                vibrar('error');
-                return;
-            }
-            
-            let origen, destino, origenNombre, destinoNombre;
-            
-            if (currentDirection === "bodegaToTienda") {
-                if (cantidad > currentProduct.bodega) {
-                    mostrarNotificacion(`Solo hay ${currentProduct.bodega} unidades en bodega`, 'error');
-                    vibrar('error');
-                    return;
-                }
-                origen = "bodega";
-                destino = "tienda";
-                origenNombre = "Bodega";
-                destinoNombre = "Tienda";
-            } else {
-                // Verificar permisos de admin para Tienda → Bodega
-                if (!isAdmin) {
-                    mostrarNotificacion('Solo administradores pueden hacer traslados de Tienda a Bodega', 'error');
-                    vibrar('error');
-                    return;
-                }
-                
-                if (cantidad > currentProduct.tienda) {
-                    mostrarNotificacion(`Solo hay ${currentProduct.tienda} unidades en tienda`, 'error');
-                    vibrar('error');
-                    return;
-                }
-                origen = "tienda";
-                destino = "bodega";
-                origenNombre = "Tienda";
-                destinoNombre = "Bodega";
-            }
-            
-            // Mostrar spinner y deshabilitar botones
-            mostrarSpinnerConfirmar(true);
-            
-            try {
-                // Ejecutar traslado
-                await realizarTraslado(productoId, cantidad, origen, destino, origenNombre, destinoNombre);
-            } catch (error) {
-                console.error('Error en traslado:', error);
-                mostrarNotificacion('Error al realizar el traslado', 'error');
-                mostrarSpinnerConfirmar(false);
-            }
-        }
-
-        // Realizar traslado y guardar en historial
-        async function realizarTraslado(productoId, cantidad, origen, destino, origenNombre, destinoNombre) {
-            const productoIndex = productos.findIndex(p => p.id === productoId);
-            if (productoIndex === -1) {
-                mostrarNotificacion('Producto no encontrado', 'error');
-                mostrarSpinnerConfirmar(false);
-                return;
-            }
-            
-            const producto = productos[productoIndex];
-            
-            // Actualizar stock
-            if (origen === "bodega") {
-                producto.bodega -= cantidad;
-                producto.tienda += cantidad;
-            } else {
-                producto.tienda -= cantidad;
-                producto.bodega += cantidad;
-            }
-            
-            // Actualizar timestamp de última transferencia
-            producto.lastTransfer = getCurrentTimestamp();
-            
-            // Guardar cambios localmente
-            localStorage.setItem('handheldProductos', JSON.stringify(productos));
-            
-            // Crear registro de historial
-            const nuevoRegistro = {
-                id: 'handheld_' + Date.now(),
-                timestamp: getCurrentTimestamp(),
-                tipo: 'transferencia',
-                producto: producto.name,
-                sku: producto.sku,
-                cantidad: cantidad,
-                origen: origen,
-                destino: destino,
-                usuario: isAdmin ? 'admin' : 'handheld'
-            };
-            
-            // Guardar en historial local
-            historial.unshift(nuevoRegistro);
-            localStorage.setItem('handheldHistorial', JSON.stringify(historial));
-            
-            // Actualizar contador
-            actualizarContadorTraslados();
-            
-            // Sincronizar con Firebase si hay conexión
-            let syncSuccess = false;
-            if (db && isOnline) {
-                syncSuccess = await sincronizarTrasladoFirebase(producto, nuevoRegistro);
-            }
-            
-            // Efectos
-            vibrar('transfer');
-            reproducirSonido('success');
-            
-            // Ocultar spinner
-            mostrarSpinnerConfirmar(false);
-            
-            // Cerrar modal
-            cerrarModalTraslado();
-            
-            // Mostrar confirmación
-            Swal.fire({
-                title: '✅ Traslado exitoso',
-                html: `<strong>${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</strong><br>
-                      <small>${producto.name}</small><br>
-                      <small>${origenNombre} → ${destinoNombre}</small>`,
-                icon: 'success',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                // Enfocar input para siguiente escaneo
-                scannerInput.focus();
             });
         }
 

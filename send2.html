@@ -323,79 +323,103 @@
             margin-bottom: 8px;
         }
         
-        /* Sección de existencia en BODEGA */
+        /* Sección de existencia en BODEGA - REDUCIDA */
         .existence-section {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
-        
+
         .existence-section .card {
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
-            border: 2px solid #2c3e50;
+            border: 1px solid #dee2e6; /* Borde más delgado */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        
+
         .existence-section .card-header {
-            border-radius: 10px 10px 0 0 !important;
+            border-radius: 9px 9px 0 0 !important;
             background: linear-gradient(135deg, #2c3e50, #1a252f);
+            padding: 8px 12px; /* Padding reducido */
         }
-        
+
+        .existence-section .card-header h6 {
+            font-size: 0.9rem; /* Texto más pequeño */
+            margin-bottom: 0;
+        }
+
         .existence-content {
-            padding: 20px;
+            padding: 12px; /* Padding reducido */
             text-align: center;
         }
-        
+
         .existence-label {
-            font-size: 0.9rem;
+            font-size: 0.8rem; /* Texto más pequeño */
             color: #6c757d;
-            margin-bottom: 5px;
+            margin-bottom: 3px; /* Margen reducido */
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
-        
+
         .existence-value {
-            font-size: 3.5rem;
-            font-weight: 800;
+            font-size: 2.2rem; /* Tamaño reducido (era 3.5rem) */
+            font-weight: 700; /* Peso reducido (era 800) */
             line-height: 1;
-            margin: 10px 0;
+            margin: 5px 0; /* Margen reducido */
             color: #2c3e50;
             transition: transform 0.3s;
         }
-        
-        .existence-value:hover {
-            transform: scale(1.05);
-        }
-        
+
         .existence-unit {
-            font-size: 0.9rem;
+            font-size: 0.8rem; /* Texto más pequeño */
             color: #6c757d;
-            margin-top: 5px;
+            margin-top: 3px; /* Margen reducido */
         }
-        
-        /* Estado de existencia */
+
+        /* Estado de existencia - REDUCIDO */
         .existence-status {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.9rem;
+            margin-top: 8px; /* Margen reducido */
+            padding: 6px 8px; /* Padding reducido */
+            border-radius: 6px;
+            font-size: 0.8rem; /* Texto más pequeño */
             font-weight: 600;
         }
-        
+
         .existence-status.available {
             background-color: rgba(39, 174, 96, 0.1);
             color: #27ae60;
             border: 1px solid rgba(39, 174, 96, 0.2);
         }
-        
+
         .existence-status.low {
             background-color: rgba(243, 156, 18, 0.1);
             color: #f39c12;
             border: 1px solid rgba(243, 156, 18, 0.2);
         }
-        
+
         .existence-status.empty {
             background-color: rgba(231, 76, 60, 0.1);
             color: #e74c3c;
             border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+        
+        /* Para pantallas más pequeñas */
+        @media (max-height: 600px) {
+            .existence-value {
+                font-size: 1.8rem; /* Aún más pequeño en pantallas cortas */
+            }
+            
+            .existence-content {
+                padding: 8px; /* Aún menos padding */
+            }
+        }
+
+        @media (max-width: 400px) {
+            .existence-value {
+                font-size: 2rem; /* Ajuste para móviles pequeños */
+            }
+            
+            .existence-section .card-header {
+                padding: 6px 10px; /* Aún menos padding */
+            }
         }
         
         /* Selector de cantidad */
@@ -653,10 +677,6 @@
                 padding: 10px !important;
                 margin: 8px !important;
             }
-            
-            .existence-value {
-                font-size: 2.5rem;
-            }
         }
         
         @media (max-width: 400px) {
@@ -674,10 +694,6 @@
             .quantity-input {
                 padding: 10px 35px 10px 30px;
             }
-            
-            .existence-value {
-                font-size: 2.8rem;
-            }
         }
         
         @media (max-height: 500px) {
@@ -688,10 +704,6 @@
             
             .existence-section {
                 margin-bottom: 10px;
-            }
-            
-            .existence-value {
-                font-size: 2.2rem;
             }
             
             .quantity-section {
@@ -908,7 +920,7 @@
                         <div class="product-sku" id="modalProductSku">SKU: 000000</div>
                     </div>
                     
-                    <!-- EXISTENCIA EN BODEGA -->
+                    <!-- EXISTENCIA EN BODEGA - REDUCIDA -->
                     <div class="existence-section mb-4">
                         <div class="card">
                             <div class="card-header text-white py-2">

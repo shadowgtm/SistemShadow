@@ -285,43 +285,58 @@
             margin: 0 auto;
         }
         
+        /* Modal de traslado - Header EXTRA PEQUEÑO */
         .traslado-header {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border-bottom: 1px solid #eee;
-            border-radius: 10px 10px 0 0;
+            border-radius: 10px 10px 0 0; /* Bordes más pequeños */
+            padding: 6px 10px; /* Muy compacto */
         }
-        
+
         .traslado-title {
             color: var(--primary);
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 4px;
-            font-size: 0.85rem;
+            gap: 4px; /* Espacio reducido entre icono y texto */
+            font-size: 0.85rem; /* Texto muy pequeño */
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .traslado-title i {
+            font-size: 0.8rem; /* Icono muy pequeño */
+        }
+
+        /* Botón de cerrar más pequeño */
+        .traslado-header .btn-close {
+            font-size: 0.7rem; /* Botón X más pequeño */
+            padding: 0.5rem;
+            background-size: 0.7rem;
         }
         
         .product-info {
             text-align: center;
-            padding: 15px;
+            padding: 12px; /* Reducido de 15px */
             background: white;
             border-radius: 8px;
             border: 1px solid #eee;
-            margin-bottom: 15px;
+            margin-bottom: 12px; /* Reducido de 15px */
         }
         
         .product-name {
-            font-size: 1rem;
+            font-size: 0.95rem; /* Reducido de 1rem */
             font-weight: 600;
             color: var(--dark);
-            margin-bottom: 4px;
+            margin-bottom: 3px; /* Reducido de 4px */
             word-break: break-word;
             line-height: 1.3;
         }
         
         .product-sku {
             color: #666;
-            font-size: 0.85rem;
-            margin-bottom: 8px;
+            font-size: 0.8rem; /* Reducido de 0.85rem */
+            margin-bottom: 6px; /* Reducido de 8px */
         }
         
         /* Sección de existencia en BODEGA - VERSIÓN EXTRA PEQUEÑA */
@@ -410,6 +425,14 @@
             .existence-content {
                 padding: 6px;
             }
+            
+            .traslado-header {
+                padding: 5px 8px; /* Aún más pequeño */
+            }
+            
+            .traslado-title {
+                font-size: 0.8rem;
+            }
         }
 
         @media (max-width: 400px) {
@@ -420,25 +443,37 @@
             .existence-section .card-header {
                 padding: 5px 8px;
             }
+            
+            .traslado-modal .modal-content {
+                max-width: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+                margin: 0;
+            }
+            
+            .traslado-header {
+                padding: 4px 8px;
+                border-radius: 0;
+            }
         }
         
         /* Selector de cantidad */
         .quantity-section {
-            margin: 12px 0;
+            margin: 10px 0; /* Reducido de 12px */
         }
         
         .quantity-label {
-            font-size: 0.85rem;
+            font-size: 0.8rem; /* Reducido de 0.85rem */
             color: #666;
-            margin-bottom: 8px;
+            margin-bottom: 6px; /* Reducido de 8px */
             text-align: center;
         }
         
         .quantity-input-group {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px; /* Reducido de 10px */
+            margin-bottom: 12px; /* Reducido de 15px */
         }
         
         .quantity-input-container {
@@ -448,10 +483,10 @@
         
         .quantity-input {
             width: 100%;
-            padding: 12px 40px 12px 35px;
+            padding: 10px 35px 10px 30px; /* Reducido de 12px 40px 12px 35px */
             border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 1rem; /* Reducido de 1.1rem */
             font-weight: 600;
             text-align: center;
             color: var(--primary);
@@ -467,24 +502,24 @@
         
         .quantity-input-icon {
             position: absolute;
-            left: 12px;
+            left: 10px; /* Reducido de 12px */
             top: 50%;
             transform: translateY(-50%);
             color: var(--secondary);
-            font-size: 1rem;
+            font-size: 0.9rem; /* Reducido de 1rem */
         }
         
         .clear-quantity-btn {
             position: absolute;
-            right: 8px;
+            right: 6px; /* Reducido de 8px */
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
             color: #999;
-            font-size: 1rem;
+            font-size: 0.9rem; /* Reducido de 1rem */
             cursor: pointer;
-            padding: 4px;
+            padding: 3px; /* Reducido de 4px */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -497,29 +532,29 @@
         
         .available-text {
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem; /* Reducido de 0.9rem */
             color: #666;
-            margin-top: 8px;
+            margin-top: 6px; /* Reducido de 8px */
             font-weight: 600;
         }
         
         .available-text .stock-amount {
             color: var(--primary);
-            font-size: 1.1rem;
+            font-size: 1rem; /* Reducido de 1.1rem */
         }
         
         .traslado-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px; /* Reducido de 8px */
             margin-top: auto;
-            padding-top: 15px;
+            padding-top: 12px; /* Reducido de 15px */
             border-top: 1px solid #eee;
         }
         
         .traslado-actions button {
             flex: 1;
-            padding: 12px;
-            font-size: 0.95rem;
+            padding: 10px; /* Reducido de 12px */
+            font-size: 0.9rem; /* Reducido de 0.95rem */
             font-weight: 600;
             position: relative;
         }
@@ -532,13 +567,13 @@
         /* Spinner en botón */
         .btn-spinner {
             display: inline-block;
-            width: 18px;
-            height: 18px;
+            width: 16px; /* Reducido de 18px */
+            height: 16px; /* Reducido de 18px */
             border: 2px solid rgba(255,255,255,.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 1s ease-in-out infinite;
-            margin-right: 8px;
+            margin-right: 6px; /* Reducido de 8px */
         }
         
         /* Bloquear scroll cuando modal está abierto */
@@ -560,10 +595,10 @@
         }
         
         .historial-item {
-            padding: 12px;
+            padding: 10px; /* Reducido de 12px */
             background: white;
             border-radius: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 6px; /* Reducido de 8px */
             border-left: 4px solid var(--success);
             border: 1px solid #dee2e6;
             transition: all 0.3s;
@@ -585,13 +620,13 @@
         .historial-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
+            margin-bottom: 4px; /* Reducido de 5px */
         }
         
         .historial-product {
             font-weight: 600;
             color: var(--primary);
-            font-size: 0.95rem;
+            font-size: 0.9rem; /* Reducido de 0.95rem */
             flex: 1;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -601,59 +636,60 @@
         .historial-quantity {
             font-weight: 700;
             color: var(--success);
-            font-size: 0.95rem;
+            font-size: 0.9rem; /* Reducido de 0.95rem */
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px; /* Reducido de 5px */
         }
         
         .historial-details {
-            font-size: 0.8rem;
+            font-size: 0.75rem; /* Reducido de 0.8rem */
             color: #666;
-            margin-bottom: 3px;
+            margin-bottom: 2px; /* Reducido de 3px */
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px; /* Reducido de 5px */
         }
         
         .historial-time {
-            font-size: 0.75rem;
+            font-size: 0.7rem; /* Reducido de 0.75rem */
             color: #999;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px; /* Reducido de 5px */
         }
         
         .empty-historial {
             text-align: center;
-            padding: 30px 15px;
+            padding: 20px 12px; /* Reducido de 30px 15px */
             color: #999;
         }
         
         .empty-icon {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
+            font-size: 2rem; /* Reducido de 2.5rem */
+            margin-bottom: 8px; /* Reducido de 12px */
             color: #dee2e6;
         }
         
         /* Configuración items */
         .config-item {
-            margin-bottom: 15px;
+            margin-bottom: 12px; /* Reducido de 15px */
         }
         
         .config-label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 4px; /* Reducido de 6px */
             font-weight: 600;
             color: var(--primary);
+            font-size: 0.9rem; /* Reducido */
         }
         
         .config-input {
             width: 100%;
-            padding: 12px;
+            padding: 10px; /* Reducido de 12px */
             border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.95rem; /* Reducido de 1rem */
             transition: all 0.3s;
         }
         
@@ -666,52 +702,46 @@
         /* Responsive */
         @media (max-height: 600px) {
             .app-header {
-                padding: 8px 12px !important;
+                padding: 6px 10px !important; /* Reducido */
             }
             
             .header-title {
-                font-size: 1.2rem;
+                font-size: 1.1rem; /* Reducido de 1.2rem */
             }
             
             .scanner-section {
-                padding: 10px !important;
-                margin: 8px !important;
+                padding: 8px !important; /* Reducido de 10px */
+                margin: 6px !important; /* Reducido de 8px */
+            }
+            
+            .scanner-title {
+                font-size: 1rem; /* Reducido */
+                margin-bottom: 8px; /* Reducido */
             }
         }
         
         @media (max-width: 400px) {
-            .traslado-modal .modal-content {
-                max-width: 100%;
-                max-height: 100vh;
-                border-radius: 0;
-                margin: 0;
-            }
-            
-            .traslado-header {
-                border-radius: 0;
-            }
-            
             .quantity-input {
-                padding: 10px 35px 10px 30px;
+                padding: 8px 30px 8px 25px; /* Más reducido */
             }
         }
         
         @media (max-height: 500px) {
             .product-info {
-                margin-bottom: 10px;
-                padding: 10px;
+                margin-bottom: 8px; /* Reducido de 10px */
+                padding: 8px; /* Reducido de 10px */
             }
             
             .existence-section {
-                margin-bottom: 8px;
+                margin-bottom: 6px; /* Reducido de 8px */
             }
             
             .quantity-section {
-                margin: 8px 0;
+                margin: 6px 0; /* Reducido de 8px */
             }
             
             .traslado-actions {
-                padding-top: 12px;
+                padding-top: 10px; /* Reducido de 12px */
             }
         }
         
@@ -725,17 +755,17 @@
         
         /* Scrollbar styling */
         .historial-list::-webkit-scrollbar {
-            width: 6px;
+            width: 5px; /* Reducido de 6px */
         }
         
         .historial-list::-webkit-scrollbar-track {
             background: #f1f1f1;
-            border-radius: 3px;
+            border-radius: 2px; /* Reducido de 3px */
         }
         
         .historial-list::-webkit-scrollbar-thumb {
             background: #888;
-            border-radius: 3px;
+            border-radius: 2px; /* Reducido de 3px */
         }
         
         .historial-list::-webkit-scrollbar-thumb:hover {
@@ -907,6 +937,7 @@
     <div class="modal fade" id="trasladoModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
+                <!-- HEADER REDUCIDO -->
                 <div class="modal-header traslado-header">
                     <h5 class="modal-title traslado-title">
                         <i class="bi bi-arrow-left-right me-2"></i> Trasladar Producto

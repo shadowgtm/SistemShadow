@@ -104,6 +104,23 @@
             color: #FF9800;
         }
         
+        /* Badge para cola pendiente */
+        .queue-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--warning);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
         /* Scanner section modernizada */
         .scanner-section {
             background: white;
@@ -215,35 +232,139 @@
             font-weight: 600;
         }
         
-        /* Loading overlay */
+        /* Loading overlay - FONDO TRANSPARENTE CON BLUR */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.85); /* Más transparente */
+            backdrop-filter: blur(5px); /* Efecto blur del fondo */
+            -webkit-backdrop-filter: blur(5px); /* Para Safari */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 2000;
             display: none;
+            animation: fadeIn 0.3s ease;
         }
         
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--secondary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .loading-content {
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.95); /* Fondo semitransparente */
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: slideUp 0.4s ease;
+        }
+        
+        @keyframes slideUp {
+            from { 
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: rgba(240, 240, 240, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            height: 12px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--info));
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-image: linear-gradient(
+                -45deg,
+                rgba(255, 255, 255, 0.2) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0.2) 75%,
+                transparent 75%,
+                transparent
+            );
+            z-index: 1;
+            background-size: 50px 50px;
+            animation: move 2s linear infinite;
+        }
+        
+        @keyframes move {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 50px 50px;
+            }
+        }
+        
+        .loading-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+            text-align: left;
+        }
+        
+        .loading-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: #666;
+            padding: 5px 0;
+        }
+        
+        .loading-step i {
+            font-size: 0.9rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .loading-step i.bi-circle {
+            color: #ddd;
+        }
+        
+        .loading-step.active i {
+            color: var(--secondary);
+        }
+        
+        .loading-step.completed i {
+            color: var(--success);
         }
         
         /* Notificaciones */
@@ -252,7 +373,6 @@
             top: 80px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--success);
             color: white;
             padding: 12px 20px;
             border-radius: 8px;
@@ -260,6 +380,10 @@
             z-index: 1000;
             animation: slideDown 0.3s ease;
             display: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(39, 174, 96, 0.9); /* Transparente para éxito */
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         @keyframes slideDown {
@@ -268,15 +392,19 @@
         }
         
         .notification.error {
-            background: var(--danger);
+            background: rgba(231, 76, 60, 0.9); /* Transparente para error */
         }
         
         .notification.warning {
-            background: var(--warning);
+            background: rgba(243, 156, 18, 0.9); /* Transparente para advertencia */
         }
         
         .notification.info {
-            background: var(--info);
+            background: rgba(155, 89, 182, 0.9); /* Transparente para info */
+        }
+        
+        .notification.offline {
+            background: rgba(52, 152, 219, 0.9); /* Azul para offline */
         }
         
         /* Modal de traslado actualizado */
@@ -421,6 +549,11 @@
             animation: spin 1s linear infinite;
         }
 
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
         .existence-unit {
             font-size: 0.75rem;
             color: #6c757d;
@@ -471,6 +604,11 @@
             .traslado-title {
                 font-size: 0.8rem;
             }
+            
+            .loading-content {
+                padding: 20px;
+                max-width: 350px;
+            }
         }
 
         @media (max-width: 400px) {
@@ -492,6 +630,11 @@
             .traslado-header {
                 padding: 4px 8px;
                 border-radius: 0;
+            }
+            
+            .loading-content {
+                padding: 15px;
+                max-width: 90%;
             }
         }
         
@@ -655,6 +798,11 @@
             border-left-color: var(--info);
         }
         
+        .historial-item.offline {
+            border-left-color: #3498db;
+            opacity: 0.9;
+        }
+        
         .historial-header {
             display: flex;
             justify-content: space-between;
@@ -695,6 +843,18 @@
             display: flex;
             align-items: center;
             gap: 4px; /* Reducido de 5px */
+        }
+        
+        .offline-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
         }
         
         .empty-historial {
@@ -781,6 +941,10 @@
             .traslado-actions {
                 padding-top: 10px; /* Reducido de 12px */
             }
+            
+            .loading-content {
+                padding: 15px;
+            }
         }
         
         /* Mejoras de accesibilidad */
@@ -830,6 +994,7 @@
                     </button>
                     <button class="header-btn" id="btnHistory" title="Transferencias">
                         <i class="bi bi-arrow-left-right"></i>
+                        <span id="queueBadge" class="queue-badge" style="display: none;">0</span>
                     </button>
                     <button class="header-btn" id="btnSync" title="Sincronizar">
                         <i class="bi bi-cloud-arrow-up"></i>
@@ -873,10 +1038,23 @@
         </div>
     </div>
     
-    <!-- Loading overlay -->
+    <!-- Loading overlay con FONDO TRANSPARENTE -->
     <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div id="loadingText" class="mt-2">Sincronizando con Firebase...</div>
+        <div class="loading-content">
+            <h5 id="loadingTitle" class="mb-3 text-primary">Sincronizando con Firebase</h5>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="loading-steps" id="loadingSteps">
+                <!-- Los pasos se generarán dinámicamente -->
+            </div>
+            
+            <div class="mt-3">
+                <small id="loadingText" class="text-muted">Iniciando sincronización...</small>
+            </div>
+        </div>
     </div>
     
     <!-- Notification -->
@@ -937,6 +1115,7 @@
                             <div class="mb-1"><strong>Transferencias hoy:</strong> <span id="trasladosToday">0</span></div>
                             <div class="mb-1"><strong>Última sincronización:</strong> <span id="lastSync">Nunca</span></div>
                             <div class="mb-1"><strong>Tipo de usuario:</strong> <span id="userTypeDisplay">Usuario normal</span></div>
+                            <div class="mb-1"><strong>Traslados pendientes:</strong> <span id="pendientesCount">0</span></div>
                         </div>
                     </div>
                 </div>
@@ -959,9 +1138,12 @@
                         <div class="small text-muted">
                             <span id="historialCount">0</span> transferencias registradas
                         </div>
-                        <button class="btn btn-primary btn-sm" id="btnRefreshHistorial">
-                            <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
-                        </button>
+                        <div>
+                            <span id="pendientesBadge" class="badge bg-warning" style="display: none;">0 pendientes</span>
+                            <button class="btn btn-primary btn-sm ms-2" id="btnRefreshHistorial">
+                                <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+                            </button>
+                        </div>
                     </div>
                     <div id="historialList" class="historial-list">
                         <!-- Las transferencias se cargarán aquí dinámicamente -->
@@ -987,6 +1169,7 @@
                     <div class="product-info">
                         <div class="product-name" id="modalProductName">Nombre del producto</div>
                         <div class="product-sku" id="modalProductSku">SKU: 000000</div>
+                        <!-- NOTA: Se eliminó el indicador de conexión -->
                     </div>
                     
                     <!-- EXISTENCIA EN BODEGA - VERSIÓN EXTRA PEQUEÑA -->
@@ -1096,6 +1279,10 @@
         let datosProductosCargados = false;
         let datosHistorialCargados = false;
         const VERSION_DATOS = '1.0.0';
+        
+        // Sistema de cola para sincronización offline
+        let colaSincronizacion = [];
+        const MAX_INTENTOS_SINCRONIZACION = 3;
 
         // Elementos del DOM
         const scannerInput = document.getElementById('scannerInput');
@@ -1119,7 +1306,10 @@
         const btnClearLocal = document.getElementById('btnClearLocal');
         const connectionStatus = document.getElementById('connectionStatus');
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingTitle = document.getElementById('loadingTitle');
         const loadingText = document.getElementById('loadingText');
+        const progressBar = document.getElementById('progressBar');
+        const loadingSteps = document.getElementById('loadingSteps');
         const notification = document.getElementById('notification');
         const firebaseStatus = document.getElementById('firebaseStatus');
         const productCount = document.getElementById('productCount');
@@ -1129,6 +1319,9 @@
         const historialList = document.getElementById('historialList');
         const historialCount = document.getElementById('historialCount');
         const btnRefreshHistorial = document.getElementById('btnRefreshHistorial');
+        const pendientesCount = document.getElementById('pendientesCount');
+        const pendientesBadge = document.getElementById('pendientesBadge');
+        const queueBadge = document.getElementById('queueBadge');
         
         // Modal de traslado
         const btnCancelTraslado = document.getElementById('btnCancelTraslado');
@@ -1191,6 +1384,9 @@
             // Cargar configuración básica
             cargarConfiguracion();
             
+            // Cargar cola de sincronización
+            cargarColaSincronizacion();
+            
             // Configurar eventos
             configurarEventos();
             
@@ -1205,7 +1401,78 @@
             
             // Configurar escáner handheld
             setupHandheldScanner();
+            
+            // Actualizar estado de conexión en UI
+            actualizarEstadoConexionUI();
         });
+
+        // Cargar cola de sincronización desde localStorage
+        function cargarColaSincronizacion() {
+            const colaGuardada = localStorage.getItem('handheldColaSincronizacion');
+            if (colaGuardada) {
+                try {
+                    colaSincronizacion = JSON.parse(colaGuardada);
+                    console.log(`Cargados ${colaSincronizacion.length} elementos en cola de sincronización`);
+                    actualizarBadgeCola();
+                    actualizarInfoConfiguracion();
+                } catch (error) {
+                    console.error('Error cargando cola de sincronización:', error);
+                    colaSincronizacion = [];
+                }
+            } else {
+                colaSincronizacion = [];
+            }
+        }
+
+        // Guardar cola de sincronización en localStorage
+        function guardarColaSincronizacion() {
+            localStorage.setItem('handheldColaSincronizacion', JSON.stringify(colaSincronizacion));
+            actualizarBadgeCola();
+            actualizarInfoConfiguracion();
+        }
+
+        // Agregar elemento a la cola de sincronización
+        function agregarALaCola(accion, datos) {
+            const id = 'cola_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            colaSincronizacion.push({
+                id: id,
+                timestamp: Date.now(),
+                accion: accion,
+                datos: datos,
+                intentos: 0,
+                estado: 'pendiente',
+                ultimoIntento: null,
+                error: null
+            });
+            
+            guardarColaSincronizacion();
+            console.log(`Elemento agregado a cola: ${accion}`, datos);
+            
+            // Mostrar notificación
+            if (accion === 'actualizarProducto') {
+                mostrarNotificacion('Traslado guardado localmente. Se sincronizará cuando haya conexión', 'offline');
+            }
+            
+            return id;
+        }
+
+        // Actualizar badge de cola pendiente
+        function actualizarBadgeCola() {
+            const pendientes = colaSincronizacion.filter(item => item.estado === 'pendiente').length;
+            
+            if (pendientes > 0) {
+                queueBadge.textContent = pendientes;
+                queueBadge.style.display = 'flex';
+                pendientesBadge.textContent = `${pendientes} pendientes`;
+                pendientesBadge.style.display = 'inline-block';
+            } else {
+                queueBadge.style.display = 'none';
+                pendientesBadge.style.display = 'none';
+            }
+            
+            pendientesCount.textContent = pendientes;
+        }
 
         // Verificar versión de datos
         function verificarVersionDatos() {
@@ -1248,13 +1515,14 @@
                 }
                 
                 actualizarEstadoConexion();
+                actualizarEstadoConexionUI();
                 actualizarContadorTraslados();
                 actualizarInfoConfiguracion();
                 return;
             }
             
             // Si no están cargados, cargar normalmente
-            mostrarLoading(true, "Cargando datos...");
+            mostrarLoading(true, "Cargando datos...", "Iniciando aplicación...");
             
             try {
                 // Cargar datos locales una sola vez
@@ -1286,6 +1554,7 @@
             } finally {
                 mostrarLoading(false);
                 actualizarEstadoConexion();
+                actualizarEstadoConexionUI();
                 actualizarContadorTraslados();
                 actualizarInfoConfiguracion();
             }
@@ -1371,7 +1640,6 @@
         // Verificar si es admin
         function verificarAdminStatus() {
             isAdmin = config.userType === "admin";
-            // Ya no hay botón de Tienda → Bodega que actualizar
         }
 
         // Mostrar notificación
@@ -1383,6 +1651,85 @@
             setTimeout(() => {
                 notification.style.display = 'none';
             }, 3000);
+        }
+
+        // Mostrar/ocultar loading con barra de progreso
+        function mostrarLoading(mostrar, titulo = "", texto = "", progreso = 0) {
+            if (mostrar) {
+                if (titulo) loadingTitle.textContent = titulo;
+                if (texto) loadingText.textContent = texto;
+                
+                // Actualizar barra de progreso
+                progressBar.style.width = progreso + '%';
+                
+                loadingOverlay.style.display = 'flex';
+                
+                // Animación de entrada
+                loadingOverlay.style.animation = 'fadeIn 0.3s ease';
+                
+                // Asegurar que el contenido también tenga animación
+                const loadingContent = document.querySelector('.loading-content');
+                if (loadingContent) {
+                    loadingContent.style.animation = 'slideUp 0.4s ease';
+                }
+            } else {
+                // Animación de salida
+                loadingOverlay.style.opacity = '0';
+                loadingOverlay.style.transition = 'opacity 0.3s ease';
+                
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                    loadingOverlay.style.opacity = '1';
+                    // Resetear barra de progreso
+                    progressBar.style.width = '0%';
+                }, 300);
+            }
+        }
+
+        // Actualizar pasos de carga
+        function actualizarPasosCarga(pasos, pasoActual) {
+            loadingSteps.innerHTML = '';
+            
+            pasos.forEach((paso, index) => {
+                const stepElement = document.createElement('div');
+                stepElement.className = 'loading-step';
+                
+                if (index < pasoActual) {
+                    stepElement.className += ' completed';
+                    stepElement.innerHTML = `
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>${paso}</span>
+                    `;
+                } else if (index === pasoActual) {
+                    stepElement.className += ' active';
+                    stepElement.innerHTML = `
+                        <i class="bi bi-arrow-right-circle-fill"></i>
+                        <span>${paso}</span>
+                    `;
+                } else {
+                    stepElement.innerHTML = `
+                        <i class="bi bi-circle"></i>
+                        <span>${paso}</span>
+                    `;
+                }
+                
+                loadingSteps.appendChild(stepElement);
+            });
+        }
+
+        // Actualizar estado de conexión en la UI (solo header)
+        function actualizarEstadoConexionUI() {
+            if (connectionStatus) {
+                if (isOnline) {
+                    connectionStatus.innerHTML = '<i class="bi bi-wifi"></i> Conectado';
+                    connectionStatus.classList.add('online');
+                    connectionStatus.classList.remove('offline');
+                } else {
+                    connectionStatus.innerHTML = '<i class="bi bi-wifi-off"></i> Sin conexión';
+                    connectionStatus.classList.add('offline');
+                    connectionStatus.classList.remove('online');
+                }
+            }
         }
 
         // Configurar eventos
@@ -1409,7 +1756,27 @@
             
             // Sincronizar
             btnSync.addEventListener('click', async function() {
-                await sincronizarConFirebase();
+                // Verificar si hay elementos en cola
+                if (colaSincronizacion.length > 0) {
+                    Swal.fire({
+                        title: 'Sincronizar pendientes',
+                        text: `Hay ${colaSincronizacion.length} traslados pendientes de sincronizar. ¿Desea sincronizarlos ahora?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, sincronizar',
+                        cancelButtonText: 'Solo datos actuales',
+                        confirmButtonColor: '#3498db',
+                        cancelButtonColor: '#6c757d'
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            await sincronizarColaPendiente();
+                        } else {
+                            await sincronizarConFirebase();
+                        }
+                    });
+                } else {
+                    await sincronizarConFirebase();
+                }
             });
             
             // Transferencias
@@ -1442,17 +1809,27 @@
             // Sincronizar ahora
             btnSyncNow.addEventListener('click', async function() {
                 settingsModal.hide();
-                await sincronizarConFirebase();
+                if (colaSincronizacion.length > 0) {
+                    await sincronizarColaPendiente();
+                } else {
+                    await sincronizarConFirebase();
+                }
             });
             
             // Limpiar datos locales
             btnClearLocal.addEventListener('click', function() {
                 Swal.fire({
                     title: '¿Limpiar datos locales?',
-                    text: 'Los datos del servidor NO se eliminarán',
+                    html: `Esta acción eliminará:<br>
+                          <ul class="text-start">
+                            <li>Productos almacenados localmente</li>
+                            <li>Historial de transferencias</li>
+                            <li>Traslados pendientes de sincronizar</li>
+                          </ul>
+                          <strong>Los datos del servidor NO se eliminarán</strong>`,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Sí, limpiar',
+                    confirmButtonText: 'Sí, limpiar todo',
                     cancelButtonText: 'Cancelar',
                     confirmButtonColor: '#dc3545',
                     cancelButtonColor: '#6c757d'
@@ -1460,15 +1837,20 @@
                     if (result.isConfirmed) {
                         productos = [];
                         historial = [];
+                        colaSincronizacion = [];
                         datosProductosCargados = false;
                         datosHistorialCargados = false;
+                        
+                        // Limpiar localStorage
                         localStorage.removeItem('handheldProductos');
                         localStorage.removeItem('handheldHistorial');
+                        localStorage.removeItem('handheldColaSincronizacion');
                         
                         // Limpiar session storage para forzar recarga
                         sessionStorage.removeItem('handheldDatosCargados');
                         
                         actualizarContadorTraslados();
+                        actualizarBadgeCola();
                         mostrarNotificacion('Datos locales limpiados', 'success');
                         
                         // Recargar desde Firebase
@@ -1547,6 +1929,35 @@
                         e.preventDefault();
                     }
                 }
+            });
+            
+            // Manejar conexión/desconexión
+            window.addEventListener('online', async () => {
+                isOnline = true;
+                actualizarEstadoConexion();
+                actualizarEstadoConexionUI();
+                
+                // Verificar si hay elementos en cola
+                const pendientes = colaSincronizacion.filter(item => item.estado === 'pendiente').length;
+                if (pendientes > 0) {
+                    // Esperar un momento para que la interfaz se actualice
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Sincronizar automáticamente sin preguntar
+                    await sincronizarColaPendiente();
+                } else {
+                    // Sincronizar datos actuales
+                    await sincronizarConFirebase();
+                }
+                
+                mostrarNotificacion('Conexión restablecida', 'success');
+            });
+            
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                actualizarEstadoConexion();
+                actualizarEstadoConexionUI();
+                mostrarNotificacion('Sin conexión - Modo offline activado', 'warning');
             });
         }
 
@@ -1727,13 +2138,15 @@
             }
         }
 
-        // Mostrar modal de traslado
+        // Mostrar modal de traslado (SIN indicador de conexión)
         function mostrarModalTraslado(producto) {
             currentProduct = producto;
             
             // Actualizar información del producto en el modal
             modalProductName.textContent = producto.name;
             modalProductSku.textContent = `SKU: ${producto.sku}`;
+            
+            // NOTA: Se eliminó el indicador de conexión del modal
             
             // Resetear valores
             quantityInput.value = "1";
@@ -1859,7 +2272,8 @@
                 cantidad: cantidad,
                 origen: origen,
                 destino: destino,
-                usuario: isAdmin ? 'admin' : 'handheld'
+                usuario: isAdmin ? 'admin' : 'handheld',
+                sincronizado: isOnline // Marcar si ya está sincronizado
             };
             
             // Guardar en historial local
@@ -1870,14 +2284,45 @@
             actualizarContadorTraslados();
             
             // Sincronizar con Firebase si hay conexión
-            let syncSuccess = false;
             if (db && isOnline) {
-                syncSuccess = await sincronizarTrasladoFirebase(producto, nuevoRegistro);
+                try {
+                    await sincronizarTrasladoFirebase(producto, nuevoRegistro);
+                    nuevoRegistro.sincronizado = true;
+                    
+                    // Actualizar historial local con estado sincronizado
+                    localStorage.setItem('handheldHistorial', JSON.stringify(historial));
+                    
+                    // Efectos
+                    vibrar('transfer');
+                    reproducirSonido('success');
+                    
+                } catch (error) {
+                    console.error('Error sincronizando traslado:', error);
+                    // Si falla la sincronización, agregar a la cola
+                    agregarALaCola('actualizarProducto', {
+                        productoId: producto.id,
+                        bodega: producto.bodega,
+                        tienda: producto.tienda,
+                        lastTransfer: producto.lastTransfer
+                    });
+                    
+                    agregarALaCola('agregarHistorial', nuevoRegistro);
+                }
+            } else {
+                // Si no hay conexión, agregar a la cola
+                agregarALaCola('actualizarProducto', {
+                    productoId: producto.id,
+                    bodega: producto.bodega,
+                    tienda: producto.tienda,
+                    lastTransfer: producto.lastTransfer
+                });
+                
+                agregarALaCola('agregarHistorial', nuevoRegistro);
+                
+                // Efectos para modo offline
+                vibrar('transfer');
+                reproducirSonido('success');
             }
-            
-            // Efectos
-            vibrar('transfer');
-            reproducirSonido('success');
             
             // Ocultar spinner
             mostrarSpinnerConfirmar(false);
@@ -1885,19 +2330,170 @@
             // Cerrar modal
             cerrarModalTraslado();
             
-            // Mostrar confirmación
-            Swal.fire({
-                title: '✅ Traslado exitoso',
-                html: `<strong>${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</strong><br>
-                      <small>${producto.name}</small><br>
-                      <small>${origenNombre} → ${destinoNombre}</small>`,
-                icon: 'success',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                // Enfocar input para siguiente escaneo
-                scannerInput.focus();
-            });
+            // Mostrar confirmación según estado de conexión
+            if (isOnline) {
+                // En línea: sin botón, se cierra automáticamente
+                Swal.fire({
+                    title: '✅ Traslado exitoso',
+                    html: `<strong>${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</strong><br>
+                          <small>${producto.name}</small><br>
+                          <small>${origenNombre} → ${destinoNombre}</small>`,
+                    icon: 'success',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    // Enfocar input para siguiente escaneo
+                    scannerInput.focus();
+                });
+            } else {
+                // Offline: con botón OK
+                Swal.fire({
+                    title: '📱 Traslado guardado',
+                    html: `<strong>${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</strong><br>
+                          <small>${producto.name}</small><br>
+                          <small>${origenNombre} → ${destinoNombre}</small><br>
+                          <small class="text-warning"><i class="bi bi-wifi-off"></i> Guardado localmente</small>`,
+                    icon: 'info',
+                    confirmButtonText: 'OK',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#3498db'
+                }).then(() => {
+                    // Enfocar input para siguiente escaneo
+                    scannerInput.focus();
+                });
+            }
+        }
+
+        // Sincronizar cola pendiente
+        async function sincronizarColaPendiente() {
+            if (syncInProgress) return;
+            
+            syncInProgress = true;
+            
+            const pendientes = colaSincronizacion.filter(item => item.estado === 'pendiente');
+            if (pendientes.length === 0) {
+                mostrarNotificacion('No hay traslados pendientes por sincronizar', 'info');
+                syncInProgress = false;
+                return;
+            }
+            
+            // Configurar pasos iniciales
+            const pasos = ['Preparando sincronización', 'Sincronizando productos', 'Sincronizando historial', 'Completado'];
+            actualizarPasosCarga(pasos, 0);
+            mostrarLoading(true, "Sincronizando traslados pendientes", `Procesando ${pendientes.length} elementos...`, 10);
+            
+            try {
+                if (!db) throw new Error("Firebase no disponible");
+                
+                // Paso 1
+                actualizarPasosCarga(pasos, 0);
+                mostrarLoading(true, "Preparando sincronización", "Organizando elementos pendientes...", 15);
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                let exitosos = 0;
+                let fallidos = 0;
+                let procesados = 0;
+                const total = pendientes.length;
+                
+                // Procesar elementos de la cola
+                for (let i = 0; i < pendientes.length; i++) {
+                    const item = pendientes[i];
+                    
+                    try {
+                        // Actualizar estado del item
+                        item.estado = 'procesando';
+                        item.ultimoIntento = Date.now();
+                        item.intentos++;
+                        
+                        // Ejecutar acción según tipo
+                        if (item.accion === 'actualizarProducto') {
+                            await db.collection('products').doc(item.datos.productoId.toString()).update({
+                                bodega: item.datos.bodega,
+                                tienda: item.datos.tienda,
+                                lastTransfer: item.datos.lastTransfer
+                            });
+                        } else if (item.accion === 'agregarHistorial') {
+                            await db.collection('historial').doc(item.datos.id.toString()).set(item.datos);
+                        }
+                        
+                        // Marcar como completado
+                        item.estado = 'completado';
+                        item.error = null;
+                        exitosos++;
+                        
+                    } catch (error) {
+                        console.error(`Error sincronizando item ${item.id}:`, error);
+                        item.estado = 'pendiente';
+                        item.error = error.message;
+                        
+                        // Si supera el máximo de intentos, marcar como fallido
+                        if (item.intentos >= MAX_INTENTOS_SINCRONIZACION) {
+                            item.estado = 'fallido';
+                        }
+                        
+                        fallidos++;
+                    }
+                    
+                    procesados++;
+                    
+                    // Actualizar progreso
+                    const progreso = 15 + Math.floor((procesados / total) * 80);
+                    mostrarLoading(true, "Sincronizando traslados pendientes", 
+                        `${exitosos} exitosos, ${fallidos} fallidos, ${total - procesados} pendientes`, progreso);
+                }
+                
+                // Actualizar historial local para marcar como sincronizado
+                historial.forEach(registro => {
+                    if (!registro.sincronizado) {
+                        const itemEnCola = colaSincronizacion.find(item => 
+                            item.accion === 'agregarHistorial' && 
+                            item.datos.id === registro.id && 
+                            item.estado === 'completado'
+                        );
+                        
+                        if (itemEnCola) {
+                            registro.sincronizado = true;
+                        }
+                    }
+                });
+                
+                // Guardar historial actualizado
+                localStorage.setItem('handheldHistorial', JSON.stringify(historial));
+                
+                // Filtrar elementos completados de la cola
+                colaSincronizacion = colaSincronizacion.filter(item => item.estado !== 'completado');
+                guardarColaSincronizacion();
+                
+                // Paso final
+                actualizarPasosCarga(pasos, 3);
+                mostrarLoading(true, "Sincronización completada", "Finalizando proceso...", 100);
+                
+                // Pequeña pausa para mostrar el 100%
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Mostrar resumen
+                if (fallidos === 0) {
+                    mostrarNotificacion(`${exitosos} traslados sincronizados exitosamente`, 'success');
+                } else {
+                    mostrarNotificacion(`${exitosos} sincronizados, ${fallidos} fallidos`, 'warning');
+                }
+                
+                // Actualizar historial si está abierto
+                if (historialModal._isShown) {
+                    mostrarHistorial();
+                }
+                
+            } catch (error) {
+                console.error('Error en sincronización de cola:', error);
+                mostrarNotificacion('Error sincronizando traslados pendientes', 'error');
+                mostrarLoading(true, "Error en sincronización", error.message, 100);
+                
+                // Mostrar error por 2 segundos
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            } finally {
+                syncInProgress = false;
+                mostrarLoading(false);
+            }
         }
 
         // Actualizar estado de conexión
@@ -1919,23 +2515,9 @@
             hoy.setHours(0, 0, 0, 0);
             
             // Filtrar solo transferencias del historial
-            const transferenciasHoy = historial.filter(t => {
-                if (t.tipo !== 'transferencia') return false;
-                const fechaTraslado = new Date(t.timestamp);
-                return fechaTraslado >= hoy;
-            });
+            const transferenciasHoy = historial.filter(t => t.tipo === 'transferencia');
             
             trasladosToday.textContent = transferenciasHoy.length;
-        }
-
-        // Mostrar/ocultar loading
-        function mostrarLoading(mostrar, texto = "Cargando...") {
-            if (mostrar) {
-                loadingText.textContent = texto;
-                loadingOverlay.style.display = 'flex';
-            } else {
-                loadingOverlay.style.display = 'none';
-            }
         }
 
         // Cargar productos desde Firebase
@@ -1943,8 +2525,16 @@
             try {
                 if (!db) throw new Error("Firebase no disponible");
                 
+                // Actualizar interfaz
+                mostrarLoading(true, "Sincronizando productos", "Descargando lista de productos...", 30);
+                actualizarPasosCarga(['Conectando a Firebase', 'Descargando productos', 'Guardando localmente', 'Completado'], 1);
+                
                 const snapshot = await db.collection('products').get();
                 productos = [];
+                
+                // Actualizar progreso durante la carga
+                let contador = 0;
+                const total = snapshot.size;
                 
                 snapshot.forEach(doc => {
                     const data = doc.data();
@@ -1958,6 +2548,13 @@
                         tienda: data.tienda || 0,
                         lastTransfer: data.lastTransfer || null
                     });
+                    
+                    contador++;
+                    // Actualizar progreso cada 10 productos
+                    if (contador % 10 === 0 || contador === total) {
+                        const progreso = 30 + Math.floor((contador / total) * 40);
+                        mostrarLoading(true, "Sincronizando productos", `Descargando ${contador} de ${total} productos...`, progreso);
+                    }
                 });
                 
                 // Guardar localmente para modo offline
@@ -1965,6 +2562,11 @@
                 datosProductosCargados = true; // Marcar como cargado
                 
                 console.log(`Cargados ${productos.length} productos de Firebase`);
+                
+                // Actualizar paso completado
+                actualizarPasosCarga(['Conectando a Firebase', 'Descargando productos', 'Guardando localmente', 'Completado'], 2);
+                mostrarLoading(true, "Sincronizando productos", "Guardando productos localmente...", 80);
+                
                 return true;
             } catch (error) {
                 console.error('Error cargando productos:', error);
@@ -1977,6 +2579,10 @@
             try {
                 if (!db) return;
                 
+                // Actualizar interfaz
+                mostrarLoading(true, "Sincronizando historial", "Descargando transferencias del día...", 80);
+                actualizarPasosCarga(['Conectando a Firebase', 'Descargando productos', 'Descargando historial', 'Completado'], 2);
+                
                 const hoy = new Date();
                 hoy.setHours(0, 0, 0, 0);
                 
@@ -1988,6 +2594,9 @@
                     .get();
                 
                 const nuevasTransferencias = [];
+                let contador = 0;
+                const total = snapshot.size;
+                
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     
@@ -2004,8 +2613,16 @@
                         cantidad: data.cantidad,
                         origen: data.origen,
                         destino: data.destino,
-                        usuario: data.usuario || 'handheld'
+                        usuario: data.usuario || 'handheld',
+                        sincronizado: true // Viene de Firebase, ya está sincronizado
                     });
+                    
+                    contador++;
+                    // Actualizar progreso
+                    if (contador % 5 === 0 || contador === total) {
+                        const progreso = 80 + Math.floor((contador / total) * 15);
+                        mostrarLoading(true, "Sincronizando historial", `Descargando ${contador} transferencias...`, progreso);
+                    }
                 });
                 
                 // Limpiar transferencias del día actual y agregar las nuevas
@@ -2029,6 +2646,11 @@
                 datosHistorialCargados = true; // Marcar como cargado
                 
                 console.log(`Cargadas ${nuevasTransferencias.length} transferencias de Firebase`);
+                
+                // Actualizar paso completado
+                actualizarPasosCarga(['Conectando a Firebase', 'Descargando productos', 'Descargando historial', 'Completado'], 3);
+                mostrarLoading(true, "Finalizando sincronización", "Guardando datos localmente...", 95);
+                
                 return true;
             } catch (error) {
                 console.error('Error cargando historial:', error);
@@ -2041,7 +2663,11 @@
             if (syncInProgress) return;
             
             syncInProgress = true;
-            mostrarLoading(true, "Sincronizando con Firebase...");
+            
+            // Configurar pasos iniciales
+            const pasos = ['Conectando a Firebase', 'Descargando productos', 'Descargando historial', 'Completado'];
+            actualizarPasosCarga(pasos, 0);
+            mostrarLoading(true, "Sincronizando con Firebase", "Iniciando conexión...", 10);
             
             try {
                 if (!db) throw new Error("Firebase no disponible");
@@ -2049,16 +2675,34 @@
                 // Resetear estado para forzar recarga desde Firebase
                 resetearEstadoCarga();
                 
+                // Actualizar paso 1
+                actualizarPasosCarga(pasos, 0);
+                mostrarLoading(true, "Conectando a Firebase", "Estableciendo conexión...", 15);
+                await new Promise(resolve => setTimeout(resolve, 500)); // Pequeña pausa visual
+                
                 // Sincronizar productos
-                await cargarProductosFirebase();
+                const productosSuccess = await cargarProductosFirebase();
+                if (!productosSuccess) {
+                    throw new Error("Error al sincronizar productos");
+                }
                 
                 // Sincronizar historial
-                await cargarHistorialFirebase();
+                const historialSuccess = await cargarHistorialFirebase();
+                if (!historialSuccess) {
+                    console.warn('Advertencia: Error al sincronizar historial');
+                }
                 
                 // Actualizar última sincronización
                 const ahora = new Date();
                 lastSync.textContent = ahora.toLocaleTimeString('es-ES');
                 localStorage.setItem('lastSync', ahora.toISOString());
+                
+                // Paso final
+                actualizarPasosCarga(pasos, 3);
+                mostrarLoading(true, "Sincronización completada", "Finalizando proceso...", 100);
+                
+                // Pequeña pausa para mostrar el 100%
+                await new Promise(resolve => setTimeout(resolve, 500));
                 
                 actualizarContadorTraslados();
                 mostrarNotificacion('Sincronización completa', 'success');
@@ -2070,9 +2714,47 @@
             } catch (error) {
                 console.error('Error en sincronización:', error);
                 mostrarNotificacion('Error en sincronización', 'error');
+                mostrarLoading(true, "Error en sincronización", error.message, 100);
+                
+                // Mostrar error por 2 segundos
+                await new Promise(resolve => setTimeout(resolve, 2000));
             } finally {
                 syncInProgress = false;
                 mostrarLoading(false);
+            }
+        }
+
+        // Sincronizar traslado con Firebase
+        async function sincronizarTrasladoFirebase(producto, historialItem) {
+            try {
+                if (!db) return false;
+                
+                // Actualizar producto en Firebase
+                await db.collection('products').doc(producto.id.toString()).update({
+                    bodega: producto.bodega,
+                    tienda: producto.tienda,
+                    lastTransfer: producto.lastTransfer
+                });
+                
+                // Guardar en historial de Firebase
+                await db.collection('historial').doc(historialItem.id.toString()).set({
+                    ...historialItem,
+                    sincronizado: true
+                });
+                
+                console.log('Traslado sincronizado con Firebase:', {
+                    id: producto.id,
+                    sku: producto.sku,
+                    bodega: producto.bodega,
+                    tienda: producto.tienda,
+                    cantidad: historialItem.cantidad,
+                    direccion: `${historialItem.origen} → ${historialItem.destino}`,
+                    timestamp: historialItem.timestamp
+                });
+                return true;
+            } catch (error) {
+                console.error('Error sincronizando traslado:', error);
+                return false;
             }
         }
 
@@ -2107,7 +2789,7 @@
             // Si no se encuentra localmente, buscar en Firebase
             if (!producto && db) {
                 try {
-                    mostrarLoading(true, "Buscando producto...");
+                    mostrarLoading(true, "Buscando producto...", "Buscando en la base de datos...", 30);
                     
                     // Intentar buscar primero por coincidencia exacta
                     let snapshotSKU = await db.collection('products')
@@ -2115,6 +2797,7 @@
                         .get();
                     
                     if (snapshotSKU.empty) {
+                        mostrarLoading(true, "Buscando producto...", "Buscando por código de barras...", 60);
                         snapshotSKU = await db.collection('products')
                             .where('barcode', '==', codigo)
                             .get();
@@ -2136,6 +2819,7 @@
                         };
                     } else {
                         // Si no hay coincidencia exacta, buscar todos y filtrar insensiblemente
+                        mostrarLoading(true, "Buscando producto...", "Buscando en todos los productos...", 80);
                         const snapshotAll = await db.collection('products').get();
                         
                         snapshotAll.forEach(doc => {
@@ -2195,6 +2879,87 @@
             }
         }
 
+        // Mostrar historial - CON SISTEMA OFFLINE
+        function mostrarHistorial() {
+            historialList.innerHTML = '';
+            
+            // FILTRAR SOLO TRANSFERENCIAS (del historial)
+            const transferencias = historial.filter(t => t.tipo === 'transferencia');
+            
+            if (transferencias.length === 0) {
+                historialList.innerHTML = `
+                    <div class="empty-historial">
+                        <div class="empty-icon">
+                            <i class="bi bi-arrow-left-right"></i>
+                        </div>
+                        <p>No hay transferencias registradas</p>
+                    </div>
+                `;
+                historialCount.textContent = "0";
+                return;
+            }
+            
+            // Actualizar contador - solo transferencias
+            historialCount.textContent = transferencias.length + " transferencias";
+            
+            // Mostrar solo las transferencias filtradas
+            transferencias.forEach(transferencia => {
+                const tiempoRelativo = formatTimeAgo(transferencia.timestamp);
+                const tipoClase = transferencia.origen === 'bodega' ? 'out' : 'in';
+                const icono = transferencia.origen === 'bodega' ? 'bi-arrow-right' : 'bi-arrow-left';
+                const origen = transferencia.origen === 'bodega' ? 'Bodega' : 'Tienda';
+                const destino = transferencia.destino === 'bodega' ? 'Bodega' : 'Tienda';
+                
+                const item = document.createElement('div');
+                item.className = `historial-item ${tipoClase} ${transferencia.sincronizado ? '' : 'offline'}`;
+                
+                let offlineBadge = '';
+                if (!transferencia.sincronizado) {
+                    offlineBadge = '<span class="offline-badge"><i class="bi bi-wifi-off"></i> Pendiente</span>';
+                }
+                
+                item.innerHTML = `
+                    <div class="historial-header">
+                        <div class="historial-product" title="${transferencia.producto}">${transferencia.producto}</div>
+                        <div class="historial-quantity">${transferencia.cantidad} uds ${offlineBadge}</div>
+                    </div>
+                    <div class="historial-details">
+                        <i class="bi ${icono}"></i> ${origen} → ${destino}
+                    </div>
+                    <div class="historial-details">
+                        <i class="bi bi-upc-scan"></i> SKU: ${transferencia.sku}
+                    </div>
+                    <div class="historial-time">
+                        <i class="bi bi-clock"></i> ${tiempoRelativo}
+                    </div>
+                `;
+                
+                historialList.appendChild(item);
+            });
+        }
+
+        // Actualizar información en configuración
+        function actualizarInfoConfiguracion() {
+            firebaseStatus.textContent = db && isOnline ? 'Conectado' : 'Desconectado';
+            firebaseStatus.style.color = db && isOnline ? 'var(--success)' : 'var(--danger)';
+            
+            productCount.textContent = productos.length;
+            actualizarContadorTraslados();
+            
+            const savedLastSync = localStorage.getItem('lastSync');
+            if (savedLastSync) {
+                const lastSyncDate = new Date(savedLastSync);
+                lastSync.textContent = lastSyncDate.toLocaleTimeString('es-ES');
+            }
+            
+            userTypeDisplay.textContent = config.userType === 'admin' ? 'Administrador' : 'Usuario normal';
+            userTypeDisplay.style.color = config.userType === 'admin' ? 'var(--warning)' : 'var(--secondary)';
+            
+            // Actualizar contador de pendientes
+            const pendientes = colaSincronizacion.filter(item => item.estado === 'pendiente').length;
+            pendientesCount.textContent = pendientes;
+        }
+
         // Vibrar dispositivo
         function vibrar(tipo) {
             if (!navigator.vibrate || config.vibrationMode !== 'on') return;
@@ -2241,110 +3006,6 @@
             }
         }
 
-        // Mostrar historial - SOLO TRANSFERENCIAS
-        function mostrarHistorial() {
-            historialList.innerHTML = '';
-            
-            // FILTRAR SOLO TRANSFERENCIAS (del historial)
-            const transferencias = historial.filter(t => t.tipo === 'transferencia');
-            
-            if (transferencias.length === 0) {
-                historialList.innerHTML = `
-                    <div class="empty-historial">
-                        <div class="empty-icon">
-                            <i class="bi bi-arrow-left-right"></i>
-                        </div>
-                        <p>No hay transferencias registradas</p>
-                    </div>
-                `;
-                historialCount.textContent = "0";
-                return;
-            }
-            
-            // Actualizar contador - solo transferencias
-            historialCount.textContent = transferencias.length + " transferencias";
-            
-            // Mostrar solo las transferencias filtradas
-            transferencias.forEach(transferencia => {
-                const tiempoRelativo = formatTimeAgo(transferencia.timestamp);
-                const tipoClase = transferencia.origen === 'bodega' ? 'out' : 'in';
-                const icono = transferencia.origen === 'bodega' ? 'bi-arrow-right' : 'bi-arrow-left';
-                const origen = transferencia.origen === 'bodega' ? 'Bodega' : 'Tienda';
-                const destino = transferencia.destino === 'bodega' ? 'Bodega' : 'Tienda';
-                
-                const item = document.createElement('div');
-                item.className = `historial-item ${tipoClase}`;
-                item.innerHTML = `
-                    <div class="historial-header">
-                        <div class="historial-product" title="${transferencia.producto}">${transferencia.producto}</div>
-                        <div class="historial-quantity">${transferencia.cantidad} uds</div>
-                    </div>
-                    <div class="historial-details">
-                        <i class="bi ${icono}"></i> ${origen} → ${destino}
-                    </div>
-                    <div class="historial-details">
-                        <i class="bi bi-upc-scan"></i> SKU: ${transferencia.sku}
-                    </div>
-                    <div class="historial-time">
-                        <i class="bi bi-clock"></i> ${tiempoRelativo}
-                    </div>
-                `;
-                
-                historialList.appendChild(item);
-            });
-        }
-
-        // Sincronizar traslado con Firebase
-        async function sincronizarTrasladoFirebase(producto, historialItem) {
-            try {
-                if (!db) return false;
-                
-                // Actualizar producto en Firebase
-                await db.collection('products').doc(producto.id.toString()).update({
-                    bodega: producto.bodega,
-                    tienda: producto.tienda,
-                    lastTransfer: producto.lastTransfer
-                });
-                
-                // Guardar en historial de Firebase
-                await db.collection('historial').doc(historialItem.id.toString()).set({
-                    ...historialItem
-                });
-                
-                console.log('Traslado sincronizado con Firebase:', {
-                    id: producto.id,
-                    sku: producto.sku,
-                    bodega: producto.bodega,
-                    tienda: producto.tienda,
-                    cantidad: historialItem.cantidad,
-                    direccion: `${historialItem.origen} → ${historialItem.destino}`,
-                    timestamp: historialItem.timestamp
-                });
-                return true;
-            } catch (error) {
-                console.error('Error sincronizando traslado:', error);
-                return false;
-            }
-        }
-
-        // Actualizar información en configuración
-        function actualizarInfoConfiguracion() {
-            firebaseStatus.textContent = db && isOnline ? 'Conectado' : 'Desconectado';
-            firebaseStatus.style.color = db && isOnline ? 'var(--success)' : 'var(--danger)';
-            
-            productCount.textContent = productos.length;
-            actualizarContadorTraslados();
-            
-            const savedLastSync = localStorage.getItem('lastSync');
-            if (savedLastSync) {
-                const lastSyncDate = new Date(savedLastSync);
-                lastSync.textContent = lastSyncDate.toLocaleTimeString('es-ES');
-            }
-            
-            userTypeDisplay.textContent = config.userType === 'admin' ? 'Administrador' : 'Usuario normal';
-            userTypeDisplay.style.color = config.userType === 'admin' ? 'var(--warning)' : 'var(--secondary)';
-        }
-
         // Configurar escáner handheld
         function setupHandheldScanner() {
             console.log('Handheld scanner configurado');
@@ -2367,18 +3028,6 @@
                 }, 30000);
             });
         }
-
-        // Manejar conexión/desconexión
-        window.addEventListener('online', async () => {
-            isOnline = true;
-            actualizarEstadoConexion();
-            await sincronizarConFirebase();
-        });
-        
-        window.addEventListener('offline', () => {
-            isOnline = false;
-            actualizarEstadoConexion();
-        });
     </script>
 </body>
 </html>

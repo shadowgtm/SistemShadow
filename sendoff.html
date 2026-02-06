@@ -467,30 +467,6 @@
             margin-bottom: 6px; /* Reducido de 8px */
         }
         
-        /* Indicador de conexión en modal */
-        .conexion-indicador {
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            border-radius: 10px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            margin-top: 8px;
-            font-weight: 600;
-        }
-
-        .conexion-indicador.online {
-            background-color: rgba(39, 174, 96, 0.1);
-            color: #27ae60;
-            border: 1px solid rgba(39, 174, 96, 0.2);
-        }
-
-        .conexion-indicador.offline {
-            background-color: rgba(243, 156, 18, 0.1);
-            color: #f39c12;
-            border: 1px solid rgba(243, 156, 18, 0.2);
-        }
-        
         /* Sección de existencia en BODEGA - VERSIÓN EXTRA PEQUEÑA */
         .existence-section {
             margin-bottom: 10px;
@@ -1193,10 +1169,7 @@
                     <div class="product-info">
                         <div class="product-name" id="modalProductName">Nombre del producto</div>
                         <div class="product-sku" id="modalProductSku">SKU: 000000</div>
-                        <!-- Indicador de conexión -->
-                        <div id="conexionIndicador" class="conexion-indicador online">
-                            <i class="bi bi-wifi"></i> Conectado
-                        </div>
+                        <!-- NOTA: Se eliminó el indicador de conexión -->
                     </div>
                     
                     <!-- EXISTENCIA EN BODEGA - VERSIÓN EXTRA PEQUEÑA -->
@@ -1360,7 +1333,6 @@
         const modalAvailableStock = document.getElementById('modalAvailableStock');
         const stockBodega = document.getElementById('stockBodega'); // Ahora es un botón
         const existenceStatus = document.getElementById('existenceStatus');
-        const conexionIndicador = document.getElementById('conexionIndicador');
         
         // Bootstrap Modal instances
         let settingsModal, historialModal, trasladoModal;
@@ -1745,15 +1717,17 @@
             });
         }
 
-        // Actualizar estado de conexión en la UI
+        // Actualizar estado de conexión en la UI (solo header)
         function actualizarEstadoConexionUI() {
-            if (conexionIndicador) {
+            if (connectionStatus) {
                 if (isOnline) {
-                    conexionIndicador.innerHTML = '<i class="bi bi-wifi"></i> Conectado';
-                    conexionIndicador.className = 'conexion-indicador online';
+                    connectionStatus.innerHTML = '<i class="bi bi-wifi"></i> Conectado';
+                    connectionStatus.classList.add('online');
+                    connectionStatus.classList.remove('offline');
                 } else {
-                    conexionIndicador.innerHTML = '<i class="bi bi-wifi-off"></i> Sin conexión - Modo offline';
-                    conexionIndicador.className = 'conexion-indicador offline';
+                    connectionStatus.innerHTML = '<i class="bi bi-wifi-off"></i> Sin conexión';
+                    connectionStatus.classList.add('offline');
+                    connectionStatus.classList.remove('online');
                 }
             }
         }
@@ -1956,6 +1930,35 @@
                     }
                 }
             });
+            
+            // Manejar conexión/desconexión
+            window.addEventListener('online', async () => {
+                isOnline = true;
+                actualizarEstadoConexion();
+                actualizarEstadoConexionUI();
+                
+                // Verificar si hay elementos en cola
+                const pendientes = colaSincronizacion.filter(item => item.estado === 'pendiente').length;
+                if (pendientes > 0) {
+                    // Esperar un momento para que la interfaz se actualice
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Sincronizar automáticamente sin preguntar
+                    await sincronizarColaPendiente();
+                } else {
+                    // Sincronizar datos actuales
+                    await sincronizarConFirebase();
+                }
+                
+                mostrarNotificacion('Conexión restablecida', 'success');
+            });
+            
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                actualizarEstadoConexion();
+                actualizarEstadoConexionUI();
+                mostrarNotificacion('Sin conexión - Modo offline activado', 'warning');
+            });
         }
 
         // Función para actualizar la existencia del producto
@@ -2135,7 +2138,7 @@
             }
         }
 
-        // Mostrar modal de traslado
+        // Mostrar modal de traslado (SIN indicador de conexión)
         function mostrarModalTraslado(producto) {
             currentProduct = producto;
             
@@ -2143,8 +2146,7 @@
             modalProductName.textContent = producto.name;
             modalProductSku.textContent = `SKU: ${producto.sku}`;
             
-            // Actualizar indicador de conexión
-            actualizarEstadoConexionUI();
+            // NOTA: Se eliminó el indicador de conexión del modal
             
             // Resetear valores
             quantityInput.value = "1";
@@ -2328,29 +2330,38 @@
             // Cerrar modal
             cerrarModalTraslado();
             
-            // Mostrar confirmación
-            let confirmacionTexto = '';
+            // Mostrar confirmación según estado de conexión
             if (isOnline) {
-                confirmacionTexto = `<strong>${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</strong><br>
-                      <small>${producto.name}</small><br>
-                      <small>${origenNombre} → ${destinoNombre}</small>`;
+                // En línea: sin botón, se cierra automáticamente
+                Swal.fire({
+                    title: '✅ Traslado exitoso',
+                    html: `<strong>${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</strong><br>
+                          <small>${producto.name}</small><br>
+                          <small>${origenNombre} → ${destinoNombre}</small>`,
+                    icon: 'success',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    // Enfocar input para siguiente escaneo
+                    scannerInput.focus();
+                });
             } else {
-                confirmacionTexto = `<strong>${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</strong><br>
-                      <small>${producto.name}</small><br>
-                      <small>${origenNombre} → ${destinoNombre}</small><br>
-                      <small class="text-warning"><i class="bi bi-wifi-off"></i> Guardado localmente</small>`;
+                // Offline: con botón OK
+                Swal.fire({
+                    title: '📱 Traslado guardado',
+                    html: `<strong>${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}</strong><br>
+                          <small>${producto.name}</small><br>
+                          <small>${origenNombre} → ${destinoNombre}</small><br>
+                          <small class="text-warning"><i class="bi bi-wifi-off"></i> Guardado localmente</small>`,
+                    icon: 'info',
+                    confirmButtonText: 'OK',
+                    showConfirmButton: true,
+                    confirmButtonColor: '#3498db'
+                }).then(() => {
+                    // Enfocar input para siguiente escaneo
+                    scannerInput.focus();
+                });
             }
-            
-            Swal.fire({
-                title: isOnline ? '✅ Traslado exitoso' : '📱 Traslado guardado',
-                html: confirmacionTexto,
-                icon: isOnline ? 'success' : 'info',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                // Enfocar input para siguiente escaneo
-                scannerInput.focus();
-            });
         }
 
         // Sincronizar cola pendiente
@@ -3017,48 +3028,6 @@
                 }, 30000);
             });
         }
-
-        // Manejar conexión/desconexión
-        window.addEventListener('online', async () => {
-            isOnline = true;
-            actualizarEstadoConexion();
-            actualizarEstadoConexionUI();
-            
-            // Verificar si hay elementos en cola
-            const pendientes = colaSincronizacion.filter(item => item.estado === 'pendiente').length;
-            if (pendientes > 0) {
-                // Esperar un momento para que la interfaz se actualice
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // Preguntar si sincronizar
-                Swal.fire({
-                    title: '¡Conexión recuperada!',
-                    html: `Hay <strong>${pendientes}</strong> traslados pendientes de sincronizar.<br>¿Desea sincronizarlos ahora?`,
-                    icon: 'info',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, sincronizar ahora',
-                    cancelButtonText: 'Más tarde',
-                    confirmButtonColor: '#3498db',
-                    cancelButtonColor: '#6c757d'
-                }).then(async (result) => {
-                    if (result.isConfirmed) {
-                        await sincronizarColaPendiente();
-                    } else {
-                        mostrarNotificacion(`Conectado. ${pendientes} traslados pendientes`, 'info');
-                    }
-                });
-            } else {
-                // Sincronizar datos actuales
-                await sincronizarConFirebase();
-            }
-        });
-        
-        window.addEventListener('offline', () => {
-            isOnline = false;
-            actualizarEstadoConexion();
-            actualizarEstadoConexionUI();
-            mostrarNotificacion('Sin conexión - Modo offline activado', 'warning');
-        });
     </script>
 </body>
 </html>

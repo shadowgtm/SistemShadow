@@ -212,7 +212,7 @@
         
         .modal-title {
             color: var(--primary);
-            font-weight: 300;
+            font-weight: 600;
         }
         
         /* Loading overlay */
@@ -288,12 +288,12 @@
         .traslado-header {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border-bottom: 1px solid #eee;
-            border-radius: 6px 6px 0 0;
+            border-radius: 12px 12px 0 0;
         }
         
         .traslado-title {
             color: var(--primary);
-            font-weight: 300;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -323,63 +323,62 @@
             margin-bottom: 8px;
         }
         
-        /* Sección de existencia en BODEGA - REDUCIDA */
+        /* Sección de existencia en BODEGA - VERSIÓN EXTRA PEQUEÑA */
         .existence-section {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .existence-section .card {
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #dee2e6; /* Borde más delgado */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
 
         .existence-section .card-header {
-            border-radius: 9px 9px 0 0 !important;
+            padding: 6px 10px;
             background: linear-gradient(135deg, #2c3e50, #1a252f);
-            padding: 8px 12px; /* Padding reducido */
+            border-radius: 7px 7px 0 0 !important;
         }
 
         .existence-section .card-header h6 {
-            font-size: 0.9rem; /* Texto más pequeño */
+            font-size: 0.85rem;
             margin-bottom: 0;
         }
 
         .existence-content {
-            padding: 12px; /* Padding reducido */
+            padding: 8px;
             text-align: center;
         }
 
         .existence-label {
-            font-size: 0.8rem; /* Texto más pequeño */
+            font-size: 0.75rem;
             color: #6c757d;
-            margin-bottom: 3px; /* Margen reducido */
+            margin-bottom: 2px;
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
 
         .existence-value {
-            font-size: 2.2rem; /* Tamaño reducido (era 3.5rem) */
-            font-weight: 700; /* Peso reducido (era 800) */
+            font-size: 1.8rem;
+            font-weight: 700;
             line-height: 1;
-            margin: 5px 0; /* Margen reducido */
+            margin: 3px 0;
             color: #2c3e50;
             transition: transform 0.3s;
         }
 
         .existence-unit {
-            font-size: 0.8rem; /* Texto más pequeño */
+            font-size: 0.75rem;
             color: #6c757d;
-            margin-top: 3px; /* Margen reducido */
+            margin-top: 2px;
         }
 
-        /* Estado de existencia - REDUCIDO */
+        /* Estado de existencia - EXTRA PEQUEÑO */
         .existence-status {
-            margin-top: 8px; /* Margen reducido */
-            padding: 6px 8px; /* Padding reducido */
-            border-radius: 6px;
-            font-size: 0.8rem; /* Texto más pequeño */
+            margin-top: 6px;
+            padding: 4px 6px;
+            border-radius: 5px;
+            font-size: 0.75rem;
             font-weight: 600;
         }
 
@@ -404,21 +403,21 @@
         /* Para pantallas más pequeñas */
         @media (max-height: 600px) {
             .existence-value {
-                font-size: 1.8rem; /* Aún más pequeño en pantallas cortas */
+                font-size: 1.6rem;
             }
             
             .existence-content {
-                padding: 8px; /* Aún menos padding */
+                padding: 6px;
             }
         }
 
         @media (max-width: 400px) {
             .existence-value {
-                font-size: 2rem; /* Ajuste para móviles pequeños */
+                font-size: 1.7rem;
             }
             
             .existence-section .card-header {
-                padding: 6px 10px; /* Aún menos padding */
+                padding: 5px 8px;
             }
         }
         
@@ -703,7 +702,7 @@
             }
             
             .existence-section {
-                margin-bottom: 10px;
+                margin-bottom: 8px;
             }
             
             .quantity-section {
@@ -920,7 +919,7 @@
                         <div class="product-sku" id="modalProductSku">SKU: 000000</div>
                     </div>
                     
-                    <!-- EXISTENCIA EN BODEGA - REDUCIDA -->
+                    <!-- EXISTENCIA EN BODEGA - VERSIÓN EXTRA PEQUEÑA -->
                     <div class="existence-section mb-4">
                         <div class="card">
                             <div class="card-header text-white py-2">
@@ -1653,6 +1652,7 @@
                     confirmButtonColor: "#dc3545"
                 });
                 vibrar('error');
+                reproducirSonido('error');
                 return;
             }
             
@@ -1938,6 +1938,7 @@
             if (!codigo) {
                 mostrarNotificacion('Escanee con el handheld', 'warning');
                 vibrar('error');
+                reproducirSonido('error');
                 return;
             }
             
@@ -2032,9 +2033,18 @@
                 vibrar('success');
                 reproducirSonido('success');
             } else {
-                mostrarNotificacion(`Producto no encontrado: ${codigo}`, 'error');
+                // SweetAlert cuando NO se encuentra producto
+                Swal.fire({
+                    title: "¡Producto no encontrado!",
+                    text: `No se encontró ningún producto con el código: ${codigo}`,
+                    icon: "error",
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#dc3545"
+                });
                 vibrar('error');
                 reproducirSonido('error');
+                scannerInput.value = '';
+                scannerInput.focus();
             }
         }
 
@@ -2068,15 +2078,17 @@
                     oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
                     oscillator.frequency.setValueAtTime(1200, audioContext.currentTime + 0.1);
                 } else if (tipo === 'error') {
-                    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime + 0.1);
+                    // Sonido de error más marcado
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(150, audioContext.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(100, audioContext.currentTime + 0.2);
                 }
                 
                 gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
                 
                 oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.2);
+                oscillator.stop(audioContext.currentTime + 0.3);
             } catch (e) {
                 console.log('Audio no soportado');
             }

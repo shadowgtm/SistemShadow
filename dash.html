@@ -15,7 +15,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* ... (mantén todos tus estilos existentes aquí) ... */
         * {
             margin: 0;
             padding: 0;
@@ -80,7 +79,7 @@
             position: fixed;
             left: 0;
             top: 0;
-            width: 30px;
+            width: 40px;
             height: 100vh;
             z-index: 1002;
             background: transparent;
@@ -487,95 +486,28 @@
     </style>
 </head>
 <body>
-    <!-- SCRIPTS DE BLOQUEO DE AUTOFOCUS - EJECUTAR PRIMERO -->
+    <!-- SCRIPTS DE BLOQUEO DE AUTOFOCUS -->
     <script>
-        // BLOQUEO TOTAL DE AUTOFOCUS - Versión agresiva
         (function() {
-            console.log('🔒 Bloqueando autofocus en iframes...');
-            
-            // 1. Prevenir el evento focus en el documento
-            document.addEventListener('focus', function(e) {
-                if (e.target && (e.target.tagName === 'IFRAME' || e.target.closest('iframe'))) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                }
-            }, true);
-
-            // 2. Deshabilitar el método focus() en todos los elementos
+            // Bloquear autofocus
             const originalFocus = HTMLElement.prototype.focus;
             HTMLElement.prototype.focus = function() {
-                // Ignorar focus en iframes y sus contenidos
                 if (this.tagName === 'IFRAME' || this.closest('iframe')) {
                     return;
                 }
                 return originalFocus.apply(this, arguments);
             };
 
-            // 3. Bloquear setTimeout y setInterval que intenten hacer focus
-            const originalSetTimeout = window.setTimeout;
-            window.setTimeout = function(callback, delay) {
-                if (callback && typeof callback === 'string' && callback.includes('focus')) {
-                    return 0; // Bloquear strings con focus
-                }
-                return originalSetTimeout(callback, delay);
-            };
-
-            // 4. Interceptar mensajes de iframes
-            window.addEventListener('message', function(e) {
-                if (e.data && typeof e.data === 'string' && e.data.includes('focus')) {
-                    e.stopPropagation();
-                    return false;
-                }
-            }, true);
-
-            // 5. Parchear el objeto document de los iframes (cuando sea posible)
-            const patchIframeDocument = function(iframe) {
-                try {
-                    if (iframe.contentDocument) {
-                        const iframeDoc = iframe.contentDocument;
-                        if (iframeDoc) {
-                            iframeDoc.addEventListener('focus', function(e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                return false;
-                            }, true);
-                        }
-                    }
-                } catch (e) {
-                    // Error de cross-origin, ignorar
-                }
-            };
-
-            // 6. Observar nuevos iframes
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    mutation.addedNodes.forEach(function(node) {
-                        if (node.tagName === 'IFRAME') {
-                            patchIframeDocument(node);
-                        } else if (node.querySelectorAll) {
-                            node.querySelectorAll('iframe').forEach(patchIframeDocument);
-                        }
-                    });
-                });
-            });
-
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-
-            // 7. Suprimir warnings específicos
+            // Suprimir warnings específicos
             const originalConsoleWarn = console.warn;
             console.warn = function(...args) {
                 if (args[0] && typeof args[0] === 'string' && 
-                    args[0].includes('Blocked autofocusing on a')) {
-                    return; // Ignorar este warning
+                    (args[0].includes('Blocked autofocusing') || 
+                     args[0].includes('Ignored attempt to cancel'))) {
+                    return;
                 }
                 originalConsoleWarn.apply(console, args);
             };
-
-            console.log('✅ Bloqueo de autofocus activado');
         })();
     </script>
 
@@ -638,7 +570,7 @@
             </div>
         </div>
 
-        <!-- Contenido principal con iframes -->
+        <!-- Contenido principal -->
         <div class="content" id="content">
             <div class="page-container">
                 <!-- Página 1: Escaneo -->
@@ -706,24 +638,24 @@
 
         // Variables para gestos
         let touchStartX = 0;
-        let touchEndX = 0;
         let touchStartY = 0;
         let isDragging = false;
+        let dragStartTime = 0;
         const minSwipeDistance = 50;
+        const maxSwipeTime = 300;
 
-        // ===== GESTOS TÁCTILES =====
+        // ===== GESTOS TÁCTILES CORREGIDOS =====
         function initGestureDetection() {
             const gestureArea = document.getElementById('gestureArea');
-            const gestureHint = document.getElementById('gestureHint');
-
-            // Detectar inicio de toque
-            gestureArea.addEventListener('touchstart', handleTouchStart, { passive: false });
-            gestureArea.addEventListener('touchmove', handleTouchMove, { passive: false });
-            gestureArea.addEventListener('touchend', handleTouchEnd);
             
-            // También detectar gestos en todo el contenido
-            document.getElementById('content').addEventListener('touchstart', handleContentTouchStart, { passive: false });
-            document.getElementById('content').addEventListener('touchmove', handleContentTouchMove, { passive: false });
+            // Usar opciones pasivas para mejor rendimiento
+            gestureArea.addEventListener('touchstart', handleTouchStart, { passive: true });
+            gestureArea.addEventListener('touchmove', handleTouchMove, { passive: true });
+            gestureArea.addEventListener('touchend', handleTouchEnd);
+            gestureArea.addEventListener('touchcancel', handleTouchCancel);
+            
+            document.getElementById('content').addEventListener('touchstart', handleContentTouchStart, { passive: true });
+            document.getElementById('content').addEventListener('touchmove', handleContentTouchMove, { passive: true });
             document.getElementById('content').addEventListener('touchend', handleContentTouchEnd);
         }
 
@@ -732,8 +664,8 @@
             touchStartX = touch.clientX;
             touchStartY = touch.clientY;
             isDragging = true;
+            dragStartTime = Date.now();
             
-            // Activar hint visual
             document.getElementById('gestureHint').classList.add('active');
         }
 
@@ -743,17 +675,11 @@
             const touch = e.touches[0];
             const currentX = touch.clientX;
             const diffX = currentX - touchStartX;
+            const diffY = Math.abs(touch.clientY - touchStartY);
             
-            // Si el menú está cerrado y desliza hacia la derecha
-            if (!mobileMenuOpen && diffX > 20) {
-                e.preventDefault(); // Prevenir scroll
-                // Feedback visual del deslizamiento
+            // Solo dar feedback visual, sin prevenir scroll
+            if (!mobileMenuOpen && diffX > 10 && diffY < 30) {
                 document.getElementById('gestureHint').style.transform = `translateX(${Math.min(diffX, 50)}px)`;
-            }
-            
-            // Si el menú está abierto y desliza hacia la izquierda
-            if (mobileMenuOpen && diffX < -20) {
-                e.preventDefault(); // Prevenir scroll
             }
         }
 
@@ -761,27 +687,19 @@
             if (!isDragging) return;
             
             const touch = e.changedTouches[0];
-            touchEndX = touch.clientX;
-            const diffX = touchEndX - touchStartX;
+            const diffX = touch.clientX - touchStartX;
             const diffY = Math.abs(touch.clientY - touchStartY);
+            const swipeTime = Date.now() - dragStartTime;
             
             // Restaurar hint visual
             document.getElementById('gestureHint').classList.remove('active');
             document.getElementById('gestureHint').style.transform = 'translateX(0)';
             
-            // Ignorar si el movimiento fue principalmente vertical
-            if (diffY > Math.abs(diffX) * 1.5) {
-                isDragging = false;
-                return;
-            }
-            
-            // Determinar dirección del gesto
-            if (Math.abs(diffX) > minSwipeDistance) {
+            // Detectar swipe solo si es rápido y horizontal
+            if (swipeTime < maxSwipeTime && Math.abs(diffX) > minSwipeDistance && diffY < 50) {
                 if (diffX > 0 && !mobileMenuOpen) {
-                    // Deslizó derecha - ABRIR MENÚ
                     openMenuWithGesture();
                 } else if (diffX < 0 && mobileMenuOpen) {
-                    // Deslizó izquierda - CERRAR MENÚ
                     closeMenuWithGesture();
                 }
             }
@@ -789,7 +707,13 @@
             isDragging = false;
         }
 
-        // Gestos en el contenido principal
+        function handleTouchCancel() {
+            isDragging = false;
+            document.getElementById('gestureHint').classList.remove('active');
+            document.getElementById('gestureHint').style.transform = 'translateX(0)';
+        }
+
+        // Gestos en contenido principal
         function handleContentTouchStart(e) {
             if (!mobileMenuOpen) return;
             
@@ -797,30 +721,23 @@
             touchStartX = touch.clientX;
             touchStartY = touch.clientY;
             isDragging = true;
+            dragStartTime = Date.now();
         }
 
         function handleContentTouchMove(e) {
             if (!isDragging || !mobileMenuOpen) return;
-            
-            const touch = e.touches[0];
-            const currentX = touch.clientX;
-            const diffX = currentX - touchStartX;
-            
-            // Si el menú está abierto y desliza hacia la izquierda desde el borde
-            if (currentX < 50 && diffX < -20) {
-                e.preventDefault();
-            }
+            // Solo monitorear, sin prevenir nada
         }
 
         function handleContentTouchEnd(e) {
             if (!isDragging || !mobileMenuOpen) return;
             
             const touch = e.changedTouches[0];
-            touchEndX = touch.clientX;
-            const diffX = touchEndX - touchStartX;
+            const diffX = touch.clientX - touchStartX;
+            const swipeTime = Date.now() - dragStartTime;
             
-            // Cerrar menú si desliza rápidamente hacia la izquierda desde el borde
-            if (touchStartX < 50 && diffX < -minSwipeDistance) {
+            // Cerrar si desliza izquierda desde el borde
+            if (swipeTime < maxSwipeTime && touchStartX < 50 && diffX < -minSwipeDistance) {
                 closeMenuWithGesture();
             }
             
@@ -835,7 +752,6 @@
                 document.getElementById('menuOverlay').classList.add('visible');
                 mobileMenuOpen = true;
                 
-                // Feedback háptico (si está disponible)
                 if (navigator.vibrate) {
                     navigator.vibrate(20);
                 }
@@ -848,7 +764,6 @@
             document.getElementById('menuOverlay').classList.remove('visible');
             mobileMenuOpen = false;
             
-            // Feedback háptico
             if (navigator.vibrate) {
                 navigator.vibrate(10);
             }
@@ -857,13 +772,11 @@
         function showPage(pageNumber) {
             if (pageNumber < 1 || pageNumber > totalPages) return;
 
-            // Actualizar páginas
             document.getElementById('page1').classList.remove('active');
             document.getElementById('page2').classList.remove('active');
             document.getElementById('page3').classList.remove('active');
             document.getElementById(`page${pageNumber}`).classList.add('active');
 
-            // Actualizar menú
             document.querySelectorAll('.menu-item').forEach((item, index) => {
                 if (index + 1 === pageNumber) {
                     item.classList.add('active');
@@ -872,7 +785,6 @@
                 }
             });
 
-            // Actualizar dots
             document.querySelectorAll('.dot').forEach((dot, index) => {
                 if (index + 1 === pageNumber) {
                     dot.classList.add('active');
@@ -881,16 +793,12 @@
                 }
             });
 
-            // Actualizar contador
             document.getElementById('pageCounter').textContent = `${pageNumber}/${totalPages}`;
-            
-            // Actualizar botones
             document.getElementById('prevBtn').disabled = pageNumber === 1;
             document.getElementById('nextBtn').disabled = pageNumber === totalPages;
 
             currentPage = pageNumber;
             
-            // Cerrar menú después de seleccionar (en móvil)
             if (isMobile && mobileMenuOpen) {
                 setTimeout(closeMenuWithGesture, 200);
             }
@@ -917,18 +825,10 @@
             }, 100);
         }
 
-        // Inicializar gestos
+        // Inicializar
         document.addEventListener('DOMContentLoaded', function() {
             initGestureDetection();
             
-            // Configurar iframes
-            setupIframes();
-            
-            // Inicializar página
-            showPage(1);
-        });
-
-        function setupIframes() {
             for (let i = 1; i <= 3; i++) {
                 const iframe = document.getElementById(`iframe${i}`);
                 const errorDiv = document.getElementById(`error${i}`);
@@ -936,19 +836,6 @@
                 if (iframe) {
                     iframe.addEventListener('load', function() {
                         if (errorDiv) errorDiv.classList.remove('visible');
-                        
-                        // Intentar parchear el documento del iframe
-                        try {
-                            if (iframe.contentDocument) {
-                                iframe.contentDocument.addEventListener('focus', function(e) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    return false;
-                                }, true);
-                            }
-                        } catch (e) {
-                            // Error de cross-origin, ignorar
-                        }
                     });
                     
                     iframe.addEventListener('error', function() {
@@ -956,9 +843,10 @@
                     });
                 }
             }
-        }
+            
+            showPage(1);
+        });
 
-        // Detectar cambios de tamaño
         window.addEventListener('resize', () => {
             isMobile = window.innerWidth <= 768;
             if (!isMobile && mobileMenuOpen) {
@@ -966,7 +854,6 @@
             }
         });
 
-        // Navegación con teclado
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') {
                 previousPage();
@@ -976,14 +863,6 @@
                 closeMenuWithGesture();
             }
         });
-
-        // Prevenir errores de extensiones
-        window.addEventListener('error', function(e) {
-            if (e.message && (e.message.includes('firestore') || e.message.includes('ERR_BLOCKED_BY_CLIENT'))) {
-                e.preventDefault();
-                return false;
-            }
-        }, true);
     </script>
 </body>
 </html>

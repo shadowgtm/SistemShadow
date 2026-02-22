@@ -545,12 +545,17 @@
             </div>
         </div>
 
-        <!-- Contenido principal -->
+        <!-- Contenido principal con iframes mejorados -->
         <div class="content" id="content">
             <div class="page-container">
                 <!-- Página 1: Escaneo -->
                 <div id="page1" class="page active">
-                    <iframe src="send.html" title="Módulo de Escaneo" id="iframe1" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
+                    <iframe src="send.html" 
+                            title="Módulo de Escaneo" 
+                            id="iframe1" 
+                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation allow-pointer-lock allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-downloads"
+                            allow="camera; microphone; fullscreen; autoplay; clipboard-read; clipboard-write">
+                    </iframe>
                     <div class="iframe-error" id="error1">
                         <i class="fas fa-exclamation-circle"></i>
                         <h3>Error de carga</h3>
@@ -563,7 +568,12 @@
                 
                 <!-- Página 2: Búsqueda -->
                 <div id="page2" class="page">
-                    <iframe src="busqueda.html" title="Módulo de Búsqueda" id="iframe2" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
+                    <iframe src="busqueda.html" 
+                            title="Módulo de Búsqueda" 
+                            id="iframe2"
+                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation allow-pointer-lock allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-downloads"
+                            allow="camera; microphone; fullscreen; autoplay; clipboard-read; clipboard-write">
+                    </iframe>
                     <div class="iframe-error" id="error2">
                         <i class="fas fa-exclamation-circle"></i>
                         <h3>Error de carga</h3>
@@ -576,7 +586,12 @@
                 
                 <!-- Página 3: Tareas -->
                 <div id="page3" class="page">
-                    <iframe src="tareas.html" title="Módulo de Tareas" id="iframe3" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
+                    <iframe src="tareas.html" 
+                            title="Módulo de Tareas" 
+                            id="iframe3"
+                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation allow-pointer-lock allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-downloads"
+                            allow="camera; microphone; fullscreen; autoplay; clipboard-read; clipboard-write">
+                    </iframe>
                     <div class="iframe-error" id="error3">
                         <i class="fas fa-exclamation-circle"></i>
                         <h3>Error de carga</h3>
@@ -602,6 +617,16 @@
         let touchStartY = 0;
         let isDragging = false;
         const minSwipeDistance = 50;
+
+        // Suprimir warning de autofocus en iframes
+        const originalConsoleWarn = console.warn;
+        console.warn = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && 
+                args[0].includes('Blocked autofocusing on a')) {
+                return; // Ignorar este warning específico
+            }
+            originalConsoleWarn.apply(console, args);
+        };
 
         // ===== GESTOS TÁCTILES =====
         function initGestureDetection() {
@@ -858,7 +883,7 @@
 
         // Prevenir errores de extensiones
         window.addEventListener('error', function(e) {
-            if (e.message.includes('firestore') || e.message.includes('ERR_BLOCKED_BY_CLIENT')) {
+            if (e.message && (e.message.includes('firestore') || e.message.includes('ERR_BLOCKED_BY_CLIENT'))) {
                 e.preventDefault();
                 return false;
             }

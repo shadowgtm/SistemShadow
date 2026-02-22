@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dashboard Corporativo | Proyectos Móviles</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230066cc'%3E%3Cpath d='M4 6H20V8H4V6ZM4 11H20V13H4V11ZM4 16H20V18H4V16Z'/%3E%3C/svg%3E">
@@ -19,6 +19,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         :root {
@@ -42,6 +43,7 @@
             height: 100vh;
             overflow: hidden;
             background: var(--light);
+            touch-action: pan-y pinch-zoom;
         }
 
         /* Dashboard Container */
@@ -49,72 +51,84 @@
             display: flex;
             height: 100vh;
             position: relative;
+            overflow: hidden;
         }
 
-        /* Zona de hover */
-        .hover-zone {
+        /* Overlay para cuando el menú está abierto */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(2px);
+        }
+
+        .menu-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Zona de gestos */
+        .gesture-area {
             position: fixed;
             left: 0;
             top: 0;
-            width: 40px;
+            width: 30px;
             height: 100vh;
-            z-index: 999;
+            z-index: 1002;
             background: transparent;
-            cursor: pointer;
         }
 
-        .hover-zone::after {
-            content: '';
-            position: absolute;
-            left: 0;
+        /* Indicador visual de gesto */
+        .gesture-hint {
+            position: fixed;
+            left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            width: 3px;
-            height: 50px;
+            width: 4px;
+            height: 60px;
             background: var(--primary);
-            border-radius: 0 4px 4px 0;
-            transition: all 0.3s ease;
+            border-radius: 4px;
             opacity: 0.3;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1001;
         }
 
-        .hover-zone:hover::after {
-            opacity: 1;
-            height: 80px;
+        .gesture-hint.active {
+            opacity: 0.8;
+            height: 100px;
             background: var(--primary-light);
         }
 
-        /* Tooltip */
-        .hover-tooltip {
-            position: fixed;
-            left: 50px;
+        .gesture-hint::after {
+            content: '⟢ Desliza';
+            position: absolute;
+            left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            background: white;
-            color: var(--primary);
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 13px;
-            font-weight: 500;
-            pointer-events: none;
-            opacity: 0;
-            transition: all 0.3s ease;
             white-space: nowrap;
+            background: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--primary);
             box-shadow: var(--shadow-md);
             border: 1px solid var(--primary-soft);
-            letter-spacing: 0.3px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            font-weight: 500;
         }
 
-        .hover-tooltip i {
-            color: var(--primary);
-            font-size: 14px;
-        }
-
-        .hover-zone:hover ~ .hover-tooltip {
+        .gesture-hint:hover::after {
             opacity: 1;
-            left: 60px;
         }
 
         /* Menú lateral - Estilo corporativo */
@@ -128,7 +142,7 @@
             top: 0;
             transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: var(--shadow-lg);
-            z-index: 1000;
+            z-index: 1001;
             overflow-y: auto;
             border-right: 1px solid var(--light-gray);
         }
@@ -179,6 +193,12 @@
             margin: 2px 10px;
             border-radius: 8px;
             font-weight: 500;
+            user-select: none;
+        }
+
+        .menu-item:active {
+            background: var(--primary-soft);
+            transform: scale(0.98);
         }
 
         .menu-item:hover {
@@ -239,6 +259,13 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .nav-arrow:active:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            transform: scale(0.95);
         }
 
         .nav-arrow:hover:not(:disabled) {
@@ -282,6 +309,10 @@
             transition: all 0.2s ease;
         }
 
+        .dot:active {
+            transform: scale(1.2);
+        }
+
         .dot:hover {
             background: var(--primary-light);
         }
@@ -300,6 +331,7 @@
             width: 100%;
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             background: var(--light);
+            touch-action: pan-y pinch-zoom;
         }
 
         .content.shifted {
@@ -324,6 +356,8 @@
             visibility: hidden;
             transition: opacity 0.3s ease;
             background: white;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .page.active {
@@ -353,6 +387,7 @@
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--light-gray);
             max-width: 350px;
+            z-index: 10;
         }
 
         .iframe-error.visible {
@@ -393,55 +428,15 @@
             gap: 8px;
         }
 
+        .iframe-error button:active {
+            transform: scale(0.95);
+            background: var(--primary-dark);
+        }
+
         .iframe-error button:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
             box-shadow: var(--shadow-md);
-        }
-
-        /* Botón móvil */
-        .mobile-menu-btn {
-            display: none;
-            position: fixed;
-            left: 15px;
-            top: 15px;
-            width: 45px;
-            height: 45px;
-            background: var(--primary);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 1001;
-            box-shadow: var(--shadow-md);
-            transition: all 0.2s ease;
-        }
-
-        .mobile-menu-btn:hover {
-            background: var(--primary-dark);
-            transform: scale(1.05);
-        }
-
-        @media (max-width: 768px) {
-            .mobile-menu-btn {
-                display: block;
-            }
-
-            .hover-zone,
-            .hover-tooltip {
-                display: none;
-            }
-
-            .sidebar {
-                width: 260px;
-                left: -260px;
-            }
-
-            .content.shifted {
-                margin-left: 0;
-                width: 100%;
-            }
         }
 
         /* Scrollbar personalizado */
@@ -471,26 +466,38 @@
             color: var(--primary);
             margin: 0 4px;
         }
+
+        @media (max-width: 768px) {
+            .gesture-area,
+            .gesture-hint {
+                display: block;
+            }
+
+            .sidebar {
+                width: 260px;
+                left: -260px;
+            }
+
+            .content.shifted {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="dashboard">
-        <!-- Botón móvil -->
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-            <i class="fas fa-bars"></i>
-        </button>
+        <!-- Overlay para cerrar con tap -->
+        <div class="menu-overlay" id="menuOverlay" onclick="closeMenuWithGesture()"></div>
 
-        <!-- Zona de hover -->
-        <div class="hover-zone" onmouseenter="showMenu()" onmouseleave="startMenuHideTimer()"></div>
-        <div class="hover-tooltip">
-            <i class="fas fa-arrow-right"></i>
-            <span>Menú principal</span>
-        </div>
+        <!-- Área de gestos -->
+        <div class="gesture-area" id="gestureArea"></div>
+        <div class="gesture-hint" id="gestureHint"></div>
 
         <!-- Menú lateral -->
-        <div class="sidebar" id="sidebar" onmouseenter="cancelMenuHide()" onmouseleave="startMenuHideTimer()">
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h2>Panel Control</h2>
+                <h2>Proyectos Móviles</h2>
                 <p>
                     <i class="fas fa-circle" style="font-size: 6px;"></i>
                     Sistema Integrado
@@ -499,25 +506,21 @@
 
             <div class="menu-options">
                 <div class="menu-item active" onclick="showPage(1)">
-                    <span class="menu-icon"><i class="fas fa-box"></i></span>
-                    <span class="menu-text">Inventario</span>
+                    <span class="menu-icon"><i class="fas fa-qrcode"></i></span>
+                    <span class="menu-text">Escaneo</span>
                 </div>
                 <div class="menu-item" onclick="showPage(2)">
-                    <span class="menu-icon"><i class="fas fa-truck"></i></span>
-                    <span class="menu-text">Req. X Salida</span>
+                    <span class="menu-icon"><i class="fas fa-search"></i></span>
+                    <span class="menu-text">Búsqueda</span>
                 </div>
                 <div class="menu-item" onclick="showPage(3)">
-                    <span class="menu-icon"><i class="fas fa-chart-bar"></i></span>
-                    <span class="menu-text">Reportes</span>
-                </div>
-                <div class="menu-item" onclick="showPage(3)">
-                    <span class="menu-icon"><i class="fas fa-cog"></i></span>
-                    <span class="menu-text">Configuración</span>
+                    <span class="menu-icon"><i class="fas fa-tasks"></i></span>
+                    <span class="menu-text">Tareas x Salida</span>
                 </div>
             </div>
 
             <div class="nav-controls">
-                <div class="nav-label">Navegación</div>
+                <div class="nav-label">Navegación rápida</div>
                 <div class="nav-buttons">
                     <button class="nav-arrow" onclick="previousPage()" id="prevBtn">
                         <i class="fas fa-chevron-left"></i>
@@ -538,42 +541,49 @@
             </div>
 
             <div class="menu-footer">
-                <i class="far fa-building"></i> Shadow
+                <i class="fas fa-mobile-alt"></i> 3 Proyectos Activos
             </div>
         </div>
 
         <!-- Contenido principal -->
         <div class="content" id="content">
             <div class="page-container">
+                <!-- Página 1: Escaneo -->
                 <div id="page1" class="page active">
-                    <iframe src="inventory.html" title="Inventario" id="iframe1" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
+                    <iframe src="send.html" title="Módulo de Escaneo" id="iframe1" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
                     <div class="iframe-error" id="error1">
                         <i class="fas fa-exclamation-circle"></i>
                         <h3>Error de carga</h3>
-                        <p>No se pudo cargar el módulo de inventario</p>
+                        <p>No se pudo cargar el módulo de escaneo</p>
                         <button onclick="reloadIframe('iframe1')">
                             <i class="fas fa-sync-alt"></i> Reintentar
                         </button>
                     </div>
                 </div>
+                
+                <!-- Página 2: Búsqueda -->
                 <div id="page2" class="page">
-                    <iframe src="req-traslados.html" title="Requerimientos" id="iframe2" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
+                    <iframe src="busqueda.html" title="Módulo de Búsqueda" id="iframe2" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
                     <div class="iframe-error" id="error2">
                         <i class="fas fa-exclamation-circle"></i>
                         <h3>Error de carga</h3>
-                        <p>No se pudo cargar el módulo de requerimientos</p>
+                        <p>No se pudo cargar el módulo de búsqueda</p>
                         <button onclick="reloadIframe('iframe2')">
                             <i class="fas fa-sync-alt"></i> Reintentar
                         </button>
                     </div>
                 </div>
+                
+                <!-- Página 3: Tareas -->
                 <div id="page3" class="page">
-                    <div style="display: flex; justify-content: center; align-items: center; height: 100%; background: var(--light);">
-                        <div style="text-align: center;">
-                            <i class="fas fa-chart-bar" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
-                            <h3 style="color: var(--dark); margin-bottom: 8px; font-weight: 500;">Centro de Reportes</h3>
-                            <p style="color: var(--gray); font-size: 0.9rem;">Módulo en desarrollo</p>
-                        </div>
+                    <iframe src="tareas.html" title="Módulo de Tareas" id="iframe3" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
+                    <div class="iframe-error" id="error3">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Error de carga</h3>
+                        <p>No se pudo cargar el módulo de tareas</p>
+                        <button onclick="reloadIframe('iframe3')">
+                            <i class="fas fa-sync-alt"></i> Reintentar
+                        </button>
                     </div>
                 </div>
             </div>
@@ -583,42 +593,157 @@
     <script>
         let currentPage = 1;
         const totalPages = 3;
-        let menuHideTimer;
         let isMobile = window.innerWidth <= 768;
         let mobileMenuOpen = false;
 
-        function showMenu() {
-            if (isMobile) return;
-            clearTimeout(menuHideTimer);
-            document.getElementById('sidebar').classList.add('visible');
-            document.getElementById('content').classList.add('shifted');
+        // Variables para gestos
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let touchStartY = 0;
+        let isDragging = false;
+        const minSwipeDistance = 50;
+
+        // ===== GESTOS TÁCTILES =====
+        function initGestureDetection() {
+            const gestureArea = document.getElementById('gestureArea');
+            const gestureHint = document.getElementById('gestureHint');
+
+            // Detectar inicio de toque
+            gestureArea.addEventListener('touchstart', handleTouchStart, { passive: false });
+            gestureArea.addEventListener('touchmove', handleTouchMove, { passive: false });
+            gestureArea.addEventListener('touchend', handleTouchEnd);
+            
+            // También detectar gestos en todo el contenido
+            document.getElementById('content').addEventListener('touchstart', handleContentTouchStart, { passive: false });
+            document.getElementById('content').addEventListener('touchmove', handleContentTouchMove, { passive: false });
+            document.getElementById('content').addEventListener('touchend', handleContentTouchEnd);
         }
 
-        function hideMenu() {
-            if (isMobile && mobileMenuOpen) return;
+        function handleTouchStart(e) {
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            isDragging = true;
+            
+            // Activar hint visual
+            document.getElementById('gestureHint').classList.add('active');
+        }
+
+        function handleTouchMove(e) {
+            if (!isDragging) return;
+            
+            const touch = e.touches[0];
+            const currentX = touch.clientX;
+            const diffX = currentX - touchStartX;
+            
+            // Si el menú está cerrado y desliza hacia la derecha
+            if (!mobileMenuOpen && diffX > 20) {
+                e.preventDefault(); // Prevenir scroll
+                // Feedback visual del deslizamiento
+                document.getElementById('gestureHint').style.transform = `translateX(${Math.min(diffX, 50)}px)`;
+            }
+            
+            // Si el menú está abierto y desliza hacia la izquierda
+            if (mobileMenuOpen && diffX < -20) {
+                e.preventDefault(); // Prevenir scroll
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (!isDragging) return;
+            
+            const touch = e.changedTouches[0];
+            touchEndX = touch.clientX;
+            const diffX = touchEndX - touchStartX;
+            const diffY = Math.abs(touch.clientY - touchStartY);
+            
+            // Restaurar hint visual
+            document.getElementById('gestureHint').classList.remove('active');
+            document.getElementById('gestureHint').style.transform = 'translateX(0)';
+            
+            // Ignorar si el movimiento fue principalmente vertical
+            if (diffY > Math.abs(diffX) * 1.5) {
+                isDragging = false;
+                return;
+            }
+            
+            // Determinar dirección del gesto
+            if (Math.abs(diffX) > minSwipeDistance) {
+                if (diffX > 0 && !mobileMenuOpen) {
+                    // Deslizó derecha - ABRIR MENÚ
+                    openMenuWithGesture();
+                } else if (diffX < 0 && mobileMenuOpen) {
+                    // Deslizó izquierda - CERRAR MENÚ
+                    closeMenuWithGesture();
+                }
+            }
+            
+            isDragging = false;
+        }
+
+        // Gestos en el contenido principal
+        function handleContentTouchStart(e) {
+            if (!mobileMenuOpen) return;
+            
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            isDragging = true;
+        }
+
+        function handleContentTouchMove(e) {
+            if (!isDragging || !mobileMenuOpen) return;
+            
+            const touch = e.touches[0];
+            const currentX = touch.clientX;
+            const diffX = currentX - touchStartX;
+            
+            // Si el menú está abierto y desliza hacia la izquierda desde el borde
+            if (currentX < 50 && diffX < -20) {
+                e.preventDefault();
+            }
+        }
+
+        function handleContentTouchEnd(e) {
+            if (!isDragging || !mobileMenuOpen) return;
+            
+            const touch = e.changedTouches[0];
+            touchEndX = touch.clientX;
+            const diffX = touchEndX - touchStartX;
+            
+            // Cerrar menú si desliza rápidamente hacia la izquierda desde el borde
+            if (touchStartX < 50 && diffX < -minSwipeDistance) {
+                closeMenuWithGesture();
+            }
+            
+            isDragging = false;
+        }
+
+        // ===== FUNCIONES DEL MENÚ =====
+        function openMenuWithGesture() {
+            if (isMobile) {
+                document.getElementById('sidebar').classList.add('visible');
+                document.getElementById('content').classList.add('shifted');
+                document.getElementById('menuOverlay').classList.add('visible');
+                mobileMenuOpen = true;
+                
+                // Feedback háptico (si está disponible)
+                if (navigator.vibrate) {
+                    navigator.vibrate(20);
+                }
+            }
+        }
+
+        function closeMenuWithGesture() {
             document.getElementById('sidebar').classList.remove('visible');
             document.getElementById('content').classList.remove('shifted');
-        }
-
-        function startMenuHideTimer() {
-            if (isMobile && mobileMenuOpen) return;
-            menuHideTimer = setTimeout(hideMenu, 500);
-        }
-
-        function cancelMenuHide() {
-            clearTimeout(menuHideTimer);
-        }
-
-        function toggleMobileMenu() {
-            const sidebar = document.getElementById('sidebar');
-            if (mobileMenuOpen) {
-                sidebar.classList.remove('visible');
-                document.getElementById('content').classList.remove('shifted');
-            } else {
-                sidebar.classList.add('visible');
-                document.getElementById('content').classList.add('shifted');
+            document.getElementById('menuOverlay').classList.remove('visible');
+            mobileMenuOpen = false;
+            
+            // Feedback háptico
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
             }
-            mobileMenuOpen = !mobileMenuOpen;
         }
 
         function showPage(pageNumber) {
@@ -656,6 +781,11 @@
             document.getElementById('nextBtn').disabled = pageNumber === totalPages;
 
             currentPage = pageNumber;
+            
+            // Cerrar menú después de seleccionar (en móvil)
+            if (isMobile && mobileMenuOpen) {
+                setTimeout(closeMenuWithGesture, 200);
+            }
         }
 
         function nextPage() {
@@ -679,20 +809,39 @@
             }, 100);
         }
 
-        // Manejar errores de iframe
-        document.getElementById('iframe1').onerror = function() {
-            document.getElementById('error1').classList.add('visible');
-        };
+        // Inicializar gestos
+        document.addEventListener('DOMContentLoaded', function() {
+            initGestureDetection();
+            
+            // Configurar iframes
+            setupIframes();
+            
+            // Inicializar página
+            showPage(1);
+        });
 
-        document.getElementById('iframe2').onerror = function() {
-            document.getElementById('error2').classList.add('visible');
-        };
+        function setupIframes() {
+            for (let i = 1; i <= 3; i++) {
+                const iframe = document.getElementById(`iframe${i}`);
+                const errorDiv = document.getElementById(`error${i}`);
+                
+                if (iframe) {
+                    iframe.addEventListener('load', function() {
+                        if (errorDiv) errorDiv.classList.remove('visible');
+                    });
+                    
+                    iframe.addEventListener('error', function() {
+                        if (errorDiv) errorDiv.classList.add('visible');
+                    });
+                }
+            }
+        }
 
         // Detectar cambios de tamaño
         window.addEventListener('resize', () => {
             isMobile = window.innerWidth <= 768;
-            if (isMobile) {
-                hideMenu();
+            if (!isMobile && mobileMenuOpen) {
+                closeMenuWithGesture();
             }
         });
 
@@ -702,11 +851,10 @@
                 previousPage();
             } else if (e.key === 'ArrowRight') {
                 nextPage();
+            } else if (e.key === 'Escape' && mobileMenuOpen) {
+                closeMenuWithGesture();
             }
         });
-
-        // Inicializar
-        showPage(1);
 
         // Prevenir errores de extensiones
         window.addEventListener('error', function(e) {
@@ -715,16 +863,6 @@
                 return false;
             }
         }, true);
-
-        // Console personalizado
-        const originalConsoleError = console.error;
-        console.error = function(...args) {
-            if (args[0] && typeof args[0] === 'string' && 
-                (args[0].includes('firestore') || args[0].includes('ERR_BLOCKED'))) {
-                return;
-            }
-            originalConsoleError.apply(console, args);
-        };
     </script>
 </body>
 </html>

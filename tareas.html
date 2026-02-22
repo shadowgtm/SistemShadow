@@ -1703,6 +1703,7 @@
             if (firebaseProduct) {
                 const requirementProduct = currentRequirement.products.find(p => p.sku === firebaseProduct.sku);
                 if (requirementProduct) {
+                    // SOLO ABRIR MODAL, SIN NOTIFICACIÓN
                     openScanModal(requirementProduct.id);
                     scannerInput.value = '';
                 } else {
@@ -1814,6 +1815,15 @@
             if (selectedProblem) {
                 currentProduct.issues = [selectedProblem === 'insufficient' ? 'Existencia Insuficiente' : 'Quebrado'];
                 currentProduct.scanned = 0;
+                
+                // NOTIFICACIÓN DESPUÉS DE GUARDAR PROBLEMA
+                Swal.fire({
+                    title: "Problema Marcado",
+                    text: `${currentProduct.name} - ${currentProduct.issues[0]}`,
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
             } else {
                 currentProduct.issues = [];
             }
@@ -1842,6 +1852,15 @@
             
             currentProduct.scanned = quantity;
             if (quantity > 0) currentProduct.issues = [];
+            
+            // NOTIFICACIÓN DESPUÉS DE GUARDAR CANTIDAD
+            Swal.fire({
+                title: "Cantidad Agregada",
+                text: `${currentProduct.name} - ${quantity} unidades`,
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false
+            });
             
             renderProducts();
             updateRequirementProgress();

@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistema de Requerimientos por Salida</title>
+    <title>Requerimientos por Salida</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c3e50'><path d='M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z'/></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     
     <style>
         :root {
@@ -192,7 +196,6 @@
             color: #636e72;
         }
         
-        /* Interfaz de escaneo */
         .scan-interface {
             display: none;
             position: fixed;
@@ -244,19 +247,22 @@
             border-bottom: 1px solid #eee;
         }
         
-        .scanner-input-container {
+        .search-container {
             position: relative;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
         }
         
         .scanner-input {
-            width: 100%;
+            flex: 1;
             padding: 14px 15px 14px 45px;
             border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            border-radius: 10px 0 0 10px;
             font-size: 1rem;
             background: var(--light);
             transition: border-color 0.3s;
+            border-right: none;
         }
         
         .scanner-input:focus {
@@ -271,6 +277,45 @@
             transform: translateY(-50%);
             color: var(--secondary);
             font-size: 1.1rem;
+            z-index: 1;
+        }
+        
+        .search-button {
+            background: var(--secondary);
+            border: 2px solid var(--secondary);
+            border-radius: 0 10px 10px 0;
+            width: 50px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+        }
+        
+        .search-button:hover {
+            background: #2980b9;
+            border-color: #2980b9;
+        }
+        
+        .search-button:active {
+            transform: scale(0.95);
+        }
+        
+        .auto-submit-indicator {
+            position: absolute;
+            right: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #27ae60;
+            font-size: 0.8rem;
+            background: rgba(39, 174, 96, 0.1);
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: none;
+            pointer-events: none;
         }
         
         .progress-section {
@@ -351,23 +396,26 @@
         
         .product-item.completed {
             border-left-color: var(--success);
-            background: #f8fff9;
-            opacity: 0.9;
+            background: #e8f5e9;
+            border-left-width: 8px;
         }
         
         .product-item.in-progress {
             border-left-color: var(--warning);
-            background: #fffbf0;
+            background: #fff3e0;
+            border-left-width: 8px;
         }
         
         .product-item.problem {
             border-left-color: var(--danger);
-            background: #fff5f5;
+            background: #ffebee;
+            border-left-width: 8px;
         }
         
         .product-item.pending {
             border-left-color: var(--secondary);
-            background: white;
+            background: #ffffff;
+            border-left-width: 8px;
         }
         
         .product-header {
@@ -387,7 +435,7 @@
         .product-sku {
             font-size: 0.8rem;
             color: #666;
-            background: #eee;
+            background: rgba(0,0,0,0.05);
             padding: 3px 10px;
             border-radius: 20px;
         }
@@ -402,6 +450,7 @@
         .quantity-label {
             font-size: 0.9rem;
             color: #666;
+            font-weight: 500;
         }
         
         .quantity-value {
@@ -416,17 +465,33 @@
         
         .product-progress-bar {
             width: 100%;
-            height: 6px;
-            background: #e0e0e0;
-            border-radius: 3px;
+            height: 8px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 4px;
             overflow: hidden;
             margin-bottom: 8px;
         }
         
         .product-progress-fill {
             height: 100%;
-            border-radius: 3px;
+            border-radius: 4px;
             transition: width 0.5s ease;
+        }
+        
+        .product-item.completed .product-progress-fill {
+            background: linear-gradient(90deg, var(--success), #2ecc71);
+        }
+        
+        .product-item.in-progress .product-progress-fill {
+            background: linear-gradient(90deg, var(--warning), #e67e22);
+        }
+        
+        .product-item.pending .product-progress-fill {
+            background: linear-gradient(90deg, var(--secondary), #5dade2);
+        }
+        
+        .product-item.problem .product-progress-fill {
+            background: linear-gradient(90deg, var(--danger), #e74c3c);
         }
         
         .scanned-count {
@@ -434,6 +499,7 @@
             justify-content: space-between;
             font-size: 0.85rem;
             color: #666;
+            font-weight: 500;
         }
         
         .problem-badge {
@@ -455,7 +521,6 @@
             color: white;
         }
         
-        /* Botón de finalizar en header */
         .finalize-header-btn {
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -490,7 +555,6 @@
             background: rgba(39, 174, 96, 0.3);
         }
         
-        /* Modal para TAP en producto (Inventario + Problemas) */
         .tap-modal {
             display: none;
             position: fixed;
@@ -544,7 +608,6 @@
             overflow-y: auto;
         }
         
-        /* Modal para ESCANEO (Solo cantidad) */
         .scan-modal {
             display: none;
             position: fixed;
@@ -571,7 +634,7 @@
         
         .scan-modal-header {
             padding: 20px;
-            background: linear-gradient(135deg, var(--secondary), #2980b9);
+            background: linear-gradient(135deg, var(--primary), #1a252f);
             color: white;
             text-align: center;
         }
@@ -770,37 +833,6 @@
             background: #219653;
         }
         
-        .notification {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: var(--success);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-            display: none;
-        }
-        
-        @keyframes slideIn {
-            from { right: -300px; opacity: 0; }
-            to { right: 20px; opacity: 1; }
-        }
-        
-        .notification.error {
-            background: var(--danger);
-        }
-        
-        .notification.warning {
-            background: var(--warning);
-        }
-        
-        .notification.info {
-            background: var(--info);
-        }
-        
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -817,6 +849,85 @@
             font-size: 1.1rem;
             margin-bottom: 10px;
         }
+
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.8rem;
+        }
+        
+        .detail-table th {
+            background: linear-gradient(135deg, var(--primary), #1a252f);
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .detail-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.75rem;
+        }
+        
+        .detail-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .detail-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .btn-pdf {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn-pdf:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
         
         @media (max-width: 768px) {
             .cards-container {
@@ -830,6 +941,10 @@
             .tap-modal-content,
             .scan-modal-content {
                 max-width: 95%;
+            }
+            
+            .auto-submit-indicator {
+                display: none !important;
             }
         }
         
@@ -850,35 +965,31 @@
     </style>
 </head>
 <body>
-    <!-- Interfaz principal - Lista de requerimientos -->
     <div class="app-container" id="mainInterface">
         <header class="app-header">
             <div class="header-content">
                 <div>
                     <div class="header-title">
-                        <i class="fas fa-clipboard-list"></i> Requerimientos por Salida
+                        <i class="fas fa-clipboard-list"></i> Req. por Salida
                     </div>
-                    <div class="header-subtitle">Seleccione un requerimiento para escanear</div>
+                    <div class="header-subtitle">Selecciona para empezar</div>
                 </div>
                 <div class="header-actions">
                     <button class="header-btn" id="btnRefresh" title="Actualizar">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <button class="header-btn" id="btnSettings" title="Configuración">
-                        <i class="fas fa-cog"></i>
+                    <button class="header-btn" id="btnBackToSend" title="Volver a send.html">
+                        <i class="fas fa-arrow-left"></i>
                     </button>
                 </div>
             </div>
         </header>
         
         <div class="content-area">
-            <div class="cards-container" id="cardsContainer">
-                <!-- Las cards de requerimientos se generarán aquí -->
-            </div>
+            <div class="cards-container" id="cardsContainer"></div>
         </div>
     </div>
     
-    <!-- Interfaz de escaneo - Se muestra al seleccionar un requerimiento -->
     <div class="scan-interface" id="scanInterface">
         <div class="scan-header">
             <button class="scan-back-btn" id="btnBack">
@@ -891,14 +1002,13 @@
         </div>
         
         <section class="scanner-section">
-            <div class="scanner-input-container">
+            <div class="search-container">
                 <i class="fas fa-barcode scanner-icon"></i>
-                <input type="text" 
-                       class="scanner-input" 
-                       id="scannerInput"
-                       placeholder="Escanear código de barras o SKU..."
-                       autocomplete="off"
-                       autofocus>
+                <input type="text" class="scanner-input" id="scannerInput" placeholder="Escanear código de barras o SKU..." autocomplete="off" autofocus>
+                <button class="search-button" id="searchButton" title="Buscar">
+                    <i class="fas fa-search"></i>
+                </button>
+                <span class="auto-submit-indicator" id="autoSubmitIndicator">Auto</span>
             </div>
             
             <div class="progress-section">
@@ -916,12 +1026,9 @@
             </div>
         </section>
         
-        <div class="products-list" id="productsList">
-            <!-- Lista de productos se generará aquí -->
-        </div>
+        <div class="products-list" id="productsList"></div>
     </div>
     
-    <!-- Modal para TAP en producto (Inventario + Problemas) -->
     <div class="tap-modal" id="tapModal">
         <div class="tap-modal-content">
             <div class="tap-modal-header">
@@ -930,7 +1037,6 @@
             </div>
             
             <div class="tap-modal-body">
-                <!-- Sección 1: Existencia de Inventario -->
                 <div class="modal-section">
                     <div class="modal-section-title">
                         <i class="fas fa-boxes"></i> Existencia de Inventario
@@ -959,7 +1065,6 @@
                     </div>
                 </div>
                 
-                <!-- Sección 3: Marcar Problema -->
                 <div class="modal-section">
                     <div class="modal-section-title">
                         <i class="fas fa-exclamation-triangle"></i> Marcar Problema
@@ -967,12 +1072,10 @@
                     <div class="problem-options">
                         <div class="problem-buttons">
                             <button class="problem-btn" id="tapBtnInsufficient" data-problem="insufficient">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                Existencia Insuficiente
+                                <i class="fas fa-exclamation-triangle"></i> Existencia Insuficiente
                             </button>
                             <button class="problem-btn" id="tapBtnBroken" data-problem="broken">
-                                <i class="fas fa-times-circle"></i>
-                                Quebrado
+                                <i class="fas fa-times-circle"></i> Quebrado
                             </button>
                         </div>
                     </div>
@@ -990,7 +1093,6 @@
         </div>
     </div>
     
-    <!-- Modal para ESCANEO (Solo cantidad) -->
     <div class="scan-modal" id="scanModal">
         <div class="scan-modal-content">
             <div class="scan-modal-header">
@@ -999,24 +1101,16 @@
             </div>
             
             <div class="scan-modal-body">
-                <!-- Solo Sección 2: Cantidad a Escanear -->
                 <div class="modal-section">
                     <div class="modal-section-title">
                         <i class="fas fa-hashtag"></i> Cantidad Escaneada
                     </div>
                     <div class="quantity-input-section">
                         <div class="quantity-input-group">
-                            <input type="number" 
-                                   class="quantity-input" 
-                                   id="scanModalQuantityInput"
-                                   min="0"
-                                   max="1000"
-                                   value="0"
-                                   autofocus>
+                            <input type="number" class="quantity-input" id="scanModalQuantityInput" min="0" max="1000" value="0" autofocus>
                         </div>
                         <div class="quantity-info">
-                            Máximo: <strong id="scanModalMax">0</strong> unidades | 
-                            Restante: <strong id="scanModalRemaining">0</strong>
+                            Máximo: <strong id="scanModalMax">0</strong> | Restante: <strong id="scanModalRemaining">0</strong>
                         </div>
                     </div>
                 </div>
@@ -1032,133 +1126,64 @@
             </div>
         </div>
     </div>
-    
-    <div class="notification" id="notification"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        // Datos de ejemplo para requerimientos
-        const requirementsData = [
-            {
-                id: "SAL-2023-001",
-                title: "Pedido Cliente Premium",
-                date: "2023-10-15",
-                status: "En Proceso",
-                client: "Corporación XYZ",
-                priority: "Alta",
-                finalized: false,
-                products: [
-                    { 
-                        id: "P001", 
-                        sku: "SKU12345", 
-                        name: "Laptop Dell XPS 15", 
-                        required: 3, 
-                        scanned: 2, 
-                        issues: [],
-                        stock: 5,
-                        available: 3
-                    },
-                    { 
-                        id: "P002", 
-                        sku: "SKU12346", 
-                        name: "Mouse Inalámbrico Logitech", 
-                        required: 5, 
-                        scanned: 5, 
-                        issues: [],
-                        stock: 10,
-                        available: 5
-                    },
-                    { 
-                        id: "P003", 
-                        sku: "SKU12347", 
-                        name: "Teclado Mecánico RGB", 
-                        required: 2, 
-                        scanned: 0, 
-                        issues: [],
-                        stock: 3,
-                        available: 2
-                    }
-                ]
-            },
-            {
-                id: "SAL-2023-002",
-                title: "Reabastecimiento Tienda Centro",
-                date: "2023-10-15",
-                status: "Pendiente",
-                client: "Tienda Centro",
-                priority: "Media",
-                finalized: false,
-                products: [
-                    { 
-                        id: "P004", 
-                        sku: "SKU12348", 
-                        name: "Monitor 24\" Full HD", 
-                        required: 4, 
-                        scanned: 0, 
-                        issues: [],
-                        stock: 6,
-                        available: 4
-                    },
-                    { 
-                        id: "P005", 
-                        sku: "SKU12349", 
-                        name: "Impresora Multifuncional", 
-                        required: 2, 
-                        scanned: 0, 
-                        issues: [],
-                        stock: 3,
-                        available: 2
-                    },
-                    { 
-                        id: "P006", 
-                        sku: "SKU12350", 
-                        name: "Router WiFi 6", 
-                        required: 3, 
-                        scanned: 0, 
-                        issues: [],
-                        stock: 5,
-                        available: 3
-                    },
-                    { 
-                        id: "P007", 
-                        sku: "SKU12351", 
-                        name: "Disco Duro Externo 1TB", 
-                        required: 6, 
-                        scanned: 0, 
-                        issues: [],
-                        stock: 8,
-                        available: 6
-                    }
-                ]
-            }
-        ];
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
-        // Variables globales
-        let requirements = JSON.parse(JSON.stringify(requirementsData));
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQe0HfkrnRJAH8Dtzh-gesTsq_UdHnOHE",
+            authDomain: "pos-tda.firebaseapp.com",
+            projectId: "pos-tda",
+            storageBucket: "pos-tda.firebasestorage.app",
+            messagingSenderId: "732089248607",
+            appId: "1:732089248607:web:895d8588d384b05a26a4ea",
+            measurementId: "G-QTRZV9X9ML"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        db.settings({
+            cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+        });
+        
+        db.enablePersistence()
+            .catch((err) => {
+                if (err.code == 'failed-precondition') {
+                    console.log('Persistencia falló - múltiples pestañas abiertas');
+                } else if (err.code == 'unimplemented') {
+                    console.log('Persistencia no disponible en este navegador');
+                }
+            });
+
+        let requirements = [];
+        let productsFromFirebase = [];
         let currentRequirement = null;
         let currentProduct = null;
         let selectedProblem = null;
+        let autoSubmitTimeout = null;
 
-        // Elementos del DOM
         const mainInterface = document.getElementById('mainInterface');
         const scanInterface = document.getElementById('scanInterface');
         const tapModal = document.getElementById('tapModal');
         const scanModal = document.getElementById('scanModal');
         const cardsContainer = document.getElementById('cardsContainer');
         const scannerInput = document.getElementById('scannerInput');
+        const searchButton = document.getElementById('searchButton');
+        const autoSubmitIndicator = document.getElementById('autoSubmitIndicator');
         const requirementProgress = document.getElementById('requirementProgress');
         const requirementProgressFill = document.getElementById('requirementProgressFill');
         const scannedCount = document.getElementById('scannedCount');
         const totalCount = document.getElementById('totalCount');
         const productsList = document.getElementById('productsList');
         const scanReqTitle = document.getElementById('scanReqTitle');
-        const notification = document.getElementById('notification');
         const btnRefresh = document.getElementById('btnRefresh');
-        const btnSettings = document.getElementById('btnSettings');
+        const btnBackToSend = document.getElementById('btnBackToSend');
         const btnBack = document.getElementById('btnBack');
         const btnFinalizeHeader = document.getElementById('btnFinalizeHeader');
         
-        // Elementos del modal TAP
         const tapProductName = document.getElementById('tapProductName');
         const tapProductSku = document.getElementById('tapProductSku');
         const tapRequired = document.getElementById('tapRequired');
@@ -1171,7 +1196,6 @@
         const tapBtnCancel = document.getElementById('tapBtnCancel');
         const tapBtnConfirm = document.getElementById('tapBtnConfirm');
         
-        // Elementos del modal SCAN
         const scanModalProductName = document.getElementById('scanModalProductName');
         const scanModalProductSku = document.getElementById('scanModalProductSku');
         const scanModalQuantityInput = document.getElementById('scanModalQuantityInput');
@@ -1180,63 +1204,174 @@
         const scanBtnCancel = document.getElementById('scanBtnCancel');
         const scanBtnConfirm = document.getElementById('scanBtnConfirm');
 
-        // Inicializar aplicación
         document.addEventListener('DOMContentLoaded', function() {
-            renderRequirements();
+            console.log('Inicializando app de picking...');
+            loadProductsFromFirebase();
+            loadRequirementsFromFirebase();
             setupEventListeners();
-            loadFromLocalStorage();
         });
 
-        // Configurar event listeners
-        function setupEventListeners() {
-            // Botón de actualizar - ahora solo refresca
-            btnRefresh.addEventListener('click', function() {
-                location.reload();
-            });
+        async function loadProductsFromFirebase() {
+            try {
+                console.log('Cargando productos desde Firebase...');
+                const snapshot = await db.collection('products').get();
+                
+                productsFromFirebase = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        sku: data.sku || '',
+                        name: data.name || 'Producto sin nombre',
+                        barcode: data.barcode || '',
+                        barcodes: data.barcodes || [],
+                        stock: data.bodega || 0
+                    };
+                });
+                
+                console.log('Productos cargados:', productsFromFirebase.length);
+                
+            } catch (error) {
+                console.error('Error cargando productos:', error);
+            }
+        }
+
+        async function loadRequirementsFromFirebase() {
+            try {
+                console.log('Cargando requerimientos desde Firebase...');
+                const snapshot = await db.collection('requerimientos').get();
+                
+                requirements = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        title: data.title || data.nombre || 'Requerimiento',
+                        date: data.date || data.fecha || new Date().toLocaleDateString(),
+                        status: data.status || data.estado || 'Pendiente',
+                        client: data.client || data.tienda || 'Cliente',
+                        finalized: data.finalized || false,
+                        // Asegurar que productos existe y es un array
+                        products: Array.isArray(data.productos) ? data.productos.map(p => ({
+                            id: p.id || 'P' + Math.random(),
+                            sku: p.sku || '',
+                            name: p.name || 'Producto',
+                            required: p.required || 0,
+                            scanned: p.scanned || 0,
+                            issues: p.issues || [],
+                            stock: p.stock || 0,
+                            barcode: p.barcode || '',
+                            barcodes: p.barcodes || []
+                        })) : []
+                    };
+                });
+                
+                console.log('Requerimientos cargados:', requirements.length);
+                renderRequirements();
+                
+            } catch (error) {
+                console.error('Error cargando requerimientos:', error);
+            }
+        }
+
+        async function updateRequirementInFirebase(requirement) {
+            try {
+                const requirementToSave = {
+                    id: requirement.id,
+                    title: requirement.title,
+                    nombre: requirement.title,
+                    date: requirement.date,
+                    fecha: requirement.date,
+                    status: requirement.status,
+                    estado: requirement.status,
+                    client: requirement.client,
+                    tienda: requirement.client,
+                    finalized: requirement.finalized,
+                    productos: requirement.products.map(p => ({
+                        id: p.id,
+                        sku: p.sku,
+                        name: p.name,
+                        required: p.required,
+                        scanned: p.scanned || 0,
+                        issues: p.issues || [],
+                        stock: p.stock || 0,
+                        barcode: p.barcode || '',
+                        barcodes: p.barcodes || []
+                    }))
+                };
+                
+                await db.collection('requerimientos').doc(requirement.id).set(requirementToSave);
+                console.log('Requerimiento actualizado en Firebase:', requirement.id);
+                return true;
+            } catch (error) {
+                console.error('Error actualizando en Firebase:', error);
+                return false;
+            }
+        }
+
+        async function updateProductStock(productSku, quantityScanned) {
+            try {
+                const product = productsFromFirebase.find(p => p.sku === productSku);
+                if (!product) return false;
+                
+                const productRef = db.collection('products').doc(product.id);
+                const doc = await productRef.get();
+                
+                if (!doc.exists) return false;
+                
+                const currentData = doc.data();
+                const currentStock = currentData.bodega || 0;
+                const newStock = currentStock - quantityScanned;
+                
+                await productRef.update({ bodega: newStock });
+                console.log(`Stock actualizado: ${productSku} ${currentStock} -> ${newStock}`);
+                product.stock = newStock;
+                
+                return true;
+            } catch (error) {
+                console.error('Error actualizando stock:', error);
+                return false;
+            }
+        }
+
+        function findProductByCode(code) {
+            if (!productsFromFirebase || productsFromFirebase.length === 0) return null;
             
-            // Botón de configuración
-            btnSettings.addEventListener('click', function() {
+            const searchCode = code.toLowerCase().trim();
+            
+            return productsFromFirebase.find(p => {
+                if (p.sku && p.sku.toLowerCase() === searchCode) return true;
+                if (p.barcode && p.barcode.toLowerCase() === searchCode) return true;
+                if (p.barcodes && Array.isArray(p.barcodes)) {
+                    return p.barcodes.some(b => b && b.toString().toLowerCase() === searchCode);
+                }
+                return false;
+            });
+        }
+
+        function setupEventListeners() {
+            btnRefresh.addEventListener('click', function() {
+                loadProductsFromFirebase();
+                loadRequirementsFromFirebase();
                 Swal.fire({
-                    title: 'Configuración',
-                    html: `
-                        <div style="text-align: left;">
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Sonido de confirmación:</label>
-                                <select id="soundSetting" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
-                                    <option value="on">Activado</option>
-                                    <option value="off">Desactivado</option>
-                                </select>
-                            </div>
-                            <div style="margin-bottom: 15px;">
-                                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Vibrar al escanear:</label>
-                                <select id="vibrationSetting" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
-                                    <option value="on">Activado</option>
-                                    <option value="off">Desactivado</option>
-                                </select>
-                            </div>
-                        </div>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: 'Guardar',
-                    cancelButtonText: 'Cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        showNotification('Configuración guardada', 'success');
-                    }
+                    icon: 'success',
+                    title: 'Actualizado',
+                    text: 'Datos actualizados correctamente',
+                    timer: 1500,
+                    showConfirmButton: false
                 });
             });
             
-            // Botón para volver a la lista
+            btnBackToSend.addEventListener('click', function() {
+                window.location.href = 'send.html';
+            });
+            
             btnBack.addEventListener('click', function() {
                 showMainInterface();
             });
             
-            // Botón para finalizar requerimiento (en header)
             btnFinalizeHeader.addEventListener('click', function() {
                 finalizeRequirement();
             });
             
-            // Escáner - Enter key
             scannerInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -1244,7 +1379,14 @@
                 }
             });
             
-            // Modal TAP - Botones de problemas
+            scannerInput.addEventListener('input', function() {
+                handleAutoSubmit();
+            });
+            
+            searchButton.addEventListener('click', function() {
+                processScan();
+            });
+            
             tapBtnInsufficient.addEventListener('click', function() {
                 toggleProblem('insufficient');
             });
@@ -1253,110 +1395,85 @@
                 toggleProblem('broken');
             });
             
-            // Modal TAP - Cancelar
             tapBtnCancel.addEventListener('click', function() {
                 closeTapModal();
             });
             
-            // Modal TAP - Confirmar problema
             tapBtnConfirm.addEventListener('click', function() {
                 saveProblem();
             });
             
-            // Modal SCAN - Cancelar
             scanBtnCancel.addEventListener('click', function() {
                 closeScanModal();
             });
             
-            // Modal SCAN - Confirmar cantidad
             scanBtnConfirm.addEventListener('click', function() {
                 saveScanQuantity();
             });
             
-            // Cerrar modales con Escape
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    if (tapModal.style.display === 'flex') {
-                        closeTapModal();
-                    } else if (scanModal.style.display === 'flex') {
-                        closeScanModal();
-                    }
+                    if (tapModal.style.display === 'flex') closeTapModal();
+                    else if (scanModal.style.display === 'flex') closeScanModal();
                 }
             });
-            
-            // Auto-ocultar notificación después de 3 segundos
-            setInterval(() => {
-                notification.style.display = 'none';
-            }, 3000);
         }
 
-        // Renderizar requirements como cards
+        function handleAutoSubmit() {
+            const value = scannerInput.value.trim();
+            
+            // Mostrar/ocultar indicador de auto-submit
+            if (value.length >= 5) {
+                autoSubmitIndicator.style.display = 'block';
+            } else {
+                autoSubmitIndicator.style.display = 'none';
+            }
+            
+            // Limpiar timeout anterior
+            if (autoSubmitTimeout) {
+                clearTimeout(autoSubmitTimeout);
+            }
+            
+            // Si tiene al menos 5 caracteres, programar auto-submit
+            if (value.length >= 5) {
+                autoSubmitTimeout = setTimeout(() => {
+                    if (scannerInput.value.trim().length >= 5) {
+                        processScan();
+                    }
+                }, 500); // 500ms de espera después de dejar de escribir
+            }
+        }
+
         function renderRequirements() {
             cardsContainer.innerHTML = '';
             
-            if (requirements.length === 0) {
+            const activeRequirements = requirements.filter(req => !req.finalized);
+            
+            if (activeRequirements.length === 0) {
                 cardsContainer.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">
-                            <i class="fas fa-clipboard"></i>
-                        </div>
-                        <div class="empty-text">No hay requerimientos disponibles</div>
+                        <i class="fas fa-check-circle" style="font-size: 3rem; color: #27ae60; margin-bottom: 15px;"></i>
+                        <h3>No hay requerimientos pendientes</h3>
                     </div>
                 `;
                 return;
             }
             
-            // Ordenar requerimientos: primero los no finalizados, luego los finalizados
-            const sortedRequirements = [...requirements].sort((a, b) => {
-                if (a.finalized === b.finalized) return 0;
-                if (a.finalized) return 1;
-                return -1;
-            });
-            
-            sortedRequirements.forEach(req => {
-                // Calcular estadísticas del requerimiento
-                const totalProducts = req.products.length;
-                const totalRequired = req.products.reduce((sum, p) => sum + p.required, 0);
-                const totalScanned = req.products.reduce((sum, p) => sum + p.scanned, 0);
+            activeRequirements.forEach(req => {
+                const totalProducts = req.products?.length || 0;
+                const totalRequired = req.products?.reduce((sum, p) => sum + (p.required || 0), 0) || 0;
+                const totalScanned = req.products?.reduce((sum, p) => sum + (p.scanned || 0), 0) || 0;
                 const progressPercent = totalRequired > 0 ? Math.round((totalScanned / totalRequired) * 100) : 0;
-                const completedProducts = req.products.filter(p => p.scanned >= p.required).length;
-                const hasProblems = req.products.some(p => p.issues && p.issues.length > 0);
-                
-                // Determinar color de borde según progreso
-                let borderColor = '#3498db'; // Azul por defecto
-                if (req.finalized) {
-                    borderColor = '#636e72'; // Gris para finalizados
-                } else if (progressPercent === 100) {
-                    borderColor = '#27ae60'; // Verde completo
-                } else if (progressPercent > 0) {
-                    borderColor = '#f39c12'; // Naranja en progreso
-                }
-                
-                // Determinar clase de estado
-                let statusClass = 'status-pending';
-                let statusText = 'Pendiente';
-                
-                if (req.finalized) {
-                    statusClass = 'status-finalized';
-                    statusText = 'Finalizado';
-                } else if (progressPercent === 100) {
-                    statusClass = 'status-completed';
-                    statusText = 'Completado';
-                } else if (progressPercent > 0) {
-                    statusClass = 'status-in-progress';
-                    statusText = 'En Proceso';
-                }
+                const hasProblems = req.products?.some(p => p.issues && p.issues.length > 0) || false;
                 
                 const card = document.createElement('div');
                 card.className = 'requirement-card';
-                card.style.borderLeftColor = borderColor;
                 card.dataset.id = req.id;
                 
                 card.innerHTML = `
-                    <div class="card-header" onclick="${req.finalized ? '' : `openScanInterface('${req.id}')`}" style="${req.finalized ? 'cursor: default; opacity: 0.8;' : ''}">
-                        <div class="requirement-title">${req.title} ${req.finalized ? '<i class="fas fa-lock" style="font-size: 0.9rem; color: #636e72;"></i>' : ''}</div>
+                    <div class="card-header" onclick="openScanInterface('${req.id}')">
+                        <div class="requirement-title">${req.title}</div>
                         <div class="requirement-id">${req.id} • ${req.date}</div>
-                        
                         <div class="card-details">
                             <div class="detail-item">
                                 <span class="detail-value">${totalProducts}</span>
@@ -1367,27 +1484,17 @@
                                 <span class="detail-label">Unidades</span>
                             </div>
                             <div class="detail-item">
-                                <span class="detail-value" style="color: ${req.finalized ? '#636e72' : progressPercent === 100 ? '#27ae60' : progressPercent > 0 ? '#f39c12' : '#3498db'}">
-                                    ${progressPercent}%
-                                </span>
+                                <span class="detail-value">${progressPercent}%</span>
                                 <span class="detail-label">Completado</span>
                             </div>
                         </div>
-                        
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                            <span class="status-badge ${statusClass}">${statusText}</span>
-                            ${hasProblems ? '<span style="font-size: 0.8rem; color: #e74c3c;"><i class="fas fa-exclamation-triangle"></i> Con problemas</span>' : ''}
+                        <div style="margin-top: 10px;">
+                            <span class="status-badge status-pending">${req.status}</span>
+                            ${hasProblems ? '<span style="margin-left: 10px; color: #e74c3c;"><i class="fas fa-exclamation-triangle"></i> Problemas</span>' : ''}
                         </div>
-                        
-                        <div style="margin-top: 15px; color: #666; font-size: 0.9rem;">
-                            <i class="fas fa-building"></i> ${req.client} • 
-                            <i class="fas fa-flag"></i> Prioridad: ${req.priority}
+                        <div style="margin-top: 15px; color: #666;">
+                            <i class="fas fa-building"></i> ${req.client}
                         </div>
-                        
-                        ${req.finalized ? 
-                        '<div style="margin-top: 15px; padding: 8px; background: #f8f9fa; border-radius: 6px; text-align: center; color: #666; font-size: 0.85rem;">' +
-                        '<i class="fas fa-lock"></i> Requerimiento finalizado - No editable' +
-                        '</div>' : ''}
                     </div>
                 `;
                 
@@ -1395,72 +1502,64 @@
             });
         }
 
-        // Abrir interfaz de escaneo para un requerimiento
         function openScanInterface(reqId) {
             currentRequirement = requirements.find(r => r.id === reqId);
             if (!currentRequirement) return;
             
             if (currentRequirement.finalized) {
-                showNotification('Este requerimiento ya ha sido finalizado', 'warning');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Finalizado',
+                    text: 'Este requerimiento ya ha sido finalizado'
+                });
                 return;
             }
             
-            // Cambiar a interfaz de escaneo
+            console.log('Abriendo requerimiento:', currentRequirement);
+            console.log('Productos:', currentRequirement.products);
+            
             mainInterface.style.display = 'none';
             scanInterface.style.display = 'flex';
-            
-            // Actualizar título
             scanReqTitle.textContent = currentRequirement.title;
-            
-            // Renderizar productos
             renderProducts();
-            
-            // Actualizar progreso
             updateRequirementProgress();
-            
-            // Actualizar estado del botón de finalizar
             updateFinalizeButton();
             
-            // Enfocar input de escaneo
-            setTimeout(() => {
-                scannerInput.focus();
-            }, 100);
+            setTimeout(() => scannerInput.focus(), 100);
         }
 
-        // Mostrar interfaz principal
         function showMainInterface() {
             mainInterface.style.display = 'flex';
             scanInterface.style.display = 'none';
             currentRequirement = null;
             scannerInput.value = '';
-            renderRequirements();
+            loadRequirementsFromFirebase();
         }
 
-        // Renderizar productos en la interfaz de escaneo
         function renderProducts() {
             if (!currentRequirement) return;
             
             productsList.innerHTML = '';
             
-            // Ordenar productos: pendientes primero, completados al final
+            // Verificar si hay productos
+            if (!currentRequirement.products || currentRequirement.products.length === 0) {
+                productsList.innerHTML = '<div class="empty-state">No hay productos en este requerimiento</div>';
+                return;
+            }
+            
+            console.log('Renderizando productos:', currentRequirement.products);
+            
             const sortedProducts = [...currentRequirement.products].sort((a, b) => {
                 const aCompleted = a.scanned >= a.required;
                 const bCompleted = b.scanned >= b.required;
                 const aHasIssues = a.issues && a.issues.length > 0;
                 const bHasIssues = b.issues && b.issues.length > 0;
                 
-                // Productos con problemas van primero
                 if (aHasIssues && !bHasIssues) return -1;
                 if (!aHasIssues && bHasIssues) return 1;
-                
-                // Luego productos pendientes
                 if (!aCompleted && bCompleted) return -1;
                 if (aCompleted && !bCompleted) return 1;
-                
-                // Luego por cantidad faltante (mayor a menor)
-                const aRemaining = a.required - a.scanned;
-                const bRemaining = b.required - b.scanned;
-                return bRemaining - aRemaining;
+                return (b.required - b.scanned) - (a.required - a.scanned);
             });
             
             sortedProducts.forEach(product => {
@@ -1468,30 +1567,13 @@
                 const hasIssues = product.issues && product.issues.length > 0;
                 const remaining = Math.max(0, product.required - product.scanned);
                 
-                // Determinar clase del item
                 let itemClass = 'product-item';
-                if (isCompleted) {
-                    itemClass += ' completed';
-                } else if (product.scanned > 0) {
-                    itemClass += ' in-progress';
-                } else if (hasIssues) {
-                    itemClass += ' problem';
-                } else {
-                    itemClass += ' pending';
-                }
+                if (isCompleted) itemClass += ' completed';
+                else if (product.scanned > 0) itemClass += ' in-progress';
+                else if (hasIssues) itemClass += ' problem';
+                else itemClass += ' pending';
                 
-                // Calcular porcentaje de completado
                 const scanPercent = product.required > 0 ? (product.scanned / product.required) * 100 : 0;
-                
-                // Determinar color de la barra de progreso
-                let progressColor = '#3498db'; // Azul por defecto
-                if (isCompleted) {
-                    progressColor = '#27ae60'; // Verde completo
-                } else if (product.scanned > 0) {
-                    progressColor = '#f39c12'; // Naranja en progreso
-                } else if (hasIssues) {
-                    progressColor = '#e74c3c'; // Rojo para problemas
-                }
                 
                 const productElement = document.createElement('div');
                 productElement.className = itemClass;
@@ -1499,202 +1581,295 @@
                 
                 productElement.innerHTML = `
                     <div class="product-header">
-                        <div class="product-name">
-                            ${product.name}
-                            ${isCompleted ? '<i class="fas fa-check-circle" style="color: #27ae60; margin-left: 5px;"></i>' : ''}
-                        </div>
+                        <div class="product-name">${product.name}</div>
                         <div class="product-sku">${product.sku}</div>
                     </div>
-                    
                     <div class="product-quantity">
-                        <div class="quantity-label">Requerido:</div>
-                        <div class="quantity-value">${product.required}</div>
+                        <span class="quantity-label">Requerido:</span>
+                        <span class="quantity-value">${product.required}</span>
                     </div>
-                    
                     <div class="product-quantity">
-                        <div class="quantity-label">Escaneado:</div>
-                        <div class="quantity-value" style="color: ${isCompleted ? '#27ae60' : product.scanned > 0 ? '#f39c12' : hasIssues ? '#e74c3c' : '#3498db'}">
-                            ${product.scanned}
-                        </div>
+                        <span class="quantity-label">Escaneado:</span>
+                        <span class="quantity-value">${product.scanned}</span>
                     </div>
-                    
                     <div class="product-progress">
                         <div class="product-progress-bar">
-                            <div class="product-progress-fill" style="width: ${scanPercent}%; background: ${progressColor}"></div>
+                            <div class="product-progress-fill" style="width: ${scanPercent}%"></div>
                         </div>
                         <div class="scanned-count">
-                            <span>${product.scanned} / ${product.required} unidades</span>
-                            <span style="color: ${remaining === 0 ? '#27ae60' : '#f39c12'}">${remaining} faltantes</span>
+                            <span>${product.scanned} / ${product.required}</span>
+                            <span>${remaining} faltantes</span>
                         </div>
                     </div>
-                    
                     ${hasIssues ? `
-                    <div>
-                        ${product.issues.map(issue => `
-                            <div class="problem-badge ${issue === 'Existencia Insuficiente' ? 'problem-insufficient' : 'problem-broken'}">
-                                <i class="fas fa-exclamation-circle"></i> ${issue}
-                            </div>
-                        `).join('')}
-                    </div>
+                        <div class="problem-badge ${product.issues[0] === 'Quebrado' ? 'problem-broken' : 'problem-insufficient'}">
+                            <i class="fas fa-exclamation-circle"></i> ${product.issues[0]}
+                        </div>
                     ` : ''}
                 `;
                 
-                // Agregar event listener para abrir modal TAP
-                productElement.addEventListener('click', function() {
-                    openTapModal(product.id);
-                });
-                
+                productElement.addEventListener('click', () => openTapModal(product.id));
                 productsList.appendChild(productElement);
             });
-            
-            // Si todos los productos están completados, mostrar mensaje
-            if (sortedProducts.every(p => p.scanned >= p.required)) {
-                const completedMessage = document.createElement('div');
-                completedMessage.className = 'empty-state';
-                completedMessage.style.padding = '20px';
-                completedMessage.innerHTML = `
-                    <div class="empty-icon" style="color: #27ae60;">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="empty-text" style="color: #27ae60; font-weight: 600;">
-                        ¡Todos los productos están completados!
-                    </div>
-                    <div style="color: #666; font-size: 0.9rem; margin-top: 5px;">
-                        Haga tap en el botón <i class="fas fa-check"></i> para finalizar
-                    </div>
-                `;
-                productsList.insertBefore(completedMessage, productsList.firstChild);
-            }
         }
 
-        // Actualizar estado del botón de finalizar
         function updateFinalizeButton() {
             if (!currentRequirement) return;
             
-            const allCompleted = currentRequirement.products.every(p => p.scanned >= p.required);
+            const allValid = currentRequirement.products.every(p => 
+                p.scanned > 0 || (p.issues && p.issues.length > 0)
+            );
             
-            if (allCompleted) {
-                btnFinalizeHeader.disabled = false;
+            btnFinalizeHeader.disabled = !allValid;
+            if (allValid) {
                 btnFinalizeHeader.classList.add('enabled');
                 btnFinalizeHeader.title = 'Finalizar requerimiento';
             } else {
-                btnFinalizeHeader.disabled = true;
                 btnFinalizeHeader.classList.remove('enabled');
-                btnFinalizeHeader.title = 'Complete todos los productos primero';
+                btnFinalizeHeader.title = 'Complete todos los productos';
             }
         }
 
-        // Finalizar requerimiento
-        function finalizeRequirement() {
+        function generatePDF(requirement) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(18);
+            doc.setTextColor(44, 62, 80);
+            doc.text('Requerimiento de Salida', 14, 20);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`ID: ${requirement.id}`, 14, 30);
+            doc.text(`Fecha: ${requirement.date}`, 14, 36);
+            doc.text(`Tienda: ${requirement.client}`, 14, 42);
+            doc.text(`Título: ${requirement.title}`, 14, 48);
+            
+            const tableColumn = ['SKU', 'Producto', 'Req.', 'Esc.', 'Estado'];
+            const tableRows = [];
+            
+            requirement.products.forEach(p => {
+                const status = p.scanned >= p.required ? 'Completado' : 
+                              (p.issues && p.issues.length > 0 ? p.issues[0] : 'Pendiente');
+                tableRows.push([p.sku, p.name, p.required, p.scanned, status]);
+            });
+            
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 55,
+                styles: { fontSize: 9 },
+                headStyles: { fillColor: [44, 62, 80] }
+            });
+            
+            doc.save(`requerimiento_${requirement.id}.pdf`);
+        }
+
+        function showDetailTable(requirement) {
+            let productsHtml = '';
+            requirement.products.forEach(p => {
+                const status = p.scanned >= p.required ? 'Completado' : 
+                              (p.issues && p.issues.length > 0 ? p.issues[0] : 'Pendiente');
+                let statusClass = 'badge-success';
+                if (status === 'Existencia Insuficiente' || status === 'Quebrado') statusClass = 'badge-danger';
+                else if (status === 'Pendiente') statusClass = 'badge-warning';
+                
+                productsHtml += `
+                    <tr>
+                        <td>${p.sku}</td>
+                        <td>${p.name}</td>
+                        <td style="text-align: center;">${p.required}</td>
+                        <td style="text-align: center;">${p.scanned}</td>
+                        <td><span class="${statusClass}">${status}</span></td>
+                    </tr>
+                `;
+            });
+            
+            Swal.fire({
+                title: 'Detalle del Requerimiento',
+                html: `
+                    <div style="margin-bottom: 15px;">
+                        <p><strong>${requirement.title}</strong> - ${requirement.id}</p>
+                        <p>Tienda: ${requirement.client} - Fecha: ${requirement.date}</p>
+                    </div>
+                    <table class="detail-table">
+                        <thead><tr><th>SKU</th><th>Producto</th><th>Req.</th><th>Esc.</th><th>Estado</th></tr></thead>
+                        <tbody>${productsHtml}</tbody>
+                    </table>
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button class="btn-pdf" onclick="generatePDFFromSwal('${requirement.id}')">
+                            <i class="fas fa-file-pdf"></i> Descargar PDF
+                        </button>
+                    </div>
+                `,
+                icon: 'success',
+                confirmButtonText: 'Aceptar',
+                width: '700px',
+                confirmButtonColor: '#2c3e50'
+            });
+        }
+
+        window.generatePDFFromSwal = function(requirementId) {
+            const requirement = requirements.find(r => r.id === requirementId);
+            if (requirement) generatePDF(requirement);
+        };
+
+        async function finalizeRequirement() {
             if (!currentRequirement) return;
             
-            // Verificar que todos los productos estén completados
-            const allCompleted = currentRequirement.products.every(p => p.scanned >= p.required);
+            const allValid = currentRequirement.products.every(p => 
+                p.scanned > 0 || (p.issues && p.issues.length > 0)
+            );
             
-            if (!allCompleted) {
-                showNotification('Debe completar todos los productos antes de finalizar', 'warning');
+            if (!allValid) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Productos sin escanear',
+                    text: 'Debe escanear al menos 1 unidad o marcar como problema'
+                });
                 return;
             }
             
+            // Calcular totales para mostrar en la confirmación
+            const totalProductosEscaneados = currentRequirement.products.filter(p => p.scanned > 0).length;
+            const totalUnidadesEscaneadas = currentRequirement.products.reduce((sum, p) => sum + p.scanned, 0);
+            const productosConProblemas = currentRequirement.products.filter(p => p.issues && p.issues.length > 0).length;
+            
             Swal.fire({
-                title: '¿Finalizar requerimiento?',
+                title: '⚠️ ¿FINALIZAR REQUERIMIENTO? ⚠️',
                 html: `
-                    <div style="text-align: left; margin: 15px 0;">
-                        <p>¿Está seguro que desea finalizar el requerimiento?</p>
-                        <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; margin-top: 10px;">
-                            <strong>${currentRequirement.title}</strong><br>
-                            <small>ID: ${currentRequirement.id}</small>
+                    <div style="text-align: left; font-size: 1rem;">
+                        <p style="color: #e74c3c; font-weight: bold; margin-bottom: 15px; text-align: center;">
+                            ⚠️ ESTA ACCIÓN ES IRREVERSIBLE ⚠️
+                        </p>
+                        
+                        <p style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                            <strong style="color: #2c3e50;">${currentRequirement.title}</strong>
+                        </p>
+                        
+                        <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 15px;">
+                            <p style="margin-bottom: 8px; font-weight: bold;">📦 PRODUCTOS QUE SE RESTARÁN DEL INVENTARIO:</p>
+                            <ul style="margin-left: 20px;">
+                                <li><strong>${totalProductosEscaneados}</strong> productos con escaneo exitoso</li>
+                                <li><strong>${totalUnidadesEscaneadas}</strong> unidades totales a descontar</li>
+                                ${productosConProblemas > 0 ? 
+                                    `<li style="color: #856404;"><strong>${productosConProblemas}</strong> productos marcados con problema (NO se descuentan)</li>` 
+                                    : ''}
+                            </ul>
                         </div>
+                        
+                        <p style="color: #856404; font-size: 0.9rem; margin-top: 10px; text-align: center;">
+                            <i class="fas fa-info-circle"></i> 
+                            Los productos con problemas (Existencia Insuficiente/Quebrado) NO afectarán el inventario
+                        </p>
                     </div>
                 `,
-                icon: 'question',
+                icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Sí, finalizar',
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#2c3e50',
+                confirmButtonText: 'SÍ, FINALIZAR Y DESCONTAR',
                 cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#27ae60'
-            }).then((result) => {
+                width: '600px'
+            }).then(async (result) => {
                 if (result.isConfirmed) {
-                    // Marcar como finalizado
+                    Swal.fire({
+                        title: 'Procesando...',
+                        text: 'Actualizando inventario en Firebase',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Solo descontar productos escaneados (los que tienen cantidad > 0)
+                    const productosADescontar = currentRequirement.products.filter(p => p.scanned > 0);
+                    
+                    for (const product of productosADescontar) {
+                        await updateProductStock(product.sku, product.scanned);
+                    }
+                    
+                    const finalizedRequirement = {...currentRequirement};
                     currentRequirement.finalized = true;
-                    currentRequirement.status = 'Finalizado';
+                    await updateRequirementInFirebase(currentRequirement);
                     
-                    // Guardar cambios
-                    saveToLocalStorage();
-                    
-                    // Mostrar notificación
-                    showNotification('Requerimiento finalizado exitosamente', 'success');
-                    
-                    // Reproducir sonido de éxito
-                    playSound('success');
-                    vibrate();
-                    
-                    // Volver a la lista principal
-                    setTimeout(() => {
-                        showMainInterface();
-                    }, 1000);
+                    Swal.close();
+                    showDetailTable(finalizedRequirement);
+                    setTimeout(() => showMainInterface(), 500);
                 }
             });
         }
 
-        // Procesar escaneo automático
         function processScan() {
             const code = scannerInput.value.trim();
             if (!code) {
-                showNotification('Ingrese un código para escanear', 'warning');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Código vacío',
+                    text: 'Ingrese o escanee un código',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
                 return;
             }
             
-            if (!currentRequirement) return;
+            if (!currentRequirement || currentRequirement.finalized) return;
             
-            // Verificar si el requerimiento está finalizado
-            if (currentRequirement.finalized) {
-                showNotification('Este requerimiento ya ha sido finalizado', 'error');
-                scannerInput.value = '';
-                return;
-            }
+            const firebaseProduct = findProductByCode(code);
             
-            // Buscar producto por SKU
-            const product = currentRequirement.products.find(p => p.sku === code);
-            if (product) {
-                openScanModal(product.id);
-                scannerInput.value = '';
+            if (firebaseProduct) {
+                const requirementProduct = currentRequirement.products.find(p => p.sku === firebaseProduct.sku);
+                if (requirementProduct) {
+                    // Limpiar input y timeout
+                    scannerInput.value = '';
+                    if (autoSubmitTimeout) {
+                        clearTimeout(autoSubmitTimeout);
+                    }
+                    autoSubmitIndicator.style.display = 'none';
+                    
+                    // ABRIR MODAL
+                    openScanModal(requirementProduct.id);
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Producto no solicitado',
+                        text: `"${firebaseProduct.name}" no está en este requerimiento`,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    scannerInput.value = '';
+                    scannerInput.focus();
+                }
             } else {
-                showNotification(`Producto no encontrado: ${code}`, 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Producto no encontrado',
+                    text: `No existe producto con código: ${code}`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
                 scannerInput.value = '';
                 scannerInput.focus();
             }
         }
 
-        // Abrir modal TAP (Inventario + Problemas)
         function openTapModal(productId) {
             if (!currentRequirement) return;
-            
             currentProduct = currentRequirement.products.find(p => p.id === productId);
             if (!currentProduct) return;
             
-            // Resetear selección de problemas
             selectedProblem = null;
             tapBtnInsufficient.classList.remove('active');
             tapBtnBroken.classList.remove('active');
             
-            // Actualizar información del modal
             tapProductName.textContent = currentProduct.name;
             tapProductSku.textContent = `SKU: ${currentProduct.sku}`;
             tapRequired.textContent = currentProduct.required;
             tapScanned.textContent = currentProduct.scanned;
-            
-            const remaining = Math.max(0, currentProduct.required - currentProduct.scanned);
-            tapRemaining.textContent = remaining;
+            tapRemaining.textContent = Math.max(0, currentProduct.required - currentProduct.scanned);
             tapStock.textContent = currentProduct.stock || 0;
+            tapAvailable.textContent = Math.max(0, (currentProduct.stock || 0) - currentProduct.scanned);
             
-            // Calcular disponible (stock - ya escaneado)
-            const available = Math.max(0, (currentProduct.stock || 0) - currentProduct.scanned);
-            tapAvailable.textContent = available;
-            
-            // Actualizar clases de color para disponibilidad
-            updateTapInventoryColors(available, currentProduct.required);
-            
-            // Si el producto ya tiene issues, marcar el botón correspondiente
             if (currentProduct.issues && currentProduct.issues.length > 0) {
                 if (currentProduct.issues.includes('Existencia Insuficiente')) {
                     selectedProblem = 'insufficient';
@@ -1705,241 +1880,135 @@
                 }
             }
             
-            // Mostrar modal
             tapModal.style.display = 'flex';
         }
 
-        // Actualizar colores de inventario en modal TAP
-        function updateTapInventoryColors(available, required) {
-            const stockValue = tapStock;
-            const availableValue = tapAvailable;
-            
-            // Resetear clases
-            stockValue.className = 'inventory-value';
-            availableValue.className = 'inventory-value';
-            
-            // Stock bajo (menos del 20% de lo requerido)
-            if (currentProduct.stock < required * 0.2) {
-                stockValue.classList.add('critical');
-            } else if (currentProduct.stock < required) {
-                stockValue.classList.add('low');
-            }
-            
-            // Disponibilidad crítica (menos de lo requerido)
-            if (available < required) {
-                availableValue.classList.add('critical');
-            } else if (available < required * 1.5) {
-                availableValue.classList.add('low');
-            }
-        }
-
-        // Cerrar modal TAP
         function closeTapModal() {
             tapModal.style.display = 'none';
             currentProduct = null;
             selectedProblem = null;
-            
-            // Re-enfocar input de escaneo
-            setTimeout(() => {
-                scannerInput.focus();
-            }, 100);
+            setTimeout(() => scannerInput.focus(), 100);
         }
 
-        // Abrir modal SCAN (Solo cantidad)
         function openScanModal(productId) {
             if (!currentRequirement) return;
-            
             currentProduct = currentRequirement.products.find(p => p.id === productId);
             if (!currentProduct) return;
             
-            // Actualizar información del modal SCAN
             scanModalProductName.textContent = currentProduct.name;
             scanModalProductSku.textContent = `SKU: ${currentProduct.sku}`;
             
             const remaining = Math.max(0, currentProduct.required - currentProduct.scanned);
-            scanModalRemaining.textContent = remaining;
-            
-            // Calcular disponible (stock - ya escaneado)
             const available = Math.max(0, (currentProduct.stock || 0) - currentProduct.scanned);
-            
-            // Calcular máximo (lo que falta o lo disponible, lo que sea menor)
             const maxPossible = Math.min(remaining, available);
+            
+            scanModalRemaining.textContent = remaining;
             scanModalQuantityInput.max = maxPossible;
             scanModalMax.textContent = maxPossible;
+            scanModalQuantityInput.value = 0;
             
-            // Establecer valor inicial del input (sugerir lo que falta)
-            scanModalQuantityInput.value = maxPossible > 0 ? maxPossible : 0;
-            
-            // Mostrar modal
             scanModal.style.display = 'flex';
-            
-            // Enfocar input
             setTimeout(() => {
                 scanModalQuantityInput.focus();
                 scanModalQuantityInput.select();
             }, 100);
         }
 
-        // Cerrar modal SCAN
         function closeScanModal() {
             scanModal.style.display = 'none';
             currentProduct = null;
-            
-            // Re-enfocar input de escaneo
-            setTimeout(() => {
-                scannerInput.focus();
-            }, 100);
+            setTimeout(() => scannerInput.focus(), 100);
         }
 
-        // Alternar selección de problema en modal TAP
         function toggleProblem(problemType) {
             if (selectedProblem === problemType) {
-                // Deseleccionar
                 selectedProblem = null;
-                if (problemType === 'insufficient') {
-                    tapBtnInsufficient.classList.remove('active');
-                } else {
-                    tapBtnBroken.classList.remove('active');
-                }
+                document.querySelectorAll('.problem-btn').forEach(b => b.classList.remove('active'));
             } else {
-                // Seleccionar nuevo problema
                 selectedProblem = problemType;
-                
-                if (problemType === 'insufficient') {
-                    tapBtnInsufficient.classList.add('active');
-                    tapBtnBroken.classList.remove('active');
-                } else {
-                    tapBtnBroken.classList.add('active');
-                    tapBtnInsufficient.classList.remove('active');
-                }
+                document.querySelectorAll('.problem-btn').forEach(b => b.classList.remove('active'));
+                if (problemType === 'insufficient') tapBtnInsufficient.classList.add('active');
+                else tapBtnBroken.classList.add('active');
             }
         }
 
-        // Guardar problema desde modal TAP
         function saveProblem() {
             if (!currentProduct) return;
             
-            // Manejar problemas
             if (selectedProblem) {
-                // Si hay problema seleccionado, establecer issues
-                if (!currentProduct.issues) currentProduct.issues = [];
-                
-                const problemText = selectedProblem === 'insufficient' ? 'Existencia Insuficiente' : 'Quebrado';
-                
-                // Limpiar issues anteriores y agregar el nuevo
-                currentProduct.issues = [problemText];
-                
-                // Si hay problema, forzar cantidad a 0
+                currentProduct.issues = [selectedProblem === 'insufficient' ? 'Existencia Insuficiente' : 'Quebrado'];
                 currentProduct.scanned = 0;
                 
-                // Mostrar notificación
-                showNotification(`Producto marcado como: ${problemText}`, 'warning');
+                // NOTIFICACIÓN DESPUÉS DE GUARDAR PROBLEMA
+                Swal.fire({
+                    title: "Problema Marcado",
+                    text: `${currentProduct.name} - ${currentProduct.issues[0]}`,
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
             } else {
-                // Si no hay problema seleccionado, limpiar issues
                 currentProduct.issues = [];
-                showNotification('Problema eliminado del producto', 'info');
             }
             
-            // Actualizar interfaz
             renderProducts();
             updateRequirementProgress();
-            updateRequirementStatus();
             updateFinalizeButton();
-            
-            // Cerrar modal
+            updateRequirementInFirebase(currentRequirement);
             closeTapModal();
-            
-            // Guardar cambios
-            saveToLocalStorage();
         }
 
-        // Guardar cantidad desde modal SCAN
         function saveScanQuantity() {
             if (!currentProduct) return;
             
             const quantity = parseInt(scanModalQuantityInput.value) || 0;
             const maxAllowed = parseInt(scanModalQuantityInput.max) || 0;
             
-            // Validar cantidad
-            if (quantity < 0) {
-                showNotification('La cantidad no puede ser negativa', 'error');
-                scanModalQuantityInput.focus();
+            if (quantity < 0 || quantity > maxAllowed) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Cantidad inválida',
+                    text: `Máximo permitido: ${maxAllowed}`
+                });
                 return;
             }
             
-            if (quantity > maxAllowed) {
-                showNotification(`No puede exceder la cantidad máxima: ${maxAllowed}`, 'error');
-                scanModalQuantityInput.focus();
-                return;
-            }
-            
-            // Actualizar cantidad escaneada
             currentProduct.scanned = quantity;
+            if (quantity > 0) currentProduct.issues = [];
             
-            // Si se está escaneando cantidad, limpiar problemas
-            if (quantity > 0) {
-                currentProduct.issues = [];
-            }
+            // NOTIFICACIÓN DESPUÉS DE GUARDAR CANTIDAD
+            Swal.fire({
+                title: "Cantidad Agregada",
+                text: `${currentProduct.name} - ${quantity} unidades`,
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false
+            });
             
-            // Actualizar interfaz
             renderProducts();
             updateRequirementProgress();
-            updateRequirementStatus();
             updateFinalizeButton();
-            
-            // Mostrar notificación
-            let message = '';
-            if (quantity === 0) {
-                message = `Cantidad actualizada: ${currentProduct.name} - 0 unidades`;
-                showNotification(message, 'info');
-            } else {
-                message = `Escaneado: ${currentProduct.name} - ${quantity} unidades`;
-                showNotification(message, 'success');
-            }
-            
-            // Efectos
-            if (quantity > 0) {
-                playSound('success');
-                vibrate();
-            }
-            
-            // Cerrar modal
+            updateRequirementInFirebase(currentRequirement);
             closeScanModal();
             
-            // Guardar cambios
-            saveToLocalStorage();
-            
-            // Si se completó este producto, enfocar el siguiente
-            if (quantity >= currentProduct.required) {
-                autoFocusNextProduct();
-            }
+            if (quantity >= currentProduct.required) autoFocusNextProduct();
         }
 
-        // Enfocar automáticamente el siguiente producto pendiente
         function autoFocusNextProduct() {
             if (!currentRequirement) return;
             
             const pendingProducts = currentRequirement.products.filter(p => 
-                p.scanned < p.required && 
-                (!p.issues || p.issues.length === 0)
+                p.scanned < p.required && (!p.issues || p.issues.length === 0)
             );
             
             if (pendingProducts.length > 0) {
-                // Mostrar sugerencia para el siguiente producto
                 const nextProduct = pendingProducts[0];
-                showNotification(`Siguiente: ${nextProduct.name} - ${nextProduct.required - nextProduct.scanned} restantes`, 'info');
-                
-                // Auto-enfocar el input de escaneo para el SKU
                 scannerInput.value = nextProduct.sku;
                 scannerInput.focus();
                 scannerInput.select();
-            } else {
-                // Si no hay productos pendientes, mostrar mensaje
-                showNotification('¡Todos los productos están completados!', 'success');
             }
         }
 
-        // Actualizar progreso del requerimiento
         function updateRequirementProgress() {
             if (!currentRequirement) return;
             
@@ -1947,99 +2016,11 @@
             const totalScanned = currentRequirement.products.reduce((sum, p) => sum + p.scanned, 0);
             const progressPercent = totalRequired > 0 ? Math.round((totalScanned / totalRequired) * 100) : 0;
             
-            // Actualizar elementos
             requirementProgress.textContent = `${progressPercent}%`;
             requirementProgressFill.style.width = `${progressPercent}%`;
             scannedCount.textContent = totalScanned;
             totalCount.textContent = totalRequired;
-            
-            // Actualizar color de la barra
-            if (progressPercent === 100) {
-                requirementProgressFill.className = 'progress-fill progress-complete';
-                requirementProgress.style.color = '#27ae60';
-            } else {
-                requirementProgressFill.className = 'progress-fill progress-incomplete';
-                requirementProgress.style.color = '#f39c12';
-            }
         }
-
-        // Actualizar estado del requerimiento
-        function updateRequirementStatus() {
-            if (!currentRequirement) return;
-            
-            const totalRequired = currentRequirement.products.reduce((sum, p) => sum + p.required, 0);
-            const totalScanned = currentRequirement.products.reduce((sum, p) => sum + p.scanned, 0);
-            const allComplete = currentRequirement.products.every(p => p.scanned >= p.required);
-            
-            if (currentRequirement.finalized) {
-                currentRequirement.status = 'Finalizado';
-            } else if (allComplete) {
-                currentRequirement.status = 'Completado';
-            } else if (totalScanned > 0) {
-                currentRequirement.status = 'En Proceso';
-            } else {
-                currentRequirement.status = 'Pendiente';
-            }
-        }
-
-        // Mostrar notificación
-        function showNotification(message, type = 'success') {
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.style.display = 'block';
-        }
-
-        // Reproducir sonido
-        function playSound(type) {
-            try {
-                if (type === 'success') {
-                    // Beep corto
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
-                    
-                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                    
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.1);
-                }
-            } catch (e) {
-                console.log('Audio no soportado');
-            }
-        }
-
-        // Vibrar dispositivo
-        function vibrate() {
-            if (navigator.vibrate) {
-                navigator.vibrate([100, 50, 100]);
-            }
-        }
-
-        // Guardar datos en localStorage
-        function saveToLocalStorage() {
-            localStorage.setItem('requerimientosData', JSON.stringify(requirements));
-        }
-
-        // Cargar datos desde localStorage
-        function loadFromLocalStorage() {
-            const savedData = localStorage.getItem('requerimientosData');
-            if (savedData) {
-                try {
-                    requirements = JSON.parse(savedData);
-                    renderRequirements();
-                } catch (e) {
-                    console.error('Error cargando datos:', e);
-                }
-            }
-        }
-
-        // Auto-guardar cada 30 segundos
-        setInterval(saveToLocalStorage, 30000);
     </script>
 </body>
 </html>

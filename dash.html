@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Menú Hover</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: #f0f2f5;
+        }
+
+        .dashboard {
+            display: flex;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Zona de detección hover en la esquina izquierda */
+        .hover-zone {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 30px;
+            height: 100vh;
+            z-index: 999;
+            background: transparent;
+        }
+
+        /* Menú lateral */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a2634 100%);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: -280px;
+            top: 0;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        /* Menú visible por hover */
+        .hover-zone:hover + .sidebar,
+        .sidebar:hover {
+            left: 0;
+        }
+
+        /* Header del menú */
+        .sidebar-header {
+            padding: 30px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ecf0f1;
+        }
+
+        .sidebar-header p {
+            font-size: 0.85rem;
+            color: #bdc3c7;
+            margin-top: 5px;
+        }
+
+        /* Opciones del menú */
+        .menu-options {
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+        }
+
+        .menu-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+        }
+
+        .menu-icon {
+            font-size: 1.3rem;
+            margin-right: 15px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .menu-text {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Controles de navegación */
+        .nav-controls {
+            padding: 20px 25px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 20px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .nav-arrow {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-arrow:hover:not(:disabled) {
+            background: #3498db;
+            transform: scale(1.05);
+        }
+
+        .nav-arrow:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Indicador de página */
+        .page-indicator {
+            text-align: center;
+            margin-top: 15px;
+            color: #bdc3c7;
+            font-size: 0.9rem;
+        }
+
+        .dots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: #3498db;
+            transform: scale(1.2);
+        }
+
+        /* Contenido principal */
+        .content {
+            flex: 1;
+            height: 100vh;
+            overflow: hidden;
+            background: #f0f2f5;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            width: 100%;
+        }
+
+        /* Ajuste del contenido cuando el menú está visible */
+        .hover-zone:hover + .sidebar + .content,
+        .sidebar:hover + .content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+        }
+
+        .page-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.3s ease;
+            visibility: hidden;
+        }
+
+        .page.active {
+            visibility: visible;
+        }
+
+        .page iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        /* Pequeño indicador visual en la esquina */
+        .hover-indicator {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 50px;
+            background: rgba(52, 152, 219, 0.3);
+            border-radius: 0 4px 4px 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 998;
+        }
+
+        .hover-zone:hover ~ .hover-indicator {
+            background: rgba(52, 152, 219, 0.8);
+            width: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hover-zone {
+                width: 40px; /* Zona más grande en móvil */
+            }
+
+            .hover-zone:hover + .sidebar + .content,
+            .sidebar:hover + .content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .sidebar {
+                width: 240px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Zona de hover en la esquina izquierda -->
+        <div class="hover-zone"></div>
+        
+        <!-- Indicador visual (opcional) -->
+        <div class="hover-indicator"></div>
+
+        <!-- Menú lateral -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>📊 Dashboard</h2>
+                <p>Sistema de Gestión</p>
+            </div>
+
+            <div class="menu-options">
+                <div class="menu-item active" onclick="showPage(1)">
+                    <span class="menu-icon">📦</span>
+                    <span class="menu-text">Inventario</span>
+                </div>
+                <div class="menu-item" onclick="showPage(2)">
+                    <span class="menu-icon">📋</span>
+                    <span class="menu-text">Requerimientos</span>
+                </div>
+            </div>
+
+            <div class="nav-controls">
+                <div class="nav-buttons">
+                    <button class="nav-arrow" onclick="previousPage()" id="prevBtn" title="Página anterior">←</button>
+                    <button class="nav-arrow" onclick="nextPage()" id="nextBtn" title="Página siguiente">→</button>
+                </div>
+                
+                <div class="page-indicator">
+                    <span id="pageCounter">1/2</span>
+                    <div class="dots">
+                        <span class="dot active" onclick="showPage(1)"></span>
+                        <span class="dot" onclick="showPage(2)"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="content">
+            <div class="page-container">
+                <div id="page1" class="page active">
+                    <iframe src="inventory.html" title="Inventario" loading="lazy" id="iframe1"></iframe>
+                </div>
+                <div id="page2" class="page">
+                    <iframe src="req-traslados.html" title="Requerimientos" loading="lazy" id="iframe2"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 2;
+        let menuTimeout;
+
+        function showPage(pageNumber) {
+            if (pageNumber < 1 || pageNumber > totalPages) return;
+
+            // Actualizar visibilidad de páginas
+            document.getElementById('page1').classList.remove('active');
+            document.getElementById('page2').classList.remove('active');
+            document.getElementById(`page${pageNumber}`).classList.add('active');
+
+            // Actualizar items del menú
+            document.querySelectorAll('.menu-item').forEach((item, index) => {
+                if (index + 1 === pageNumber) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Actualizar dots
+            document.querySelectorAll('.dot').forEach((dot, index) => {
+                if (index + 1 === pageNumber) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+
+            // Actualizar contador
+            document.getElementById('pageCounter').textContent = `${pageNumber}/${totalPages}`;
+            
+            // Actualizar botones
+            document.getElementById('prevBtn').disabled = pageNumber === 1;
+            document.getElementById('nextBtn').disabled = pageNumber === totalPages;
+
+            currentPage = pageNumber;
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                showPage(currentPage + 1);
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                showPage(currentPage - 1);
+            }
+        }
+
+        // Cerrar menú cuando el mouse sale
+        document.querySelector('.sidebar').addEventListener('mouseleave', function() {
+            // Pequeño delay para permitir mover el mouse a la zona de hover
+            menuTimeout = setTimeout(() => {
+                if (!document.querySelector('.hover-zone:hover')) {
+                    this.style.left = '-280px';
+                }
+            }, 300);
+        });
+
+        document.querySelector('.hover-zone').addEventListener('mouseenter', function() {
+            clearTimeout(menuTimeout);
+        });
+
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                previousPage();
+            } else if (e.key === 'ArrowRight') {
+                nextPage();
+            }
+        });
+
+        // Inicializar
+        showPage(1);
+
+        // Prevenir que el menú se cierre cuando se está usando
+        document.querySelector('.sidebar').addEventListener('mouseenter', function() {
+            clearTimeout(menuTimeout);
+        });
+
+        // Manejar el autofocus de los iframes
+        document.addEventListener('focus', function(e) {
+            if (e.target.tagName === 'IFRAME') {
+                e.preventDefault();
+            }
+        }, true);
+
+        // Recargar iframe cuando se muestra
+        function reloadIframe(iframeId) {
+            const iframe = document.getElementById(iframeId);
+            const src = iframe.src;
+            iframe.src = 'about:blank';
+            setTimeout(() => {
+                iframe.src = src;
+            }, 10);
+        }
+
+        // Recargar iframe al cambiar de página
+        const originalShowPage = showPage;
+        showPage = function(pageNumber) {
+            originalShowPage(pageNumber);
+            if (pageNumber === 1) {
+                reloadIframe('iframe1');
+            } else {
+                reloadIframe('iframe2');
+            }
+        };
+    </script>
+</body>
+</html>

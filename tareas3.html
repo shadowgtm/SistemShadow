@@ -1709,11 +1709,11 @@
             const productosConProblemas = currentRequirement.products.filter(p => p.issues && p.issues.length > 0).length;
             
             Swal.fire({
-                title: '¿FINALIZAR REQUERIMIENTO?',
+                title: '¿FINALIZAR?',
                 html: `
                     <div style="text-align: left; font-size: 1rem;">
                         <p style="color: #e74c3c; font-weight: bold; margin-bottom: 15px; text-align: center;">
-                            ESTA ACCIÓN ES IRREVERSIBLE
+                            Esta accion es irreversible
                         </p>
                         
                         <p style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
@@ -1721,7 +1721,7 @@
                         </p>
                         
                         <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 15px;">
-                            <p style="margin-bottom: 8px; font-weight: bold;">PRODUCTOS QUE SE RESTARÁN DEL INVENTARIO:</p>
+                            <p style="margin-bottom: 8px; font-weight: bold;">Detalle:</p>
                             <ul style="margin-left: 20px;">
                                 <li><strong>${totalProductosEscaneados}</strong> productos con escaneo exitoso</li>
                                 <li><strong>${totalUnidadesEscaneadas}</strong> unidades totales a descontar</li>
@@ -1743,7 +1743,7 @@
                 cancelButtonColor: '#2c3e50',
                 confirmButtonText: 'SÍ, FINALIZAR Y DESCONTAR',
                 cancelButtonText: 'Cancelar',
-                width: '300px'
+                width: '600px'
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     Swal.fire({

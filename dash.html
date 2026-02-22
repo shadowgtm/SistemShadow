@@ -15,6 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        /* ... (mantén todos tus estilos existentes aquí) ... */
         * {
             margin: 0;
             padding: 0;
@@ -486,6 +487,98 @@
     </style>
 </head>
 <body>
+    <!-- SCRIPTS DE BLOQUEO DE AUTOFOCUS - EJECUTAR PRIMERO -->
+    <script>
+        // BLOQUEO TOTAL DE AUTOFOCUS - Versión agresiva
+        (function() {
+            console.log('🔒 Bloqueando autofocus en iframes...');
+            
+            // 1. Prevenir el evento focus en el documento
+            document.addEventListener('focus', function(e) {
+                if (e.target && (e.target.tagName === 'IFRAME' || e.target.closest('iframe'))) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }, true);
+
+            // 2. Deshabilitar el método focus() en todos los elementos
+            const originalFocus = HTMLElement.prototype.focus;
+            HTMLElement.prototype.focus = function() {
+                // Ignorar focus en iframes y sus contenidos
+                if (this.tagName === 'IFRAME' || this.closest('iframe')) {
+                    return;
+                }
+                return originalFocus.apply(this, arguments);
+            };
+
+            // 3. Bloquear setTimeout y setInterval que intenten hacer focus
+            const originalSetTimeout = window.setTimeout;
+            window.setTimeout = function(callback, delay) {
+                if (callback && typeof callback === 'string' && callback.includes('focus')) {
+                    return 0; // Bloquear strings con focus
+                }
+                return originalSetTimeout(callback, delay);
+            };
+
+            // 4. Interceptar mensajes de iframes
+            window.addEventListener('message', function(e) {
+                if (e.data && typeof e.data === 'string' && e.data.includes('focus')) {
+                    e.stopPropagation();
+                    return false;
+                }
+            }, true);
+
+            // 5. Parchear el objeto document de los iframes (cuando sea posible)
+            const patchIframeDocument = function(iframe) {
+                try {
+                    if (iframe.contentDocument) {
+                        const iframeDoc = iframe.contentDocument;
+                        if (iframeDoc) {
+                            iframeDoc.addEventListener('focus', function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                return false;
+                            }, true);
+                        }
+                    }
+                } catch (e) {
+                    // Error de cross-origin, ignorar
+                }
+            };
+
+            // 6. Observar nuevos iframes
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.tagName === 'IFRAME') {
+                            patchIframeDocument(node);
+                        } else if (node.querySelectorAll) {
+                            node.querySelectorAll('iframe').forEach(patchIframeDocument);
+                        }
+                    });
+                });
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+
+            // 7. Suprimir warnings específicos
+            const originalConsoleWarn = console.warn;
+            console.warn = function(...args) {
+                if (args[0] && typeof args[0] === 'string' && 
+                    args[0].includes('Blocked autofocusing on a')) {
+                    return; // Ignorar este warning
+                }
+                originalConsoleWarn.apply(console, args);
+            };
+
+            console.log('✅ Bloqueo de autofocus activado');
+        })();
+    </script>
+
     <div class="dashboard">
         <!-- Overlay para cerrar con tap -->
         <div class="menu-overlay" id="menuOverlay" onclick="closeMenuWithGesture()"></div>
@@ -545,7 +638,7 @@
             </div>
         </div>
 
-        <!-- Contenido principal con iframes mejorados -->
+        <!-- Contenido principal con iframes -->
         <div class="content" id="content">
             <div class="page-container">
                 <!-- Página 1: Escaneo -->
@@ -553,8 +646,8 @@
                     <iframe src="send.html" 
                             title="Módulo de Escaneo" 
                             id="iframe1" 
-                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation allow-pointer-lock allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-downloads"
-                            allow="camera; microphone; fullscreen; autoplay; clipboard-read; clipboard-write">
+                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"
+                            loading="lazy">
                     </iframe>
                     <div class="iframe-error" id="error1">
                         <i class="fas fa-exclamation-circle"></i>
@@ -571,8 +664,8 @@
                     <iframe src="busqueda.html" 
                             title="Módulo de Búsqueda" 
                             id="iframe2"
-                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation allow-pointer-lock allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-downloads"
-                            allow="camera; microphone; fullscreen; autoplay; clipboard-read; clipboard-write">
+                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"
+                            loading="lazy">
                     </iframe>
                     <div class="iframe-error" id="error2">
                         <i class="fas fa-exclamation-circle"></i>
@@ -589,8 +682,8 @@
                     <iframe src="tareas.html" 
                             title="Módulo de Tareas" 
                             id="iframe3"
-                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals allow-top-navigation allow-pointer-lock allow-orientation-lock allow-popups-to-escape-sandbox allow-presentation allow-downloads"
-                            allow="camera; microphone; fullscreen; autoplay; clipboard-read; clipboard-write">
+                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"
+                            loading="lazy">
                     </iframe>
                     <div class="iframe-error" id="error3">
                         <i class="fas fa-exclamation-circle"></i>
@@ -617,16 +710,6 @@
         let touchStartY = 0;
         let isDragging = false;
         const minSwipeDistance = 50;
-
-        // Suprimir warning de autofocus en iframes
-        const originalConsoleWarn = console.warn;
-        console.warn = function(...args) {
-            if (args[0] && typeof args[0] === 'string' && 
-                args[0].includes('Blocked autofocusing on a')) {
-                return; // Ignorar este warning específico
-            }
-            originalConsoleWarn.apply(console, args);
-        };
 
         // ===== GESTOS TÁCTILES =====
         function initGestureDetection() {
@@ -853,6 +936,19 @@
                 if (iframe) {
                     iframe.addEventListener('load', function() {
                         if (errorDiv) errorDiv.classList.remove('visible');
+                        
+                        // Intentar parchear el documento del iframe
+                        try {
+                            if (iframe.contentDocument) {
+                                iframe.contentDocument.addEventListener('focus', function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    return false;
+                                }, true);
+                            }
+                        } catch (e) {
+                            // Error de cross-origin, ignorar
+                        }
                     });
                     
                     iframe.addEventListener('error', function() {

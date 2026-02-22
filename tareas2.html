@@ -304,20 +304,6 @@
             transform: scale(0.95);
         }
         
-        .auto-submit-indicator {
-            position: absolute;
-            right: 70px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #27ae60;
-            font-size: 0.8rem;
-            background: rgba(39, 174, 96, 0.1);
-            padding: 3px 8px;
-            border-radius: 12px;
-            display: none;
-            pointer-events: none;
-        }
-        
         .progress-section {
             margin-top: 10px;
         }
@@ -942,10 +928,6 @@
             .scan-modal-content {
                 max-width: 95%;
             }
-            
-            .auto-submit-indicator {
-                display: none !important;
-            }
         }
         
         @media (max-width: 480px) {
@@ -1008,7 +990,6 @@
                 <button class="search-button" id="searchButton" title="Buscar">
                     <i class="fas fa-search"></i>
                 </button>
-                <span class="auto-submit-indicator" id="autoSubmitIndicator">Auto</span>
             </div>
             
             <div class="progress-section">
@@ -1172,7 +1153,6 @@
         const cardsContainer = document.getElementById('cardsContainer');
         const scannerInput = document.getElementById('scannerInput');
         const searchButton = document.getElementById('searchButton');
-        const autoSubmitIndicator = document.getElementById('autoSubmitIndicator');
         const requirementProgress = document.getElementById('requirementProgress');
         const requirementProgressFill = document.getElementById('requirementProgressFill');
         const scannedCount = document.getElementById('scannedCount');
@@ -1421,13 +1401,6 @@
 
         function handleAutoSubmit() {
             const value = scannerInput.value.trim();
-            
-            // Mostrar/ocultar indicador de auto-submit
-            if (value.length >= 5) {
-                autoSubmitIndicator.style.display = 'block';
-            } else {
-                autoSubmitIndicator.style.display = 'none';
-            }
             
             // Limpiar timeout anterior
             if (autoSubmitTimeout) {
@@ -1825,7 +1798,6 @@
                     if (autoSubmitTimeout) {
                         clearTimeout(autoSubmitTimeout);
                     }
-                    autoSubmitIndicator.style.display = 'none';
                     
                     // ABRIR MODAL
                     openScanModal(requirementProduct.id);

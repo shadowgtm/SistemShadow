@@ -3,7 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Menú Hover</title>
+    <title>Dashboard</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230066cc'%3E%3Cpath d='M4 6H20V8H4V6ZM4 11H20V13H4V11ZM4 16H20V18H4V16Z'/%3E%3C/svg%3E">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -11,20 +21,37 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
-            overflow: hidden;
-            background: #f0f2f5;
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #004999;
+            --primary-light: #4d94ff;
+            --primary-soft: #e6f0ff;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+            --gradient: linear-gradient(135deg, #0066cc 0%, #004999 100%);
+            --shadow-sm: 0 2px 4px rgba(0,102,204,0.1);
+            --shadow-md: 0 4px 6px rgba(0,102,204,0.15);
+            --shadow-lg: 0 10px 15px rgba(0,102,204,0.2);
         }
 
+        body {
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: var(--light);
+        }
+
+        /* Dashboard Container */
         .dashboard {
             display: flex;
             height: 100vh;
             position: relative;
         }
 
-        /* Zona de detección hover */
+        /* Zona de hover */
         .hover-zone {
             position: fixed;
             left: 0;
@@ -36,64 +63,105 @@
             cursor: pointer;
         }
 
-        /* Tooltip flotante */
-        .hover-tooltip {
-            position: fixed;
-            left: 45px;
+        .hover-zone::after {
+            content: '';
+            position: absolute;
+            left: 0;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(44, 62, 80, 0.9);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
+            width: 3px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 0 4px 4px 0;
+            transition: all 0.3s ease;
+            opacity: 0.3;
+        }
+
+        .hover-zone:hover::after {
+            opacity: 1;
+            height: 80px;
+            background: var(--primary-light);
+        }
+
+        /* Tooltip */
+        .hover-tooltip {
+            position: fixed;
+            left: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
             white-space: nowrap;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            z-index: 998;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--primary-soft);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hover-tooltip i {
+            color: var(--primary);
+            font-size: 14px;
         }
 
         .hover-zone:hover ~ .hover-tooltip {
             opacity: 1;
+            left: 60px;
         }
 
-        /* Menú lateral */
+        /* Menú lateral - Estilo corporativo */
         .sidebar {
-            width: 300px;
-            background: linear-gradient(180deg, #2c3e50 0%, #1a2634 100%);
-            color: white;
+            width: 280px;
+            background: white;
+            color: var(--dark);
             height: 100vh;
             position: fixed;
-            left: -300px;
+            left: -280px;
             top: 0;
             transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 2px 0 20px rgba(0,0,0,0.2);
+            box-shadow: var(--shadow-lg);
             z-index: 1000;
             overflow-y: auto;
+            border-right: 1px solid var(--light-gray);
         }
 
         .sidebar.visible {
             left: 0;
         }
 
-        /* Header del menú */
+        /* Header corporativo */
         .sidebar-header {
             padding: 30px 25px;
-            background: rgba(0,0,0,0.2);
+            background: var(--gradient);
+            color: white;
         }
 
         .sidebar-header h2 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 600;
-            color: #ecf0f1;
             margin-bottom: 5px;
+            letter-spacing: -0.3px;
         }
 
         .sidebar-header p {
-            font-size: 0.9rem;
-            color: #bdc3c7;
+            font-size: 0.85rem;
+            opacity: 0.9;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-header p i {
+            font-size: 12px;
         }
 
         /* Opciones del menú */
@@ -104,70 +172,81 @@
         .menu-item {
             display: flex;
             align-items: center;
-            padding: 18px 25px;
-            color: #ecf0f1;
-            transition: all 0.3s ease;
+            padding: 14px 25px;
+            color: var(--gray);
+            transition: all 0.2s ease;
             cursor: pointer;
-            border-left: 4px solid transparent;
-            margin: 5px 0;
+            margin: 2px 10px;
+            border-radius: 8px;
+            font-weight: 500;
         }
 
         .menu-item:hover {
-            background: rgba(52, 152, 219, 0.2);
-            border-left-color: #3498db;
-            transform: translateX(5px);
+            background: var(--primary-soft);
+            color: var(--primary);
         }
 
         .menu-item.active {
-            background: rgba(52, 152, 219, 0.3);
-            border-left-color: #3498db;
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-md);
         }
 
         .menu-icon {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             margin-right: 15px;
-            width: 35px;
+            width: 24px;
             text-align: center;
         }
 
         .menu-text {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             font-weight: 500;
         }
 
         /* Controles de navegación */
         .nav-controls {
             padding: 25px;
-            border-top: 2px solid rgba(255,255,255,0.1);
+            border-top: 1px solid var(--light-gray);
             margin-top: 20px;
+        }
+
+        .nav-label {
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+            color: var(--gray);
+            margin-bottom: 15px;
+            font-weight: 600;
         }
 
         .nav-buttons {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
         }
 
         .nav-arrow {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            width: 55px;
-            height: 55px;
-            border-radius: 12px;
+            background: white;
+            border: 1px solid var(--light-gray);
+            color: var(--primary);
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.2s ease;
         }
 
         .nav-arrow:hover:not(:disabled) {
-            background: #3498db;
-            transform: scale(1.1);
-            border-color: #3498db;
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
         .nav-arrow:disabled {
@@ -179,41 +258,38 @@
         .page-indicator {
             text-align: center;
             margin-top: 20px;
-            color: #bdc3c7;
         }
 
         .page-counter {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #3498db;
-            margin-bottom: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
         }
 
         .dots {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             justify-content: center;
         }
 
         .dot {
-            width: 12px;
-            height: 12px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.2);
+            background: var(--light-gray);
             cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            transition: all 0.2s ease;
         }
 
         .dot:hover {
-            transform: scale(1.2);
-            background: rgba(52, 152, 219, 0.5);
+            background: var(--primary-light);
         }
 
         .dot.active {
-            background: #3498db;
-            transform: scale(1.2);
-            box-shadow: 0 0 10px #3498db;
+            background: var(--primary);
+            width: 24px;
+            border-radius: 4px;
         }
 
         /* Contenido principal */
@@ -221,21 +297,21 @@
             flex: 1;
             height: 100vh;
             overflow: hidden;
-            background: #f0f2f5;
             width: 100%;
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--light);
         }
 
         .content.shifted {
-            margin-left: 300px;
-            width: calc(100% - 300px);
+            margin-left: 280px;
+            width: calc(100% - 280px);
         }
 
         .page-container {
             width: 100%;
             height: 100%;
             position: relative;
-            background: #fff;
+            background: white;
         }
 
         .page {
@@ -247,7 +323,7 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease;
-            background: #fff;
+            background: white;
         }
 
         .page.active {
@@ -262,7 +338,7 @@
             background: white;
         }
 
-        /* Mensaje de error si no cargan los iframes */
+        /* Mensaje de error */
         .iframe-error {
             display: none;
             position: absolute;
@@ -270,38 +346,81 @@
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            color: #666;
+            color: var(--dark);
             padding: 30px;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--light-gray);
+            max-width: 350px;
         }
 
         .iframe-error.visible {
             display: block;
         }
 
-        .iframe-error h3 {
-            color: #e74c3c;
-            margin-bottom: 10px;
+        .iframe-error i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
         }
 
-        /* Botón flotante para móvil */
+        .iframe-error h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .iframe-error p {
+            color: var(--gray);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .iframe-error button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .iframe-error button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Botón móvil */
         .mobile-menu-btn {
             display: none;
             position: fixed;
             left: 15px;
             top: 15px;
-            width: 50px;
-            height: 50px;
-            background: #2c3e50;
+            width: 45px;
+            height: 45px;
+            background: var(--primary);
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             color: white;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
             z-index: 1001;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
         }
 
         @media (max-width: 768px) {
@@ -315,8 +434,8 @@
             }
 
             .sidebar {
-                width: 280px;
-                left: -280px;
+                width: 260px;
+                left: -260px;
             }
 
             .content.shifted {
@@ -324,48 +443,102 @@
                 width: 100%;
             }
         }
+
+        /* Scrollbar personalizado */
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--light-gray);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Footer del menú */
+        .menu-footer {
+            padding: 20px 25px;
+            border-top: 1px solid var(--light-gray);
+            font-size: 0.8rem;
+            color: var(--gray);
+            text-align: center;
+        }
+
+        .menu-footer i {
+            color: var(--primary);
+            margin: 0 4px;
+        }
     </style>
 </head>
 <body>
     <div class="dashboard">
-        <!-- Botón para móvil -->
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        <!-- Botón móvil -->
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
 
         <!-- Zona de hover -->
         <div class="hover-zone" onmouseenter="showMenu()" onmouseleave="startMenuHideTimer()"></div>
-        <div class="hover-tooltip">👈 Menú</div>
+        <div class="hover-tooltip">
+            <i class="fas fa-arrow-right"></i>
+            <span>Menú principal</span>
+        </div>
 
         <!-- Menú lateral -->
         <div class="sidebar" id="sidebar" onmouseenter="cancelMenuHide()" onmouseleave="startMenuHideTimer()">
             <div class="sidebar-header">
-                <h2>📊 Dashboard</h2>
-                <p>Sistema de Gestión</p>
+                <h2>Panel Control</h2>
+                <p>
+                    <i class="fas fa-circle" style="font-size: 6px;"></i>
+                    Sistema Integrado
+                </p>
             </div>
 
             <div class="menu-options">
                 <div class="menu-item active" onclick="showPage(1)">
-                    <span class="menu-icon">📦</span>
+                    <span class="menu-icon"><i class="fas fa-box"></i></span>
                     <span class="menu-text">Inventario</span>
                 </div>
                 <div class="menu-item" onclick="showPage(2)">
-                    <span class="menu-icon">📋</span>
-                    <span class="menu-text">Requerimientos de Salida</span>
+                    <span class="menu-icon"><i class="fas fa-truck"></i></span>
+                    <span class="menu-text">Req. X Salida</span>
+                </div>
+                <div class="menu-item" onclick="showPage(3)">
+                    <span class="menu-icon"><i class="fas fa-chart-bar"></i></span>
+                    <span class="menu-text">Reportes</span>
+                </div>
+                <div class="menu-item" onclick="showPage(3)">
+                    <span class="menu-icon"><i class="fas fa-cog"></i></span>
+                    <span class="menu-text">Configuración</span>
                 </div>
             </div>
 
             <div class="nav-controls">
+                <div class="nav-label">Navegación</div>
                 <div class="nav-buttons">
-                    <button class="nav-arrow" onclick="previousPage()" id="prevBtn">←</button>
-                    <button class="nav-arrow" onclick="nextPage()" id="nextBtn">→</button>
+                    <button class="nav-arrow" onclick="previousPage()" id="prevBtn">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="nav-arrow" onclick="nextPage()" id="nextBtn">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
                 
                 <div class="page-indicator">
-                    <div class="page-counter" id="pageCounter">1/2</div>
+                    <div class="page-counter" id="pageCounter">1/3</div>
                     <div class="dots">
                         <span class="dot active" onclick="showPage(1)"></span>
                         <span class="dot" onclick="showPage(2)"></span>
+                        <span class="dot" onclick="showPage(3)"></span>
                     </div>
                 </div>
+            </div>
+
+            <div class="menu-footer">
+                <i class="far fa-building"></i> Shadow
             </div>
         </div>
 
@@ -375,17 +548,32 @@
                 <div id="page1" class="page active">
                     <iframe src="inventory.html" title="Inventario" id="iframe1" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
                     <div class="iframe-error" id="error1">
-                        <h3>⚠️ Error al cargar Inventario</h3>
-                        <p>Verifica que el archivo inventory.html existe</p>
-                        <button onclick="reloadIframe('iframe1')">Reintentar</button>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Error de carga</h3>
+                        <p>No se pudo cargar el módulo de inventario</p>
+                        <button onclick="reloadIframe('iframe1')">
+                            <i class="fas fa-sync-alt"></i> Reintentar
+                        </button>
                     </div>
                 </div>
                 <div id="page2" class="page">
                     <iframe src="req-traslados.html" title="Requerimientos" id="iframe2" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
                     <div class="iframe-error" id="error2">
-                        <h3>⚠️ Error al cargar Requerimientos</h3>
-                        <p>Verifica que el archivo req-traslados.html existe</p>
-                        <button onclick="reloadIframe('iframe2')">Reintentar</button>
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Error de carga</h3>
+                        <p>No se pudo cargar el módulo de requerimientos</p>
+                        <button onclick="reloadIframe('iframe2')">
+                            <i class="fas fa-sync-alt"></i> Reintentar
+                        </button>
+                    </div>
+                </div>
+                <div id="page3" class="page">
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%; background: var(--light);">
+                        <div style="text-align: center;">
+                            <i class="fas fa-chart-bar" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
+                            <h3 style="color: var(--dark); margin-bottom: 8px; font-weight: 500;">Centro de Reportes</h3>
+                            <p style="color: var(--gray); font-size: 0.9rem;">Módulo en desarrollo</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -394,12 +582,11 @@
 
     <script>
         let currentPage = 1;
-        const totalPages = 2;
+        const totalPages = 3;
         let menuHideTimer;
         let isMobile = window.innerWidth <= 768;
         let mobileMenuOpen = false;
 
-        // Función para mostrar menú
         function showMenu() {
             if (isMobile) return;
             clearTimeout(menuHideTimer);
@@ -407,42 +594,40 @@
             document.getElementById('content').classList.add('shifted');
         }
 
-        // Función para ocultar menú
         function hideMenu() {
             if (isMobile && mobileMenuOpen) return;
             document.getElementById('sidebar').classList.remove('visible');
             document.getElementById('content').classList.remove('shifted');
         }
 
-        // Iniciar timer para ocultar menú
         function startMenuHideTimer() {
             if (isMobile && mobileMenuOpen) return;
-            menuHideTimer = setTimeout(hideMenu, 300);
+            menuHideTimer = setTimeout(hideMenu, 500);
         }
 
-        // Cancelar timer de ocultar
         function cancelMenuHide() {
             clearTimeout(menuHideTimer);
         }
 
-        // Toggle menú móvil
         function toggleMobileMenu() {
             const sidebar = document.getElementById('sidebar');
             if (mobileMenuOpen) {
                 sidebar.classList.remove('visible');
+                document.getElementById('content').classList.remove('shifted');
             } else {
                 sidebar.classList.add('visible');
+                document.getElementById('content').classList.add('shifted');
             }
             mobileMenuOpen = !mobileMenuOpen;
         }
 
-        // Función para mostrar página
         function showPage(pageNumber) {
             if (pageNumber < 1 || pageNumber > totalPages) return;
 
             // Actualizar páginas
             document.getElementById('page1').classList.remove('active');
             document.getElementById('page2').classList.remove('active');
+            document.getElementById('page3').classList.remove('active');
             document.getElementById(`page${pageNumber}`).classList.add('active');
 
             // Actualizar menú
@@ -485,7 +670,6 @@
             }
         }
 
-        // Función para recargar iframe
         function reloadIframe(iframeId) {
             const iframe = document.getElementById(iframeId);
             const src = iframe.src;
@@ -524,16 +708,15 @@
         // Inicializar
         showPage(1);
 
-        // Prevenir errores de Firebase/extensiones
+        // Prevenir errores de extensiones
         window.addEventListener('error', function(e) {
             if (e.message.includes('firestore') || e.message.includes('ERR_BLOCKED_BY_CLIENT')) {
                 e.preventDefault();
-                console.log('Error de extensión bloqueado, ignorando...');
                 return false;
             }
         }, true);
 
-        // Deshabilitar console.errors molestos
+        // Console personalizado
         const originalConsoleError = console.error;
         console.error = function(...args) {
             if (args[0] && typeof args[0] === 'string' && 

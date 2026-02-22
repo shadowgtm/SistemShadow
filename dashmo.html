@@ -439,51 +439,6 @@
             box-shadow: var(--shadow-md);
         }
 
-        /* Botón móvil */
-        .mobile-menu-btn {
-            display: none;
-            position: fixed;
-            left: 15px;
-            top: 15px;
-            width: 45px;
-            height: 45px;
-            background: var(--primary);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 1002;
-            box-shadow: var(--shadow-md);
-            transition: all 0.2s ease;
-        }
-
-        .mobile-menu-btn:active {
-            transform: scale(0.95);
-            background: var(--primary-dark);
-        }
-
-        @media (max-width: 768px) {
-            .mobile-menu-btn {
-                display: block;
-            }
-
-            .gesture-area,
-            .gesture-hint {
-                display: block;
-            }
-
-            .sidebar {
-                width: 260px;
-                left: -260px;
-            }
-
-            .content.shifted {
-                margin-left: 0;
-                width: 100%;
-            }
-        }
-
         /* Scrollbar personalizado */
         .sidebar::-webkit-scrollbar {
             width: 4px;
@@ -511,17 +466,29 @@
             color: var(--primary);
             margin: 0 4px;
         }
+
+        @media (max-width: 768px) {
+            .gesture-area,
+            .gesture-hint {
+                display: block;
+            }
+
+            .sidebar {
+                width: 260px;
+                left: -260px;
+            }
+
+            .content.shifted {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="dashboard">
         <!-- Overlay para cerrar con tap -->
         <div class="menu-overlay" id="menuOverlay" onclick="closeMenuWithGesture()"></div>
-
-        <!-- Botón móvil tradicional -->
-        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-            <i class="fas fa-bars"></i>
-        </button>
 
         <!-- Área de gestos -->
         <div class="gesture-area" id="gestureArea"></div>
@@ -776,14 +743,6 @@
             // Feedback háptico
             if (navigator.vibrate) {
                 navigator.vibrate(10);
-            }
-        }
-
-        function toggleMobileMenu() {
-            if (mobileMenuOpen) {
-                closeMenuWithGesture();
-            } else {
-                openMenuWithGesture();
             }
         }
 

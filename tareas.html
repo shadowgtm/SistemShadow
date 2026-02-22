@@ -828,22 +828,22 @@
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
-            font-size: 0.8rem; /* Fuente más pequeña */
+            font-size: 0.8rem;
         }
         
         .detail-table th {
             background: linear-gradient(135deg, var(--primary), #1a252f);
             color: white;
-            padding: 8px; /* Padding más pequeño */
+            padding: 8px;
             text-align: left;
             font-size: 0.8rem;
             font-weight: 600;
         }
         
         .detail-table td {
-            padding: 6px 8px; /* Padding más pequeño */
+            padding: 6px 8px;
             border-bottom: 1px solid #e0e0e0;
-            font-size: 0.75rem; /* Fuente más pequeña para celdas */
+            font-size: 0.75rem;
         }
         
         .detail-table tr:last-child td {
@@ -1208,16 +1208,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Inicializando app de picking...');
             loadProductsFromFirebase();
-            loadRequirements();
+            loadRequirementsFromFirebase(); // Cambiado: ahora carga desde Firebase
             setupEventListeners();
-            
-            // Escuchar cambios en localStorage
-            window.addEventListener('storage', function(e) {
-                if (e.key === 'requerimientosAdmin' || e.key === 'requerimientosData') {
-                    console.log('Cambios detectados en localStorage, recargando...');
-                    loadRequirements();
-                }
-            });
         });
 
         // Cargar productos desde Firebase
@@ -1253,21 +1245,67 @@
             }
         }
 
+        // Cargar requerimientos desde Firebase
+        async function loadRequirementsFromFirebase() {
+            try {
+                console.log('Cargando requerimientos desde Firebase...');
+                const snapshot = await db.collection('requerimientos').get();
+                
+                if (!snapshot.empty) {
+                    requirements = snapshot.docs.map(doc => {
+                        const data = doc.data();
+                        return {
+                            id: doc.id,
+                            title: data.title || 'Requerimiento',
+                            date: data.date || new Date().toLocaleDateString(),
+                            status: data.status || 'Pendiente',
+                            client: data.client || 'Cliente',
+                            finalized: data.finalized || false,
+                            products: data.products || []
+                        };
+                    });
+                    console.log('Requerimientos cargados desde Firebase:', requirements.length);
+                } else {
+                    console.log('No hay requerimientos en Firebase');
+                    requirements = [];
+                }
+                
+                renderRequirements();
+                
+            } catch (error) {
+                console.error('Error cargando requerimientos:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudieron cargar los requerimientos'
+                });
+            }
+        }
+
+        // Guardar requerimiento en Firebase
+        async function saveRequirementToFirebase(requirement) {
+            try {
+                await db.collection('requerimientos').doc(requirement.id).set(requirement);
+                console.log('Requerimiento guardado en Firebase:', requirement.id);
+                return true;
+            } catch (error) {
+                console.error('Error guardando en Firebase:', error);
+                return false;
+            }
+        }
+
         // Actualizar stock en Firebase
         async function updateProductStock(productSku, quantityScanned) {
             try {
-                // Buscar el producto en Firebase
                 const product = productsFromFirebase.find(p => p.sku === productSku);
                 if (!product) {
                     console.error('Producto no encontrado en Firebase:', productSku);
                     return false;
                 }
                 
-                // Referencia al documento en Firebase
                 const productRef = db.collection('products').doc(product.id);
-                
-                // Obtener el documento actual
                 const doc = await productRef.get();
+                
                 if (!doc.exists) {
                     console.error('Documento no existe:', product.id);
                     return false;
@@ -1277,14 +1315,11 @@
                 const currentStock = currentData.bodega || 0;
                 const newStock = currentStock - quantityScanned;
                 
-                // Actualizar el stock
                 await productRef.update({
                     bodega: newStock
                 });
                 
                 console.log(`Stock actualizado para ${productSku}: ${currentStock} -> ${newStock}`);
-                
-                // Actualizar también en el array local
                 product.stock = newStock;
                 
                 return true;
@@ -1324,7 +1359,7 @@
         function setupEventListeners() {
             btnRefresh.addEventListener('click', function() {
                 loadProductsFromFirebase();
-                loadRequirements();
+                loadRequirementsFromFirebase();
                 Swal.fire({
                     icon: 'success',
                     title: 'Actualizado',
@@ -1357,6 +1392,9 @@
                                 <label style="display: block; margin-bottom: 5px; font-weight: 600;">Productos cargados:</label>
                                 <p style="background: #f0f0f0; padding: 8px; border-radius: 6px;">
                                     ${productsFromFirebase.length} productos en Firebase
+                                </p>
+                                <p style="background: #f0f0f0; padding: 8px; border-radius: 6px; margin-top: 5px;">
+                                    ${requirements.length} requerimientos en Firebase
                                 </p>
                             </div>
                         </div>
@@ -1426,89 +1464,6 @@
                     }
                 }
             });
-        }
-
-        // Cargar requerimientos desde localStorage
-        function loadRequirements() {
-            console.log('Cargando requerimientos...');
-            
-            const adminData = localStorage.getItem('requerimientosAdmin');
-            
-            if (adminData) {
-                try {
-                    const parsed = JSON.parse(adminData);
-                    
-                    requirements = parsed.map(req => ({
-                        id: req.id,
-                        title: req.nombre || req.title,
-                        date: req.fecha || req.date,
-                        status: req.estado || 'Pendiente',
-                        client: req.tienda || req.client,
-                        finalized: req.finalized || false,
-                        products: (req.productos || req.products || []).map(p => ({
-                            id: p.id || 'P' + Math.random(),
-                            sku: p.sku,
-                            name: p.name,
-                            required: p.required,
-                            scanned: p.scanned || 0,
-                            issues: p.issues || [],
-                            stock: p.stock || 0,
-                            available: p.available || (p.stock - p.scanned) || 0,
-                            barcode: p.barcode,
-                            barcodes: p.barcodes || []
-                        }))
-                    }));
-                    
-                    console.log('Requerimientos cargados:', requirements.length);
-                } catch (e) {
-                    console.error('Error parseando requerimientosAdmin:', e);
-                    useSampleData();
-                }
-            } else {
-                useSampleData();
-            }
-            
-            renderRequirements();
-        }
-
-        // Usar datos de ejemplo
-        function useSampleData() {
-            requirements = [
-                {
-                    id: "REQ-001",
-                    title: "Pedido Cliente Premium",
-                    date: new Date().toLocaleDateString(),
-                    status: "Pendiente",
-                    client: "Todo Hogar 1",
-                    finalized: false,
-                    products: [
-                        { 
-                            id: "P001", 
-                            sku: "P01", 
-                            name: "DULCES MENTA 3X2 VARIOS", 
-                            required: 5, 
-                            scanned: 0, 
-                            issues: [],
-                            stock: 50,
-                            available: 50,
-                            barcode: "010101",
-                            barcodes: ["010101", "000000"]
-                        },
-                        { 
-                            id: "P002", 
-                            sku: "P02", 
-                            name: "GALLETAS CHOCOLATE 200G", 
-                            required: 3, 
-                            scanned: 0, 
-                            issues: [],
-                            stock: 30,
-                            available: 30,
-                            barcode: "010102",
-                            barcodes: ["010102"]
-                        }
-                    ]
-                }
-            ];
         }
 
         // Renderizar requirements como cards
@@ -1643,7 +1598,7 @@
             scanInterface.style.display = 'none';
             currentRequirement = null;
             scannerInput.value = '';
-            loadRequirements();
+            loadRequirementsFromFirebase(); // Recargar desde Firebase
         }
 
         // Renderizar productos
@@ -1754,7 +1709,6 @@
             if (!currentRequirement) return;
             
             // Verificar que todos los productos estén escaneados (scanned > 0) O tengan problemas
-            // No se permite ningún producto con scanned = 0 sin problemas
             const allValid = currentRequirement.products.every(p => 
                 p.scanned > 0 || (p.issues && p.issues.length > 0)
             );
@@ -1775,12 +1729,10 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            // Título
             doc.setFontSize(18);
             doc.setTextColor(44, 62, 80);
             doc.text('Requerimiento de Salida', 14, 20);
             
-            // Información del requerimiento
             doc.setFontSize(11);
             doc.setTextColor(100, 100, 100);
             doc.text(`ID: ${requirement.id}`, 14, 30);
@@ -1788,7 +1740,6 @@
             doc.text(`Tienda: ${requirement.client}`, 14, 42);
             doc.text(`Título: ${requirement.title}`, 14, 48);
             
-            // Datos de la tabla
             const tableColumn = ['SKU', 'Producto', 'Req.', 'Esc.', 'Estado'];
             const tableRows = [];
             
@@ -1804,7 +1755,6 @@
                 ]);
             });
             
-            // Generar tabla
             doc.autoTable({
                 head: [tableColumn],
                 body: tableRows,
@@ -1813,7 +1763,6 @@
                 headStyles: { fillColor: [44, 62, 80] }
             });
             
-            // Resumen
             const finalY = doc.lastAutoTable.finalY + 10;
             const totalProductos = requirement.products.length;
             const totalUnidades = requirement.products.reduce((sum, p) => sum + p.required, 0);
@@ -1825,11 +1774,10 @@
             doc.text(`Total Unidades Requeridas: ${totalUnidades}`, 14, finalY + 6);
             doc.text(`Total Unidades Escaneadas: ${totalEscaneado}`, 14, finalY + 12);
             
-            // Guardar PDF
             doc.save(`requerimiento_${requirement.id}.pdf`);
         }
 
-        // Mostrar tabla de detalle al finalizar - CON FUENTE MÁS PEQUEÑA
+        // Mostrar tabla de detalle al finalizar
         function showDetailTable(requirement) {
             let productsHtml = '';
             requirement.products.forEach(p => {
@@ -1885,11 +1833,7 @@
                 confirmButtonColor: '#27ae60',
                 width: '700px',
                 showConfirmButton: true,
-                showCancelButton: false,
-                customClass: {
-                    container: 'swal2-container',
-                    popup: 'swal2-popup'
-                }
+                showCancelButton: false
             });
         }
 
@@ -1905,13 +1849,11 @@
         async function finalizeRequirement() {
             if (!currentRequirement) return;
             
-            // Verificar que todos los productos estén escaneados (scanned > 0) O tengan problemas
             const allValid = currentRequirement.products.every(p => 
                 p.scanned > 0 || (p.issues && p.issues.length > 0)
             );
             
             if (!allValid) {
-                // Encontrar productos problemáticos para mostrar mensaje
                 const invalidProducts = currentRequirement.products.filter(p => 
                     p.scanned === 0 && (!p.issues || p.issues.length === 0)
                 );
@@ -1954,7 +1896,6 @@
                 confirmButtonColor: '#27ae60'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    // Mostrar loading
                     Swal.fire({
                         title: 'Procesando...',
                         text: 'Actualizando stock en Firebase',
@@ -1964,7 +1905,6 @@
                         }
                     });
                     
-                    // Descontar stock de cada producto escaneado
                     const productsToUpdate = currentRequirement.products.filter(p => p.scanned > 0);
                     let successCount = 0;
                     let errorCount = 0;
@@ -1978,24 +1918,21 @@
                         }
                     }
                     
-                    // Guardar copia del requerimiento antes de finalizar
                     const finalizedRequirement = {...currentRequirement};
                     
                     currentRequirement.finalized = true;
                     currentRequirement.status = 'Finalizado';
                     
-                    saveToLocalStorage();
+                    // Guardar en Firebase
+                    await saveRequirementToFirebase(currentRequirement);
                     
-                    // Cerrar loading
                     Swal.close();
                     
-                    // Mostrar resultado de la actualización
                     let message = '';
                     if (errorCount > 0) {
                         message = `Stock actualizado para ${successCount} productos. ${errorCount} productos no pudieron ser actualizados.`;
                     }
                     
-                    // Mostrar tabla de detalle
                     showDetailTable(finalizedRequirement);
                     
                     if (errorCount > 0) {
@@ -2011,7 +1948,6 @@
                     playSound('success');
                     vibrate();
                     
-                    // Volver a la lista principal
                     setTimeout(() => {
                         showMainInterface();
                     }, 500);
@@ -2166,7 +2102,7 @@
             const maxPossible = Math.min(remaining, available);
             scanModalQuantityInput.max = maxPossible;
             scanModalMax.textContent = maxPossible;
-            scanModalQuantityInput.value = 0; // Siempre inicia en 0
+            scanModalQuantityInput.value = 0;
             
             scanModal.style.display = 'flex';
             
@@ -2242,7 +2178,7 @@
             updateFinalizeButton();
             
             closeTapModal();
-            saveToLocalStorage();
+            saveRequirementToFirebase(currentRequirement); // Guardar en Firebase
         }
 
         // Guardar cantidad
@@ -2307,7 +2243,7 @@
             }
             
             closeScanModal();
-            saveToLocalStorage();
+            saveRequirementToFirebase(currentRequirement); // Guardar en Firebase
             
             if (quantity >= currentProduct.required) {
                 autoFocusNextProduct();
@@ -2414,26 +2350,6 @@
             if (navigator.vibrate) {
                 navigator.vibrate([100, 50, 100]);
             }
-        }
-
-        // Guardar en localStorage
-        function saveToLocalStorage() {
-            localStorage.setItem('requerimientosData', JSON.stringify(requirements));
-            
-            const adminFormat = requirements.map(req => ({
-                id: req.id,
-                nombre: req.title,
-                tienda: req.client,
-                fecha: req.date,
-                productos: req.products.map(p => ({
-                    ...p,
-                    scanned: p.scanned,
-                    issues: p.issues
-                })),
-                estado: req.status,
-                finalized: req.finalized
-            }));
-            localStorage.setItem('requerimientosAdmin', JSON.stringify(adminFormat));
         }
     </script>
 </body>
